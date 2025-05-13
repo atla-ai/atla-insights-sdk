@@ -1,0 +1,41 @@
+# .github/workflows/ci.yaml
+name: CI/CD
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+
+jobs:
+    lint-test:
+        name: Lint & Test
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+
+            - name: Install uv
+              run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+            - name: Set up Python environment
+              run: |
+                  uv sync
+                  uv pip install "mypy>=1.15.0"
+                  uv pip install "ruff>=0.11.7"
+
+            - name: Lint with Ruff
+              run: |
+                  uv run ruff check .
+                  uv run ruff format --check .
+
+            - name: Type-check with Mypy
+              run: uv run dmypy run -- .
+
+            - name: Run tests with Pytest
+              run: uv run pytest -vv
