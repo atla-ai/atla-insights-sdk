@@ -12,6 +12,7 @@ from litellm import acompletion, completion
 from openai import OpenAI
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+
 from src.atla_insights import instrument, instrument_litellm, instrument_openai
 from src.atla_insights._constants import METADATA_MARK, SUCCESS_MARK
 from src.atla_insights._span_processors import (

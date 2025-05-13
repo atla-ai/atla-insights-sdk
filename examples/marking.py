@@ -2,6 +2,8 @@
 
 import os
 
+from openai import OpenAI
+
 from atla_insights import (
     configure,
     instrument,
@@ -9,7 +11,6 @@ from atla_insights import (
     mark_failure,
     mark_success,
 )
-from openai import OpenAI
 
 
 @instrument("My GenAI application")

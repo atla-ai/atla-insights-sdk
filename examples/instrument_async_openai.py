@@ -3,8 +3,9 @@
 import asyncio
 import os
 
-from atla_insights import configure, instrument, instrument_openai
 from openai import AsyncOpenAI
+
+from atla_insights import configure, instrument, instrument_openai
 
 
 @instrument("My GenAI application")

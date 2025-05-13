@@ -3,8 +3,9 @@
 import asyncio
 import os
 
-from atla_insights import configure, instrument, instrument_litellm
 from litellm import acompletion
+
+from atla_insights import configure, instrument, instrument_litellm
 
 
 @instrument("My GenAI application")
