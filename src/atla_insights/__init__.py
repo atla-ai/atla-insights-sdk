@@ -10,7 +10,7 @@ from ._main import (
     mark_success,
 )
 
-__version__ = "0.0.1a4"
+__version__ = "0.0.1a5"
 
 __all__ = [
     "configure",
