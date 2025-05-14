@@ -517,8 +517,8 @@ class TestLitellmInstrumentation(BaseSpanProcessors):
         assert span_1.attributes is not None
         assert span_2.attributes is not None
 
-        assert span_1.attributes.get("SpanAttributes.LLM_PROMPTS.0.content") is None
-        assert span_2.attributes.get("SpanAttributes.LLM_PROMPTS.0.content") is not None
+        assert span_1.attributes.get("logfire.msg") == "raw_gen_ai_request"
+        assert span_2.attributes.get("logfire.msg") == "litellm_request"
 
         assert span_1.attributes.get(SUCCESS_MARK) is None
         assert span_2.attributes.get(SUCCESS_MARK) == -1
@@ -544,8 +544,8 @@ class TestLitellmInstrumentation(BaseSpanProcessors):
         assert span_1.attributes is not None
         assert span_2.attributes is not None
 
-        assert span_1.attributes.get("SpanAttributes.LLM_PROMPTS.0.content") is None
-        assert span_2.attributes.get("SpanAttributes.LLM_PROMPTS.0.content") is not None
+        assert span_1.attributes.get("logfire.msg") == "raw_gen_ai_request"
+        assert span_2.attributes.get("logfire.msg") == "litellm_request"
 
         assert span_1.attributes.get(SUCCESS_MARK) is None
         assert span_2.attributes.get(SUCCESS_MARK) == -1
