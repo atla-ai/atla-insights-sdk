@@ -1,5 +1,6 @@
 """Core functionality for the atla_package."""
 
+import logging
 import os
 from typing import TYPE_CHECKING, ContextManager, Optional, Sequence, Union
 
@@ -15,6 +16,8 @@ from ._span_processors import (
 if TYPE_CHECKING:
     from openai import AsyncOpenAI, OpenAI
 
+logger = logging.getLogger("atla_insights")
+
 
 class AtlaInsights:
     """Atla insights."""
@@ -29,6 +32,7 @@ class AtlaInsights:
         token: str,
         metadata: Optional[dict[str, str]] = None,
         additional_span_processors: Optional[Sequence[SpanProcessor]] = None,
+        verbose: bool = True,
     ) -> None:
         """Configure Atla insights.
 
@@ -37,6 +41,8 @@ class AtlaInsights:
             to the trace.
         :param additional_span_processors (Optional[Sequence[SpanProcessor]]): Additional
             span processors. Defaults to `None`.
+        :param verbose (bool): Whether to print verbose output to console.
+            Defaults to `True`.
         """
         if metadata and not all(
             isinstance(k, str) and isinstance(v, str) for k, v in metadata.items()
@@ -56,10 +62,12 @@ class AtlaInsights:
 
         logfire.configure(
             additional_span_processors=span_processors,
-            console=False,
+            console=None if verbose else False,
             environment=os.getenv("_ATLA_ENV", "prod"),
             send_to_logfire=False,
         )
+
+        logger.info("Atla insights configured correctly ✅")
 
     def mark_success(self) -> None:
         """Mark the root span in the current trace as successful."""
@@ -68,6 +76,7 @@ class AtlaInsights:
                 "Cannot mark trace before running the atla `configure` method."
             )
         self._root_span_processor.mark_root(value=1)
+        logger.info("Marked trace as success ✅")
 
     def mark_failure(self) -> None:
         """Mark the root span in the current trace as failed."""
@@ -76,6 +85,7 @@ class AtlaInsights:
                 "Cannot mark trace before running the atla `configure` method."
             )
         self._root_span_processor.mark_root(value=0)
+        logger.info("Marked trace as failure ❌")
 
     def instrument_openai(
         self,
