@@ -32,6 +32,7 @@ Before using Atla Insights, you need to configure it with your authentication to
 ```python
 from atla_insights import configure
 
+# Run this command at the start of your application.
 configure(token="<MY_ATLA_INSIGHTS_TOKEN>")
 ```
 
@@ -61,6 +62,9 @@ instrument_openai()
 client = OpenAI()
 client.chat.completions.create(...)
 ```
+
+> ℹ️ Note that you can run `instrument_openai()` anywhere in your application, before the
+first time you call its chat completion function.
 
 Alternatively, you can also instrument an individual client.
 
