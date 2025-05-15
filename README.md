@@ -211,7 +211,7 @@ client.chat.completions.create(...)
 
 #### Logfire compatibility
 
-The `atla_insights` package's instrumentation is powered by [Pydantic LogFire](logfire.pydantic.dev/docs/).
+The `atla_insights` package's instrumentation is powered by [Pydantic Logfire](logfire.pydantic.dev/docs/).
 > ⚠️ This means that we do not (currently) support compatibility with existing LogFire
 instrumentation / observability.
 
