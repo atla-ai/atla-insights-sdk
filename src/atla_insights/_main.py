@@ -65,6 +65,7 @@ class AtlaInsights:
             console=None if verbose else False,
             environment=os.getenv("_ATLA_ENV", "prod"),
             send_to_logfire=False,
+            scrubbing=False,
         )
 
         logger.info("Atla insights configured correctly ✅")
