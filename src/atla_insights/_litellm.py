@@ -1,8 +1,12 @@
 """LiteLLM integration."""
 
+import json
+from datetime import datetime
+
 try:
     from litellm.integrations.custom_logger import CustomLogger
     from litellm.integrations.opentelemetry import OpenTelemetry
+    from litellm.proxy._types import SpanAttributes
 except ImportError as e:
     raise ImportError(
         "Litellm needs to be installed in order to use the litellm integration. "
@@ -10,7 +14,7 @@ except ImportError as e:
     ) from e
 
 from opentelemetry import trace
-from opentelemetry.trace import SpanKind
+from opentelemetry.trace import SpanKind, Status, StatusCode
 
 
 class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
@@ -25,3 +29,30 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
 
         CustomLogger.__init__(self, **kwargs)
         self._init_otel_logger_on_litellm_proxy()
+
+    def _handle_sucess(self, kwargs, response_obj, start_time, end_time):
+        _parent_context, parent_otel_span = self._get_span_context(kwargs)
+
+        self._add_dynamic_span_processor_if_needed(kwargs)
+
+        span = self.tracer.start_span(
+            name=self._get_span_name(kwargs),
+            start_time=self._to_ns(start_time),
+            context=_parent_context,
+        )
+        span.set_status(Status(StatusCode.OK))
+        self.set_attributes(span, kwargs, response_obj)
+
+        if kwargs.get("messages"):
+            for idx, prompt in enumerate(kwargs.get("messages")):
+                if prompt.get("tool_calls"):
+                    self.safe_set_attribute(
+                        span=span,
+                        key=f"{SpanAttributes.LLM_PROMPTS}.{idx}.tool_calls",
+                        value=json.dumps(prompt["tool_calls"]),
+                    )
+
+        span.end(end_time=self._to_ns(end_time))
+
+        if parent_otel_span is not None:
+            parent_otel_span.end(end_time=self._to_ns(datetime.now()))
