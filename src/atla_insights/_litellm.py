@@ -30,7 +30,7 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
         CustomLogger.__init__(self, **kwargs)
         self._init_otel_logger_on_litellm_proxy()
 
-    def _handle_sucess(self, kwargs, response_obj, start_time, end_time):
+    def _handle_otel_event(self, kwargs, response_obj, start_time, end_time, status_code):
         _parent_context, parent_otel_span = self._get_span_context(kwargs)
 
         self._add_dynamic_span_processor_if_needed(kwargs)
@@ -40,7 +40,7 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
             start_time=self._to_ns(start_time),
             context=_parent_context,
         )
-        span.set_status(Status(StatusCode.OK))
+        span.set_status(Status(status_code))
         self.set_attributes(span, kwargs, response_obj)
 
         if kwargs.get("messages"):
@@ -56,3 +56,11 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
 
         if parent_otel_span is not None:
             parent_otel_span.end(end_time=self._to_ns(datetime.now()))
+
+    def _handle_sucess(self, kwargs, response_obj, start_time, end_time):
+        self._handle_otel_event(kwargs, response_obj, start_time, end_time, StatusCode.OK)
+
+    def _handle_failure(self, kwargs, response_obj, start_time, end_time):
+        self._handle_otel_event(
+            kwargs, response_obj, start_time, end_time, StatusCode.ERROR
+        )
