@@ -30,18 +30,22 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
         CustomLogger.__init__(self, **kwargs)
         self._init_otel_logger_on_litellm_proxy()
 
-    def _handle_sucess(self, kwargs, response_obj, start_time, end_time):
+    def _handle_span(self, kwargs, response_obj, start_time, end_time, status_code):
         _parent_context, parent_otel_span = self._get_span_context(kwargs)
-
-        self._add_dynamic_span_processor_if_needed(kwargs)
 
         span = self.tracer.start_span(
             name=self._get_span_name(kwargs),
             start_time=self._to_ns(start_time),
             context=_parent_context,
         )
-        span.set_status(Status(StatusCode.OK))
+        span.set_status(Status(status_code))
         self.set_attributes(span, kwargs, response_obj)
+
+        self.safe_set_attribute(
+            span=span,
+            key="atla.instrumentation.name",
+            value="litellm",
+        )
 
         if messages := kwargs.get("messages"):
             for idx, prompt in enumerate(messages):
@@ -56,28 +60,10 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
 
         if parent_otel_span is not None:
             parent_otel_span.end(end_time=self._to_ns(datetime.now()))
+
+    def _handle_sucess(self, kwargs, response_obj, start_time, end_time):
+        self._add_dynamic_span_processor_if_needed(kwargs)
+        self._handle_span(kwargs, response_obj, start_time, end_time, StatusCode.OK)
 
     def _handle_failure(self, kwargs, response_obj, start_time, end_time):
-        _parent_context, parent_otel_span = self._get_span_context(kwargs)
-
-        span = self.tracer.start_span(
-            name=self._get_span_name(kwargs),
-            start_time=self._to_ns(start_time),
-            context=_parent_context,
-        )
-        span.set_status(Status(StatusCode.ERROR))
-        self.set_attributes(span, kwargs, response_obj)
-
-        if messages := kwargs.get("messages"):
-            for idx, prompt in enumerate(messages):
-                if tool_calls := prompt.get("tool_calls"):
-                    self.safe_set_attribute(
-                        span=span,
-                        key=f"{SpanAttributes.LLM_PROMPTS}.{idx}.tool_calls",
-                        value=json.dumps(tool_calls),
-                    )
-
-        span.end(end_time=self._to_ns(end_time))
-
-        if parent_otel_span is not None:
-            parent_otel_span.end(end_time=self._to_ns(datetime.now()))
+        self._handle_span(kwargs, response_obj, start_time, end_time, StatusCode.ERROR)
