@@ -1,0 +1,121 @@
+[
+    {
+        "name": "basic",
+        "completion_kwargs": {
+            "model": "openai/some-model",
+            "messages": [{ "role": "user", "content": "Hello, world!" }]
+        },
+        "expected_genai_attributes": {
+            "gen_ai.completion.0.content": "hello world",
+            "gen_ai.completion.0.finish_reason": "stop",
+            "gen_ai.completion.0.role": "assistant",
+            "gen_ai.prompt.0.content": "Hello, world!",
+            "gen_ai.prompt.0.role": "user",
+            "gen_ai.request.model": "some-model",
+            "gen_ai.response.id": "chatcmpl-abc123",
+            "gen_ai.response.model": "some-model",
+            "gen_ai.system": "openai",
+            "gen_ai.usage.completion_tokens": 12,
+            "gen_ai.usage.prompt_tokens": 9
+        }
+    },
+    {
+        "name": "tool-calls",
+        "completion_kwargs": {
+            "model": "openai/some-model",
+            "messages": [
+                { "role": "user", "content": "Hello, world!" },
+                {
+                    "role": "assistant",
+                    "content": null,
+                    "tool_calls": [
+                        {
+                            "id": "tool_call_1",
+                            "type": "function",
+                            "function": {
+                                "name": "test_function",
+                                "arguments": { "location": "Paris" }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "role": "tool",
+                    "tool_call_id": "tool_call_1",
+                    "content": "some mock output"
+                }
+            ],
+            "tools": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "test_function",
+                        "description": "Test function",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "location": {
+                                    "type": "string",
+                                    "description": "mock location"
+                                }
+                            },
+                            "required": ["location"]
+                        }
+                    }
+                }
+            ],
+            "tool_choice": "auto"
+        },
+        "expected_genai_attributes": {
+            "gen_ai.completion.0.content": "hello world",
+            "gen_ai.completion.0.finish_reason": "stop",
+            "gen_ai.completion.0.role": "assistant",
+            "gen_ai.prompt.0.content": "Hello, world!",
+            "gen_ai.prompt.0.role": "user",
+            "gen_ai.prompt.1.role": "assistant",
+            "gen_ai.prompt.1.tool_calls": "[{\"id\": \"tool_call_1\", \"type\": \"function\", \"function\": {\"name\": \"test_function\", \"arguments\": \"{\\\"location\\\": \\\"Paris\\\"}\"}}]",
+            "gen_ai.prompt.2.role": "tool",
+            "gen_ai.prompt.2.content": "some mock output",
+            "gen_ai.request.model": "some-model",
+            "gen_ai.response.id": "chatcmpl-abc123",
+            "gen_ai.response.model": "some-model",
+            "gen_ai.system": "openai",
+            "gen_ai.usage.completion_tokens": 12,
+            "gen_ai.usage.prompt_tokens": 9
+        }
+    },
+    {
+        "name": "multi-turn",
+        "completion_kwargs": {
+            "model": "openai/some-model",
+            "messages": [
+                { "role": "system", "content": "You are a helpful assistant." },
+                { "role": "user", "content": "Hello, world!" },
+                { "role": "assistant", "content": "Hello, world!" },
+                { "role": "assistant", "content": "Hello, world again!" },
+                { "role": "user", "content": "Hello, world!" }
+            ]
+        },
+        "expected_genai_attributes": {
+            "gen_ai.completion.0.content": "hello world",
+            "gen_ai.completion.0.finish_reason": "stop",
+            "gen_ai.completion.0.role": "assistant",
+            "gen_ai.prompt.0.content": "You are a helpful assistant.",
+            "gen_ai.prompt.0.role": "system",
+            "gen_ai.prompt.1.content": "Hello, world!",
+            "gen_ai.prompt.1.role": "user",
+            "gen_ai.prompt.2.content": "Hello, world!",
+            "gen_ai.prompt.2.role": "assistant",
+            "gen_ai.prompt.3.content": "Hello, world again!",
+            "gen_ai.prompt.3.role": "assistant",
+            "gen_ai.prompt.4.content": "Hello, world!",
+            "gen_ai.prompt.4.role": "user",
+            "gen_ai.request.model": "some-model",
+            "gen_ai.response.id": "chatcmpl-abc123",
+            "gen_ai.response.model": "some-model",
+            "gen_ai.system": "openai",
+            "gen_ai.usage.completion_tokens": 12,
+            "gen_ai.usage.prompt_tokens": 9
+        }
+    }
+]

@@ -511,17 +511,12 @@ class TestLitellmInstrumentation(BaseSpanProcessors):
 
         spans = self.in_memory_span_exporter.get_finished_spans()
 
-        assert len(spans) == 2
-        span_1, span_2 = spans
+        assert len(spans) == 1
+        [litellm_request] = spans
 
-        assert span_1.attributes is not None
-        assert span_2.attributes is not None
-
-        assert span_1.attributes.get("logfire.msg") == "raw_gen_ai_request"
-        assert span_2.attributes.get("logfire.msg") == "litellm_request"
-
-        assert span_1.attributes.get(SUCCESS_MARK) is None
-        assert span_2.attributes.get(SUCCESS_MARK) == -1
+        assert litellm_request.attributes is not None
+        assert litellm_request.attributes.get("logfire.msg") == "litellm_request"
+        assert litellm_request.attributes.get(SUCCESS_MARK) == -1
 
     @pytest.mark.asyncio
     async def test_basic_instrumentation_async(self) -> None:
@@ -538,14 +533,9 @@ class TestLitellmInstrumentation(BaseSpanProcessors):
 
         spans = self.in_memory_span_exporter.get_finished_spans()
 
-        assert len(spans) == 2
-        span_1, span_2 = spans
+        assert len(spans) == 1
+        [litellm_request] = spans
 
-        assert span_1.attributes is not None
-        assert span_2.attributes is not None
-
-        assert span_1.attributes.get("logfire.msg") == "raw_gen_ai_request"
-        assert span_2.attributes.get("logfire.msg") == "litellm_request"
-
-        assert span_1.attributes.get(SUCCESS_MARK) is None
-        assert span_2.attributes.get(SUCCESS_MARK) == -1
+        assert litellm_request.attributes is not None
+        assert litellm_request.attributes.get("logfire.msg") == "litellm_request"
+        assert litellm_request.attributes.get(SUCCESS_MARK) == -1
