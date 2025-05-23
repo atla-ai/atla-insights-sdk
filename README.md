@@ -36,7 +36,7 @@ from atla_insights import configure
 configure(token="<MY_ATLA_INSIGHTS_TOKEN>")
 ```
 
-You can retrieve your authentication token from the [Atla Insights platform](https://atla-insights.vercel.app).
+You can retrieve your authentication token from the [Atla Insights platform](https://app.atla-ai.com).
 
 ### Instrumentation
 
