@@ -73,7 +73,7 @@
             "gen_ai.prompt.0.content": "Hello, world!",
             "gen_ai.prompt.0.role": "user",
             "gen_ai.prompt.1.role": "assistant",
-            "gen_ai.prompt.1.tool_calls": "[{\"id\": \"tool_call_1\", \"type\": \"function\", \"function\": {\"name\": \"test_function\", \"arguments\": {\"location\": \"Paris\"}}}]",
+            "gen_ai.prompt.1.tool_calls": "[{\"id\": \"tool_call_1\", \"type\": \"function\", \"function\": {\"name\": \"test_function\", \"arguments\": \"{\\\"location\\\": \\\"Paris\\\"}\"}}]",
             "gen_ai.prompt.2.role": "tool",
             "gen_ai.prompt.2.content": "some mock output",
             "gen_ai.request.model": "some-model",
