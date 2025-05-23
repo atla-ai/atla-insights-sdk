@@ -46,7 +46,7 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
                 if tool_calls := prompt.get("tool_calls"):
                     self.safe_set_attribute(
                         span=span,
-                        key=f"{SpanAttributes.LLM_PROMPTS}.{idx}.tool_calls",
+                        key=f"{SpanAttributes.LLM_PROMPTS.value}.{idx}.tool_calls",
                         value=json.dumps(tool_calls),
                     )
 
