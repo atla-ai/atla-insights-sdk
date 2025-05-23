@@ -38,17 +38,11 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
                 function["arguments"] = json.dumps(function["arguments"])
         return tool_call
 
-    def _handle_span(self, kwargs, response_obj, start_time, end_time, status_code):
-        _parent_context, parent_otel_span = self._get_span_context(kwargs)
-
-        span = self.tracer.start_span(
-            name=self._get_span_name(kwargs),
-            start_time=self._to_ns(start_time),
-            context=_parent_context,
-        )
-        span.set_status(Status(status_code))
+    def _set_attributes_atla(self, span, kwargs, response_obj) -> None:
+        # Set LiteLLM otel attributes
         self.set_attributes(span, kwargs, response_obj)
 
+        # Set Atla-specific attributes
         self.safe_set_attribute(
             span=span,
             key="atla.instrumentation.name",
@@ -67,14 +61,36 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
                         value=json.dumps(tool_calls),
                     )
 
+    def _handle_sucess(self, kwargs, response_obj, start_time, end_time) -> None:
+        _parent_context, parent_otel_span = self._get_span_context(kwargs)
+
+        self._add_dynamic_span_processor_if_needed(kwargs)
+
+        span = self.tracer.start_span(
+            name=self._get_span_name(kwargs),
+            start_time=self._to_ns(start_time),
+            context=_parent_context,
+        )
+        span.set_status(Status(StatusCode.OK))
+        self._set_attributes_atla(span, kwargs, response_obj)
+        self.set_raw_request_attributes(span, kwargs, response_obj)
+
         span.end(end_time=self._to_ns(end_time))
 
         if parent_otel_span is not None:
             parent_otel_span.end(end_time=self._to_ns(datetime.now()))
 
-    def _handle_sucess(self, kwargs, response_obj, start_time, end_time):
-        self._add_dynamic_span_processor_if_needed(kwargs)
-        self._handle_span(kwargs, response_obj, start_time, end_time, StatusCode.OK)
+    def _handle_failure(self, kwargs, response_obj, start_time, end_time) -> None:
+        _parent_context, parent_otel_span = self._get_span_context(kwargs)
 
-    def _handle_failure(self, kwargs, response_obj, start_time, end_time):
-        self._handle_span(kwargs, response_obj, start_time, end_time, StatusCode.ERROR)
+        span = self.tracer.start_span(
+            name=self._get_span_name(kwargs),
+            start_time=self._to_ns(start_time),
+            context=_parent_context,
+        )
+        span.set_status(Status(StatusCode.ERROR))
+        self._set_attributes_atla(span, kwargs, response_obj)
+        span.end(end_time=self._to_ns(end_time))
+
+        if parent_otel_span is not None:
+            parent_otel_span.end(end_time=self._to_ns(datetime.now()))
