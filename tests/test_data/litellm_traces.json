@@ -34,7 +34,7 @@
                             "type": "function",
                             "function": {
                                 "name": "test_function",
-                                "arguments": { "location": "Paris" }
+                                "arguments": "{\"location\": \"Paris\"}"
                             }
                         }
                     ]

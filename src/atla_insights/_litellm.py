@@ -2,7 +2,6 @@
 
 import json
 from datetime import datetime
-from typing import Any
 
 try:
     from litellm.integrations.custom_logger import CustomLogger
@@ -31,13 +30,6 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
         CustomLogger.__init__(self, **kwargs)
         self._init_otel_logger_on_litellm_proxy()
 
-    def _postprocess_tool_call(self, tool_call: dict[str, Any]) -> dict[str, Any]:
-        """Postprocess a tool call."""
-        if function := tool_call.get("function"):
-            if isinstance(function, dict) and function.get("arguments"):
-                function["arguments"] = json.dumps(function["arguments"])
-        return tool_call
-
     def _set_attributes_atla(self, span, kwargs, response_obj) -> None:
         # Set LiteLLM otel attributes
         self.set_attributes(span, kwargs, response_obj)
@@ -52,9 +44,6 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
         if messages := kwargs.get("messages"):
             for idx, prompt in enumerate(messages):
                 if tool_calls := prompt.get("tool_calls"):
-                    tool_calls = [
-                        self._postprocess_tool_call(tool_call) for tool_call in tool_calls
-                    ]
                     self.safe_set_attribute(
                         span=span,
                         key=f"{SpanAttributes.LLM_PROMPTS}.{idx}.tool_calls",
