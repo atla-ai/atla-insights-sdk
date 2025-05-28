@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "atla-insights"
-version = "0.0.1a7"
+version = "0.0.1a9"
 description = "Atla is a platform for monitoring and improving AI agents."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -33,6 +33,9 @@ dev = [
 ]
 
 [project.optional-dependencies]
+agno = [
+    "openinference-instrumentation-agno>=0.1.4",
+]
 ci = [
     "mypy>=1.15.0",
     "ruff>=0.11.7",

@@ -129,11 +129,23 @@ class AtlaInsights:
         if atla_otel_logger not in litellm.callbacks:
             litellm.callbacks.append(atla_otel_logger)
 
+    def instrument_agno(self) -> None:
+        """Instrument agno."""
+        try:
+            from openinference.instrumentation.agno import AgnoInstrumentor
+        except ImportError as e:
+            raise ImportError(
+                "Agno needs to be installed in order to use the agno integration. "
+                "Please install it via `pip install openinference-instrumentation-agno`."
+            ) from e
+        AgnoInstrumentor().instrument()
+
 
 _ATLA = AtlaInsights()
 
 configure = _ATLA.configure
 mark_success = _ATLA.mark_success
 mark_failure = _ATLA.mark_failure
+instrument_agno = _ATLA.instrument_agno
 instrument_litellm = _ATLA.instrument_litellm
 instrument_openai = _ATLA.instrument_openai
