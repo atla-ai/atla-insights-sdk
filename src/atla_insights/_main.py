@@ -126,8 +126,8 @@ class AtlaInsights:
             import litellm
         except ImportError as e:
             raise ImportError(
-                "Litellm needs to be installed in order to use the litellm integration. "
-                "Please install it via `pip install litellm`."
+                "Litellm needs to be installed. "
+                "Please install it via `pip install atla-insights[litellm]`."
             ) from e
 
         from ._litellm import AtlaLiteLLMOpenTelemetry
@@ -152,8 +152,8 @@ class AtlaInsights:
             from openinference.instrumentation.agno import AgnoInstrumentor
         except ImportError as e:
             raise ImportError(
-                "Agno needs to be installed in order to use the agno integration. "
-                "Please install it via `pip install openinference-instrumentation-agno`."
+                "Agno instrumentation needs to be installed. "
+                "Please install it via `pip install atla-insights[agno]`."
             ) from e
 
         AgnoInstrumentor().instrument()
