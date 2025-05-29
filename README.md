@@ -130,14 +130,11 @@ Then, you can instrument Agno via:
 ```python
 from atla_insights import configure, instrument_agno
 from agno.agent import Agent
-from agno.models.litellm import LiteLLM
+from agno.models.openai import OpenAIChat
 
-instrument_agno("litellm")
+instrument_agno("openai")
 
-agent = Agent(
-    model=LiteLLM(id="gpt-4o"),
-    ...
-)
+agent = Agent(model=OpenAIChat(id="gpt-4o"))
 ```
 
 ### Adding metadata
