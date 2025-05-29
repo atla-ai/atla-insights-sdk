@@ -55,7 +55,10 @@ class TestAgnoIntegration:
 
         assert len(self.in_memory_span_exporter.get_finished_spans()) == 3
 
-        request, llm_call, run = self.in_memory_span_exporter.get_finished_spans()
+        run, llm_call, request = sorted(
+            self.in_memory_span_exporter.get_finished_spans(),
+            key=lambda x: x.start_time if x.start_time is not None else 0,
+        )
 
         assert request.name == "Chat Completion with {request_data[model]!r}"
         assert llm_call.name == "OpenAIChat.invoke"
@@ -80,7 +83,10 @@ class TestAgnoIntegration:
 
         assert len(self.in_memory_span_exporter.get_finished_spans()) == 3
 
-        llm_call, request, run = self.in_memory_span_exporter.get_finished_spans()
+        run, llm_call, request = sorted(
+            self.in_memory_span_exporter.get_finished_spans(),
+            key=lambda x: x.start_time if x.start_time is not None else 0,
+        )
 
         assert request.name == "litellm_request"
         assert llm_call.name == "LiteLLM.invoke"
