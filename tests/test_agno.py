@@ -60,9 +60,9 @@ class TestAgnoIntegration:
             key=lambda x: x.start_time if x.start_time is not None else 0,
         )
 
-        assert request.name == "Chat Completion with {request_data[model]!r}"
-        assert llm_call.name == "OpenAIChat.invoke"
         assert run.name == "Agent.run"
+        assert llm_call.name == "OpenAIChat.invoke"
+        assert request.name == "Chat Completion with {request_data[model]!r}"
 
         assert request.attributes is not None
         assert request.attributes.get("request_data")
@@ -88,9 +88,9 @@ class TestAgnoIntegration:
             key=lambda x: x.start_time if x.start_time is not None else 0,
         )
 
-        assert request.name == "litellm_request"
-        assert llm_call.name == "LiteLLM.invoke"
         assert run.name == "Agent.run"
+        assert llm_call.name == "LiteLLM.invoke"
+        assert request.name == "litellm_request"
 
         assert request.attributes is not None
         assert (
