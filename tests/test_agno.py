@@ -7,10 +7,11 @@ from agno.agent import Agent
 from agno.models.litellm import LiteLLM
 from agno.models.openai import OpenAIChat
 from openai import OpenAI
+from openinference.instrumentation.agno import AgnoInstrumentor
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 
-from src.atla_insights import instrument_agno, instrument_litellm, instrument_openai
+from src.atla_insights import instrument_agno, instrument_openai
 
 
 @pytest.mark.usefixtures("mock_openai_client")
@@ -29,12 +30,9 @@ class TestAgnoIntegration:
             send_to_logfire=False,
         )
 
-        instrument_agno()
-
     def setup_method(self) -> None:
         """Wipe any pre-existing litellm instrumentation."""
         litellm.callbacks = []
-        instrument_litellm()
 
     def teardown_method(self) -> None:
         """Wipe any added traces after each test run."""
@@ -50,6 +48,8 @@ class TestAgnoIntegration:
             ),
         )
 
+        # NOTE: testing workaround because of a lack of OpenAI uninstrument support.
+        AgnoInstrumentor().instrument()
         with instrument_openai():
             agent.print_response("Hello world!")
 
@@ -77,7 +77,7 @@ class TestAgnoIntegration:
             ),
         )
 
-        instrument_litellm()
+        instrument_agno("litellm")
 
         agent.print_response("Hello world!")
 
