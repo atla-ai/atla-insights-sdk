@@ -118,6 +118,25 @@ def run_my_agent() -> None:
     ...
 ```
 
+#### Agno
+You will need to install the Atla Insights Agno integration via:
+
+```bash
+pip install "atla-insights[agno]"
+```
+
+Then, you can instrument Agno via:
+
+```python
+from atla_insights import configure, instrument_agno
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+
+instrument_agno("openai")
+
+agent = Agent(model=OpenAIChat(id="gpt-4o"))
+```
+
 ### Adding metadata
 
 You can attach metadata to a run that provides additional information about the specs of

@@ -4,6 +4,7 @@ from logfire import instrument
 
 from ._main import (
     configure,
+    instrument_agno,
     instrument_litellm,
     instrument_openai,
     mark_failure,
@@ -13,6 +14,7 @@ from ._main import (
 __all__ = [
     "configure",
     "instrument",
+    "instrument_agno",
     "instrument_litellm",
     "instrument_openai",
     "mark_failure",

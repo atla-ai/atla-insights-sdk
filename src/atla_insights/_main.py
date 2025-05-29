@@ -2,7 +2,14 @@
 
 import logging
 import os
-from typing import TYPE_CHECKING, ContextManager, Optional, Sequence, Union
+from typing import (
+    TYPE_CHECKING,
+    ContextManager,
+    Literal,
+    Optional,
+    Sequence,
+    Union,
+)
 
 import logfire
 from opentelemetry.sdk.trace import SpanProcessor
@@ -119,8 +126,8 @@ class AtlaInsights:
             import litellm
         except ImportError as e:
             raise ImportError(
-                "Litellm needs to be installed in order to use the litellm integration. "
-                "Please install it via `pip install litellm`."
+                "Litellm needs to be installed. "
+                "Please install it via `pip install atla-insights[litellm]`."
             ) from e
 
         from ._litellm import AtlaLiteLLMOpenTelemetry
@@ -129,11 +136,46 @@ class AtlaInsights:
         if atla_otel_logger not in litellm.callbacks:
             litellm.callbacks.append(atla_otel_logger)
 
+    def instrument_agno(
+        self,
+        llm_provider: Union[
+            Sequence[Literal["openai", "litellm"]],
+            Literal["openai", "litellm"],
+        ],
+    ) -> None:
+        """Instrument the Agno framework.
+
+        :param llm_provider (Union[Sequence[Literal["openai", "litellm"]],
+            Literal["openai", "litellm"]]): The Agno LLM provider(s) to instrument.
+        """
+        try:
+            from openinference.instrumentation.agno import AgnoInstrumentor
+        except ImportError as e:
+            raise ImportError(
+                "Agno instrumentation needs to be installed. "
+                "Please install it via `pip install atla-insights[agno]`."
+            ) from e
+
+        AgnoInstrumentor().instrument()
+
+        if isinstance(llm_provider, str):
+            llm_provider = [llm_provider]
+
+        for provider in set(llm_provider):
+            match provider:
+                case "openai":
+                    self.instrument_openai()
+                case "litellm":
+                    self.instrument_litellm()
+                case _:
+                    raise ValueError(f"Invalid LLM provider: {provider}")
+
 
 _ATLA = AtlaInsights()
 
 configure = _ATLA.configure
 mark_success = _ATLA.mark_success
 mark_failure = _ATLA.mark_failure
+instrument_agno = _ATLA.instrument_agno
 instrument_litellm = _ATLA.instrument_litellm
 instrument_openai = _ATLA.instrument_openai
