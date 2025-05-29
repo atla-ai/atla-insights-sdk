@@ -119,24 +119,26 @@ def run_my_agent() -> None:
 ```
 
 #### Agno
-You can instrument Agno via:
+You will need to install the Atla Insights Agno integration via:
+
+```bash
+pip install "atla-insights[agno]"
+```
+
+Then, you can instrument Agno via:
 
 ```python
-from atla_insights import configure, instrument_agno, instrument_litellm
+from atla_insights import configure, instrument_agno
 from agno.agent import Agent
 from agno.models.litellm import LiteLLM
 
-instrument_agno()
-instrument_litellm()
+instrument_agno("litellm")
 
 agent = Agent(
     model=LiteLLM(id="gpt-4o"),
     ...
 )
 ```
-
-⚠️ Note that you will need to instrument both the Agno framework _and_ the actual model
-provider(s) you use via Agno (e.g. OpenAI, LiteLLM, etc.)
 
 ### Adding metadata
 
