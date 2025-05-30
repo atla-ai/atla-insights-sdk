@@ -3,7 +3,7 @@
 from typing import Generator
 
 import pytest
-from openai import OpenAI
+from openai import AsyncOpenAI, OpenAI
 from pytest_httpserver import HTTPServer
 
 
@@ -27,6 +27,36 @@ def mock_openai_client() -> Generator[OpenAI, None, None]:
         }
         httpserver.expect_request("/v1/chat/completions").respond_with_json(mock_response)
         yield OpenAI(api_key="unit-test", base_url=httpserver.url_for("/v1"))
+
+
+@pytest.fixture(scope="class")
+def mock_async_openai_client() -> Generator[AsyncOpenAI, None, None]:
+    """Mock the OpenAI client."""
+    with HTTPServer() as httpserver:
+        mock_response = {
+            "id": "resp_abc123",
+            "object": "response",
+            "created_at": 1677858242,
+            "status": "completed",
+            "error": None,
+            "incomplete_details": None,
+            "instructions": None,
+            "max_output_tokens": None,
+            "model": "some-model",
+            "output": [
+                {
+                    "type": "message",
+                    "id": "msg_abc123",
+                    "status": "completed",
+                    "role": "assistant",
+                    "content": [
+                        {"type": "output_text", "text": "hello world", "annotations": []}
+                    ],
+                }
+            ],
+        }
+        httpserver.expect_request("/v1/responses").respond_with_json(mock_response)
+        yield AsyncOpenAI(api_key="unit-test", base_url=httpserver.url_for("/v1"))
 
 
 @pytest.fixture(scope="class")
