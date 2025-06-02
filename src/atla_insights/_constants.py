@@ -1,5 +1,9 @@
 """Constants for the atla_insights package."""
 
+MAX_METADATA_FIELDS = 25
+MAX_METADATA_KEY_CHARS = 40
+MAX_METADATA_VALUE_CHARS = 100
+
 METADATA_MARK = "atla.metadata"
 SUCCESS_MARK = "atla.mark.success"
 

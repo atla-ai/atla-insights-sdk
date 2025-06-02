@@ -19,6 +19,7 @@ from ._span_processors import (
     get_atla_root_span_processor,
     get_atla_span_processor,
 )
+from ._utils import validate_metadata
 
 if TYPE_CHECKING:
     from openai import AsyncOpenAI, OpenAI
@@ -51,12 +52,8 @@ class AtlaInsights:
         :param verbose (bool): Whether to print verbose output to console.
             Defaults to `True`.
         """
-        if metadata and not all(
-            isinstance(k, str) and isinstance(v, str) for k, v in metadata.items()
-        ):
-            raise ValueError("The metadata field must be a mapping of string to string.")
+        validate_metadata(metadata)
 
-        self.configured = True
         additional_span_processors = additional_span_processors or []
 
         self._root_span_processor = get_atla_root_span_processor(metadata)
@@ -74,6 +71,7 @@ class AtlaInsights:
             send_to_logfire=False,
             scrubbing=False,
         )
+        self.configured = True
 
         logger.info("Atla insights configured correctly ✅")
 
