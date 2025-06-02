@@ -13,7 +13,7 @@ from ._constants import LOGFIRE_OTEL_TRACES_ENDPOINT, METADATA_MARK, SUCCESS_MAR
 class AtlaRootSpanProcessor(SpanProcessor):
     """An Atla root span processor."""
 
-    def __init__(self, metadata: Optional[dict[str, str]] = None) -> None:
+    def __init__(self, metadata: Optional[dict[str, str]]) -> None:
         """Initialize the Atla root span processor.
 
         :param metadata (Optional[dict[str, str]]): A dictionary of metadata to be added
@@ -70,7 +70,7 @@ def get_atla_span_processor(token: str) -> SpanProcessor:
 
 
 def get_atla_root_span_processor(
-    metadata: Optional[dict[str, str]] = None,
+    metadata: Optional[dict[str, str]],
 ) -> AtlaRootSpanProcessor:
     """Get an Atla root span processor.
 
