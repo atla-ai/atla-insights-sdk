@@ -46,6 +46,9 @@ ci = [
     "mypy>=1.15.0",
     "ruff>=0.11.7",
 ]
+langchain = [
+    "openinference-instrumentation-langchain>=0.1.43",
+]
 litellm = [
     "litellm>=1.72.0",
     "litellm[proxy]",

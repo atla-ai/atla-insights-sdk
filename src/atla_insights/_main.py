@@ -190,6 +190,26 @@ class AtlaInsights:
         AgnoInstrumentor().instrument()
         self._instrument_llm_provider(llm_provider)
 
+    def instrument_langchain(
+        self,
+        llm_provider: Union[Sequence[SUPPORTED_LLM_PROVIDER], SUPPORTED_LLM_PROVIDER],
+    ) -> None:
+        """Instrument the Langchain framework.
+
+        :param llm_provider (Union[Sequence[SUPPORTED_LLM_PROVIDER],
+            SUPPORTED_LLM_PROVIDER]): The Agno LLM provider(s) to instrument.
+        """
+        try:
+            from openinference.instrumentation.langchain import LangChainInstrumentor
+        except ImportError as e:
+            raise ImportError(
+                "Langchain instrumentation needs to be installed. "
+                "Please install it via `pip install atla-insights[langchain]`."
+            ) from e
+
+        LangChainInstrumentor().instrument()
+        self._instrument_llm_provider(llm_provider)
+
 
 _ATLA = AtlaInsights()
 
@@ -198,5 +218,6 @@ mark_success = _ATLA.mark_success
 mark_failure = _ATLA.mark_failure
 instrument_agno = _ATLA.instrument_agno
 instrument_anthropic = _ATLA.instrument_anthropic
+instrument_langchain = _ATLA.instrument_langchain
 instrument_litellm = _ATLA.instrument_litellm
 instrument_openai = _ATLA.instrument_openai
