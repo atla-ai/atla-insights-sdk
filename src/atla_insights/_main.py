@@ -130,6 +130,18 @@ class AtlaInsights:
             openai_client
         )
 
+    def instrument_langchain(self) -> None:
+        """Instrument the Langchain framework."""
+        try:
+            from openinference.instrumentation.langchain import LangChainInstrumentor
+        except ImportError as e:
+            raise ImportError(
+                "Langchain instrumentation needs to be installed. "
+                "Please install it via `pip install atla-insights[langchain]`."
+            ) from e
+
+        LangChainInstrumentor().instrument()
+
     def instrument_litellm(self) -> None:
         """Instrument litellm."""
         try:
@@ -188,26 +200,6 @@ class AtlaInsights:
             ) from e
 
         AgnoInstrumentor().instrument()
-        self._instrument_llm_provider(llm_provider)
-
-    def instrument_langchain(
-        self,
-        llm_provider: Union[Sequence[SUPPORTED_LLM_PROVIDER], SUPPORTED_LLM_PROVIDER],
-    ) -> None:
-        """Instrument the Langchain framework.
-
-        :param llm_provider (Union[Sequence[SUPPORTED_LLM_PROVIDER],
-            SUPPORTED_LLM_PROVIDER]): The LLM provider(s) to instrument.
-        """
-        try:
-            from openinference.instrumentation.langchain import LangChainInstrumentor
-        except ImportError as e:
-            raise ImportError(
-                "Langchain instrumentation needs to be installed. "
-                "Please install it via `pip install atla-insights[langchain]`."
-            ) from e
-
-        LangChainInstrumentor().instrument()
         self._instrument_llm_provider(llm_provider)
 
     def instrument_mcp(self) -> None:
