@@ -30,6 +30,8 @@ dev = [
     "litellm[proxy]",
     "openai-agents>=0.0.7",
     "openinference-instrumentation-agno>=0.1.4",
+    "openinference-instrumentation-anthropic>=0.1.18",
+    "openinference-instrumentation-langchain>=0.1.43",
     "pytest>=8.3.4",
     "pytest-asyncio>=0.26.0",
     "pytest-httpserver>=1.1.3",
