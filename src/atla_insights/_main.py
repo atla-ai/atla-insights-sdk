@@ -177,7 +177,7 @@ class AtlaInsights:
         """Instrument the Agno framework.
 
         :param llm_provider (Union[Sequence[SUPPORTED_LLM_PROVIDER],
-            SUPPORTED_LLM_PROVIDER]): The Agno LLM provider(s) to instrument.
+            SUPPORTED_LLM_PROVIDER]): The LLM provider(s) to instrument.
         """
         try:
             from openinference.instrumentation.agno import AgnoInstrumentor
@@ -197,7 +197,7 @@ class AtlaInsights:
         """Instrument the Langchain framework.
 
         :param llm_provider (Union[Sequence[SUPPORTED_LLM_PROVIDER],
-            SUPPORTED_LLM_PROVIDER]): The Agno LLM provider(s) to instrument.
+            SUPPORTED_LLM_PROVIDER]): The LLM provider(s) to instrument.
         """
         try:
             from openinference.instrumentation.langchain import LangChainInstrumentor
@@ -210,6 +210,38 @@ class AtlaInsights:
         LangChainInstrumentor().instrument()
         self._instrument_llm_provider(llm_provider)
 
+    def instrument_mcp(self) -> None:
+        """Instrument MCP."""
+        try:
+            from openinference.instrumentation.mcp import MCPInstrumentor
+        except ImportError as e:
+            raise ImportError(
+                "MCP instrumentation needs to be installed. "
+                "Please install it via `pip install atla-insights[mcp]`."
+            ) from e
+
+        MCPInstrumentor().instrument()
+
+    def instrument_smolagents(
+        self,
+        llm_provider: Union[Sequence[SUPPORTED_LLM_PROVIDER], SUPPORTED_LLM_PROVIDER],
+    ) -> None:
+        """Instrument the HuggingFace Smolagents framework.
+
+        :param llm_provider (Union[Sequence[SUPPORTED_LLM_PROVIDER],
+            SUPPORTED_LLM_PROVIDER]): The LLM provider(s) to instrument.
+        """
+        try:
+            from openinference.instrumentation.smolagents import SmolagentsInstrumentor
+        except ImportError as e:
+            raise ImportError(
+                "Smolagents instrumentation needs to be installed. "
+                "Please install it via `pip install atla-insights[smolagents]`."
+            ) from e
+
+        SmolagentsInstrumentor().instrument()
+        self._instrument_llm_provider(llm_provider)
+
 
 _ATLA = AtlaInsights()
 
@@ -220,4 +252,6 @@ instrument_agno = _ATLA.instrument_agno
 instrument_anthropic = _ATLA.instrument_anthropic
 instrument_langchain = _ATLA.instrument_langchain
 instrument_litellm = _ATLA.instrument_litellm
+instrument_mcp = _ATLA.instrument_mcp
 instrument_openai = _ATLA.instrument_openai
+instrument_smolagents = _ATLA.instrument_smolagents

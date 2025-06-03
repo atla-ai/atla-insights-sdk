@@ -8,7 +8,9 @@ from ._main import (
     instrument_anthropic,
     instrument_langchain,
     instrument_litellm,
+    instrument_mcp,
     instrument_openai,
+    instrument_smolagents,
     mark_failure,
     mark_success,
 )
@@ -20,8 +22,10 @@ __all__ = [
     "instrument_anthropic",
     "instrument_langchain",
     "instrument_litellm",
+    "instrument_mcp",
     "instrument_openai",
     "instrument_openai_agents",
+    "instrument_smolagents",
     "mark_failure",
     "mark_success",
 ]

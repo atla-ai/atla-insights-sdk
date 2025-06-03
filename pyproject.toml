@@ -32,6 +32,8 @@ dev = [
     "openinference-instrumentation-agno>=0.1.4",
     "openinference-instrumentation-anthropic>=0.1.18",
     "openinference-instrumentation-langchain>=0.1.43",
+    "openinference-instrumentation-mcp>=1.3.0",
+    "openinference-instrumentation-smolagents>=0.1.12",
     "pytest>=8.3.4",
     "pytest-asyncio>=0.26.0",
     "pytest-httpserver>=1.1.3",
@@ -54,6 +56,12 @@ langchain = [
 litellm = [
     "litellm>=1.72.0",
     "litellm[proxy]",
+]
+mcp = [
+    "openinference-instrumentation-mcp>=1.3.0",
+]
+smolagents = [
+    "openinference-instrumentation-smolagents>=0.1.12",
 ]
 
 [project.urls]
