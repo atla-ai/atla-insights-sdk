@@ -197,6 +197,9 @@ dependencies = [
 agno = [
     { name = "openinference-instrumentation-agno" },
 ]
+anthropic = [
+    { name = "openinference-instrumentation-anthropic" },
+]
 ci = [
     { name = "mypy" },
     { name = "ruff" },
@@ -224,12 +227,13 @@ requires-dist = [
     { name = "mypy", marker = "extra == 'ci'", specifier = ">=1.15.0" },
     { name = "openai", specifier = ">=1.77.0" },
     { name = "openinference-instrumentation-agno", marker = "extra == 'agno'", specifier = ">=0.1.4" },
+    { name = "openinference-instrumentation-anthropic", marker = "extra == 'anthropic'", specifier = ">=0.1.18" },
     { name = "opentelemetry-api", specifier = ">=1.32.1" },
     { name = "opentelemetry-exporter-otlp-proto-grpc", specifier = ">=1.32.1" },
     { name = "pydantic", specifier = ">=2.11.4" },
     { name = "ruff", marker = "extra == 'ci'", specifier = ">=0.11.7" },
 ]
-provides-extras = ["agno", "ci", "litellm"]
+provides-extras = ["agno", "anthropic", "ci", "litellm"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -1417,6 +1421,24 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/d5/61/941f8b53a787836d35945560683b8bf20ca71e31020b4df4b19bad695739/openinference_instrumentation_agno-0.1.5.tar.gz", hash = "sha256:c58e1e3d0814316b4cbf52950548f1b01c05eff0789587949f82765742ef27ae", size = 11215, upload-time = "2025-05-28T22:22:20.127Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/35/4d/49b91462efa5ff086478844e6d729aa5e11f66a0b197973d10e87e233bac/openinference_instrumentation_agno-0.1.5-py3-none-any.whl", hash = "sha256:ebdf8012320d9529744009b7787550c7ecec8714790eb4276ed1a16aa009de1f", size = 12918, upload-time = "2025-05-28T22:22:18.607Z" },
+]
+
+[[package]]
+name = "openinference-instrumentation-anthropic"
+version = "0.1.18"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "openinference-instrumentation" },
+    { name = "openinference-semantic-conventions" },
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-instrumentation" },
+    { name = "opentelemetry-semantic-conventions" },
+    { name = "typing-extensions" },
+    { name = "wrapt" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/34/4f/66ff7cd9f7d60fde67759fca05c53053a02ea654203354bf7ee5d5dca1d4/openinference_instrumentation_anthropic-0.1.18.tar.gz", hash = "sha256:0a4cb556235dbcf8003e41204841b35be17e4e240ba5436218f5f837f36b0733", size = 14108, upload-time = "2025-05-20T05:03:54.3Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e3/36/2ab55c22e17f1b426e4205fdb82925e69a22dd34bd2918e72254d5df3237/openinference_instrumentation_anthropic-0.1.18-py3-none-any.whl", hash = "sha256:c0aeb5b6fdfecc308b1e286ff66dd69d23371b999a545590811de14142716904", size = 17218, upload-time = "2025-05-20T05:03:52.788Z" },
 ]
 
 [[package]]

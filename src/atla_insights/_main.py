@@ -5,7 +5,6 @@ import os
 from typing import (
     TYPE_CHECKING,
     ContextManager,
-    Literal,
     Optional,
     Sequence,
     Union,
@@ -14,6 +13,7 @@ from typing import (
 import logfire
 from opentelemetry.sdk.trace import SpanProcessor
 
+from ._constants import SUPPORTED_LLM_PROVIDER
 from ._span_processors import (
     AtlaRootSpanProcessor,
     get_atla_root_span_processor,
@@ -93,6 +93,18 @@ class AtlaInsights:
         self._root_span_processor.mark_root(value=0)
         logger.info("Marked trace as failure ❌")
 
+    def instrument_anthropic(self) -> None:
+        """Instrument Anthropic."""
+        try:
+            from openinference.instrumentation.anthropic import AnthropicInstrumentor
+        except ImportError as e:
+            raise ImportError(
+                "Anthropic instrumentation needs to be installed. "
+                "Please install it via `pip install atla-insights[anthropic]`."
+            ) from e
+
+        AnthropicInstrumentor().instrument()
+
     def instrument_openai(
         self,
         openai_client: Union[
@@ -134,17 +146,38 @@ class AtlaInsights:
         if atla_otel_logger not in litellm.callbacks:
             litellm.callbacks.append(atla_otel_logger)
 
+    def _instrument_llm_provider(
+        self,
+        llm_provider: Union[Sequence[SUPPORTED_LLM_PROVIDER], SUPPORTED_LLM_PROVIDER],
+    ) -> None:
+        """Instrument an LLM provider.
+
+        :param llm_provider (Union[Sequence[SUPPORTED_LLM_PROVIDER],
+            SUPPORTED_LLM_PROVIDER]): The LLM provider(s) to instrument.
+        :raises (ValueError): If the LLM provider is invalid.
+        """
+        if isinstance(llm_provider, str):
+            llm_provider = [llm_provider]
+
+        for provider in set(llm_provider):
+            match provider:
+                case "anthropic":
+                    self.instrument_anthropic()
+                case "openai":
+                    self.instrument_openai()
+                case "litellm":
+                    self.instrument_litellm()
+                case _:
+                    raise ValueError(f"Invalid LLM provider: {provider}")
+
     def instrument_agno(
         self,
-        llm_provider: Union[
-            Sequence[Literal["openai", "litellm"]],
-            Literal["openai", "litellm"],
-        ],
+        llm_provider: Union[Sequence[SUPPORTED_LLM_PROVIDER], SUPPORTED_LLM_PROVIDER],
     ) -> None:
         """Instrument the Agno framework.
 
-        :param llm_provider (Union[Sequence[Literal["openai", "litellm"]],
-            Literal["openai", "litellm"]]): The Agno LLM provider(s) to instrument.
+        :param llm_provider (Union[Sequence[SUPPORTED_LLM_PROVIDER],
+            SUPPORTED_LLM_PROVIDER]): The Agno LLM provider(s) to instrument.
         """
         try:
             from openinference.instrumentation.agno import AgnoInstrumentor
@@ -155,18 +188,7 @@ class AtlaInsights:
             ) from e
 
         AgnoInstrumentor().instrument()
-
-        if isinstance(llm_provider, str):
-            llm_provider = [llm_provider]
-
-        for provider in set(llm_provider):
-            match provider:
-                case "openai":
-                    self.instrument_openai()
-                case "litellm":
-                    self.instrument_litellm()
-                case _:
-                    raise ValueError(f"Invalid LLM provider: {provider}")
+        self._instrument_llm_provider(llm_provider)
 
 
 _ATLA = AtlaInsights()
@@ -175,5 +197,6 @@ configure = _ATLA.configure
 mark_success = _ATLA.mark_success
 mark_failure = _ATLA.mark_failure
 instrument_agno = _ATLA.instrument_agno
+instrument_anthropic = _ATLA.instrument_anthropic
 instrument_litellm = _ATLA.instrument_litellm
 instrument_openai = _ATLA.instrument_openai
