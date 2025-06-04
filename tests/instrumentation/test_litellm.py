@@ -1,45 +1,69 @@
-"""Test the Litellm integration."""
+"""Test the Litellm instrumentation."""
 
 import asyncio
 import json
 import time
 
-import litellm
-import logfire
 import pytest
 from litellm import acompletion, completion
 from litellm.proxy._types import SpanAttributes
 from openai import OpenAI
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 
-from src.atla_insights import instrument_litellm
+from tests._otel import BaseLocalOtel
 
 
 @pytest.mark.usefixtures("mock_openai_client")
-class TestLitellmIntegration:
-    """Test the Litellm integration."""
+class TestLitellmInstrumentation(BaseLocalOtel):
+    """Test the Litellm instrumentation."""
 
-    in_memory_span_exporter: InMemorySpanExporter
+    def test_basic(self) -> None:
+        """Test that the Litellm instrumentation is traced."""
+        from src.atla_insights import instrument_litellm
+        from src.atla_insights._constants import SUCCESS_MARK
 
-    @classmethod
-    def setup_class(cls) -> None:
-        """Set up an in-memory span exporter to collect traces to a local object."""
-        cls.in_memory_span_exporter = InMemorySpanExporter()
-
-        logfire.configure(
-            additional_span_processors=[SimpleSpanProcessor(cls.in_memory_span_exporter)],
-            send_to_logfire=False,
-        )
-
-    def setup_method(self) -> None:
-        """Wipe any pre-existing litellm instrumentation."""
-        litellm.callbacks = []
         instrument_litellm()
 
-    def teardown_method(self) -> None:
-        """Wipe any added traces after each test run."""
-        self.in_memory_span_exporter.clear()
+        completion(
+            model="openai/gpt-3.5-turbo",
+            messages=[{"role": "user", "content": "hello world"}],
+            mock_response="hello world",
+        )
+
+        time.sleep(1)  # litellm otel logging is async which leads to a race condition
+
+        spans = self.in_memory_span_exporter.get_finished_spans()
+
+        assert len(spans) == 1
+        [litellm_request] = spans
+
+        assert litellm_request.attributes is not None
+        assert litellm_request.attributes.get("logfire.msg") == "litellm_request"
+        assert litellm_request.attributes.get(SUCCESS_MARK) == -1
+
+    @pytest.mark.asyncio
+    async def test_basic_async(self) -> None:
+        """Test that the Litellm instrumentation is traced."""
+        from src.atla_insights import instrument_litellm
+        from src.atla_insights._constants import SUCCESS_MARK
+
+        instrument_litellm()
+
+        await acompletion(
+            model="openai/gpt-3.5-turbo",
+            messages=[{"role": "user", "content": "hello world"}],
+            mock_response="hello world",
+        )
+
+        await asyncio.sleep(1)  # litellm otel logging leads to a race condition
+
+        spans = self.in_memory_span_exporter.get_finished_spans()
+
+        assert len(spans) == 1
+        [litellm_request] = spans
+
+        assert litellm_request.attributes is not None
+        assert litellm_request.attributes.get("logfire.msg") == "litellm_request"
+        assert litellm_request.attributes.get(SUCCESS_MARK) == -1
 
     @pytest.mark.parametrize(
         "completion_kwargs, expected_genai_attributes",
@@ -59,6 +83,10 @@ class TestLitellmIntegration:
         mock_openai_client: OpenAI,
     ) -> None:
         """Test the Litellm integration."""
+        from src.atla_insights import instrument_litellm
+
+        instrument_litellm()
+
         completion(
             **completion_kwargs,
             api_base=str(mock_openai_client.base_url),
@@ -67,8 +95,10 @@ class TestLitellmIntegration:
 
         time.sleep(1)  # litellm otel logging is async which leads to a race condition
 
-        assert len(self.in_memory_span_exporter.get_finished_spans()) == 1
-        [litellm_request] = self.in_memory_span_exporter.get_finished_spans()
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 1
+        [litellm_request] = finished_spans
 
         assert litellm_request.attributes is not None
 
@@ -99,6 +129,10 @@ class TestLitellmIntegration:
         mock_openai_client: OpenAI,
     ) -> None:
         """Test the Litellm integration."""
+        from src.atla_insights import instrument_litellm
+
+        instrument_litellm()
+
         await acompletion(
             **completion_kwargs,
             api_base=str(mock_openai_client.base_url),
@@ -107,8 +141,10 @@ class TestLitellmIntegration:
 
         await asyncio.sleep(1)  # litellm otel logging leads to a race condition
 
-        assert len(self.in_memory_span_exporter.get_finished_spans()) == 1
-        [litellm_request] = self.in_memory_span_exporter.get_finished_spans()
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 1
+        [litellm_request] = finished_spans
 
         assert litellm_request.attributes is not None
 
