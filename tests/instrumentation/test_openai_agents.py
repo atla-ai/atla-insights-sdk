@@ -5,6 +5,8 @@ import time
 import pytest
 from agents import Agent, OpenAIChatCompletionsModel, Runner, set_default_openai_client
 from openai import AsyncOpenAI
+from openinference.instrumentation.openai import OpenAIInstrumentor
+from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
 
 from tests._otel import BaseLocalOtel
 
@@ -16,9 +18,6 @@ class TestOpenaiAgentsInstrumentation(BaseLocalOtel):
     @pytest.mark.asyncio
     async def test_basic(self, mock_async_openai_client: AsyncOpenAI) -> None:
         """Test the OpenAI Agents integration."""
-        from openinference.instrumentation.openai import OpenAIInstrumentor
-        from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
-
         set_default_openai_client(mock_async_openai_client, use_for_tracing=False)
 
         OpenAIAgentsInstrumentor().instrument()
@@ -64,10 +63,7 @@ class TestOpenaiAgentsInstrumentation(BaseLocalOtel):
 
     @pytest.mark.asyncio
     async def test_chat_completion(self, mock_async_openai_client: AsyncOpenAI) -> None:
-        """Test the OpenAI Agents integration."""
-        from openinference.instrumentation.openai import OpenAIInstrumentor
-        from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
-
+        """Test the OpenAI Agents integration with chat completions."""
         OpenAIAgentsInstrumentor().instrument()
         openai_instrumentor = OpenAIInstrumentor()
         openai_instrumentor.instrument()
