@@ -150,6 +150,7 @@ class AtlaInsights:
     def instrument_openai_agents(self) -> None:
         """Instrument OpenAI agents."""
         try:
+            from openinference.instrumentation.openai import OpenAIInstrumentor
             from openinference.instrumentation.openai_agents import (
                 OpenAIAgentsInstrumentor,
             )
@@ -160,7 +161,7 @@ class AtlaInsights:
             ) from e
 
         OpenAIAgentsInstrumentor().instrument()
-        self.instrument_openai()
+        OpenAIInstrumentor().instrument()
 
     def instrument_langchain(self) -> None:
         """Instrument the Langchain framework."""

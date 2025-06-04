@@ -221,6 +221,7 @@ mcp = [
     { name = "openinference-instrumentation-mcp" },
 ]
 openai-agents = [
+    { name = "openinference-instrumentation-openai" },
     { name = "openinference-instrumentation-openai-agents" },
 ]
 smolagents = [
@@ -241,6 +242,7 @@ dev = [
     { name = "openinference-instrumentation-anthropic" },
     { name = "openinference-instrumentation-langchain" },
     { name = "openinference-instrumentation-mcp" },
+    { name = "openinference-instrumentation-openai" },
     { name = "openinference-instrumentation-openai-agents" },
     { name = "openinference-instrumentation-smolagents" },
     { name = "pytest" },
@@ -259,6 +261,7 @@ requires-dist = [
     { name = "openinference-instrumentation-anthropic", marker = "extra == 'anthropic'", specifier = ">=0.1.18" },
     { name = "openinference-instrumentation-langchain", marker = "extra == 'langchain'", specifier = ">=0.1.43" },
     { name = "openinference-instrumentation-mcp", marker = "extra == 'mcp'", specifier = ">=1.3.0" },
+    { name = "openinference-instrumentation-openai", marker = "extra == 'openai-agents'", specifier = ">=0.1.30" },
     { name = "openinference-instrumentation-openai-agents", marker = "extra == 'openai-agents'", specifier = ">=0.1.12" },
     { name = "openinference-instrumentation-smolagents", marker = "extra == 'smolagents'", specifier = ">=0.1.12" },
     { name = "opentelemetry-api", specifier = ">=1.32.1" },
@@ -282,6 +285,7 @@ dev = [
     { name = "openinference-instrumentation-anthropic", specifier = ">=0.1.18" },
     { name = "openinference-instrumentation-langchain", specifier = ">=0.1.43" },
     { name = "openinference-instrumentation-mcp", specifier = ">=1.3.0" },
+    { name = "openinference-instrumentation-openai", specifier = ">=0.1.30" },
     { name = "openinference-instrumentation-openai-agents", specifier = ">=0.1.12" },
     { name = "openinference-instrumentation-smolagents", specifier = ">=0.1.12" },
     { name = "pytest", specifier = ">=8.3.4" },
@@ -1538,6 +1542,24 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/8e/c3/bed2c35bc02ac5764521068885280438a6efcdff50c5ddcaf41434431d11/openinference_instrumentation_mcp-1.3.0.tar.gz", hash = "sha256:7d1cde0d2cb022ea0c380c642b58d6d575073d652c6065b005b8c9ff207be116", size = 7311, upload-time = "2025-05-20T05:03:48.682Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ec/be/32329b11ff941cc430dd4896452010f3f64e170c37f9162fa1c313f5a0ce/openinference_instrumentation_mcp-1.3.0-py3-none-any.whl", hash = "sha256:09836d41c278b11667b198a12b01a4c0e564bb62fd8ce7227f9796de54e74197", size = 8532, upload-time = "2025-05-20T05:03:47.441Z" },
+]
+
+[[package]]
+name = "openinference-instrumentation-openai"
+version = "0.1.30"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "openinference-instrumentation" },
+    { name = "openinference-semantic-conventions" },
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-instrumentation" },
+    { name = "opentelemetry-semantic-conventions" },
+    { name = "typing-extensions" },
+    { name = "wrapt" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/65/14/d72575256fe8eb511ed1d052ea3272fcc46eaa7d61adaf1043090a2ad213/openinference_instrumentation_openai-0.1.30.tar.gz", hash = "sha256:b5ef3576433900ae71f328ca771905bb1392f7ad6c3dc0c0b942ceb138f091c3", size = 21343, upload-time = "2025-05-31T00:10:33.211Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b3/b9/6026fb57c1856ce71e02b35fe9c8a40563abe3eacab2776532c88325c6b5/openinference_instrumentation_openai-0.1.30-py3-none-any.whl", hash = "sha256:de0ac47405e7f4a94bd67b8ca0512e109c97bee4d37023d8eab7cbb421705f29", size = 28366, upload-time = "2025-05-31T00:10:30.744Z" },
 ]
 
 [[package]]
