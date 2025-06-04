@@ -37,6 +37,7 @@ dev = [
     "openinference-instrumentation-anthropic>=0.1.18",
     "openinference-instrumentation-langchain>=0.1.43",
     "openinference-instrumentation-mcp>=1.3.0",
+    "openinference-instrumentation-openai-agents>=0.1.12",
     "openinference-instrumentation-smolagents>=0.1.12",
     "pytest>=8.3.4",
     "pytest-asyncio>=0.26.0",
@@ -63,6 +64,9 @@ litellm = [
 ]
 mcp = [
     "openinference-instrumentation-mcp>=1.3.0",
+]
+openai-agents = [
+    "openinference-instrumentation-openai-agents>=0.1.12",
 ]
 smolagents = [
     "openinference-instrumentation-smolagents>=0.1.12",

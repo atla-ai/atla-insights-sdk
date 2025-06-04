@@ -1,6 +1,6 @@
 """Atla package for PyPI distribution."""
 
-from logfire import instrument, instrument_openai_agents
+from logfire import instrument
 
 from ._main import (
     configure,
@@ -10,6 +10,7 @@ from ._main import (
     instrument_litellm,
     instrument_mcp,
     instrument_openai,
+    instrument_openai_agents,
     instrument_smolagents,
     mark_failure,
     mark_success,

@@ -147,6 +147,21 @@ class AtlaInsights:
             openai_client
         )
 
+    def instrument_openai_agents(self) -> None:
+        """Instrument OpenAI agents."""
+        try:
+            from openinference.instrumentation.openai_agents import (
+                OpenAIAgentsInstrumentor,
+            )
+        except ImportError as e:
+            raise ImportError(
+                "OpenAI agents instrumentation needs to be installed. "
+                "Please install it via `pip install atla-insights[openai-agents]`."
+            ) from e
+
+        OpenAIAgentsInstrumentor().instrument()
+        self.instrument_openai()
+
     def instrument_langchain(self) -> None:
         """Instrument the Langchain framework."""
         try:
@@ -263,4 +278,5 @@ instrument_langchain = _ATLA.instrument_langchain
 instrument_litellm = _ATLA.instrument_litellm
 instrument_mcp = _ATLA.instrument_mcp
 instrument_openai = _ATLA.instrument_openai
+instrument_openai_agents = _ATLA.instrument_openai_agents
 instrument_smolagents = _ATLA.instrument_smolagents
