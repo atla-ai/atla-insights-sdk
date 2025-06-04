@@ -3,7 +3,7 @@
 import time
 
 import pytest
-from agents import Agent, Runner, set_default_openai_client
+from agents import Agent, OpenAIChatCompletionsModel, Runner, set_default_openai_client
 from openai import AsyncOpenAI
 
 from tests._otel import BaseLocalOtel
@@ -59,5 +59,51 @@ class TestOpenaiAgentsInstrumentation(BaseLocalOtel):
             request.attributes.get(
                 "llm.output_messages.0.message.contents.0.message_content.text"
             )
+            == "hello world"
+        )
+
+    @pytest.mark.asyncio
+    async def test_chat_completion(self, mock_async_openai_client: AsyncOpenAI) -> None:
+        """Test the OpenAI Agents integration."""
+        from openinference.instrumentation.openai import OpenAIInstrumentor
+        from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
+
+        OpenAIAgentsInstrumentor().instrument()
+        openai_instrumentor = OpenAIInstrumentor()
+        openai_instrumentor.instrument()
+
+        agent = Agent(
+            name="Hello world",
+            instructions="You are a helpful agent.",
+            model=OpenAIChatCompletionsModel(
+                model="some-model",
+                openai_client=mock_async_openai_client,
+            ),
+        )
+        result = await Runner.run(agent, "Hello world")
+
+        openai_instrumentor._uninstrument()
+
+        assert result.final_output == "hello world"
+
+        time.sleep(1)  # wait for the spans to be finished
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 3
+        workflow, trace, request = finished_spans
+
+        assert workflow.name == "Agent workflow"
+        assert trace.name == "Hello world"
+        assert request.name == "generation"
+
+        assert request.attributes is not None
+
+        assert request.attributes.get("llm.input_messages.0.message.role") == "system"
+        assert request.attributes.get("llm.input_messages.1.message.role") == "user"
+
+        assert request.attributes.get("llm.output_messages.0.message.role") == "assistant"
+        assert (
+            request.attributes.get("llm.output_messages.0.message.content")
             == "hello world"
         )
