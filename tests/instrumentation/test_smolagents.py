@@ -1,5 +1,7 @@
 """Unit tests for the SmolAgents instrumentation."""
 
+import time
+
 import pytest
 from openai import OpenAI
 from openinference.instrumentation.smolagents import SmolagentsInstrumentor
@@ -29,6 +31,8 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
         SmolagentsInstrumentor().instrument()
         with instrument_openai():
             agent.run("Hello world!", max_steps=1)
+
+        time.sleep(1)  # addresses span creation race condition
 
         finished_spans = self.get_finished_spans()
 
@@ -61,6 +65,8 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
         instrument_smolagents("litellm")
 
         agent.run("Hello world!", max_steps=1)
+
+        time.sleep(1)  # addresses span creation race condition
 
         finished_spans = self.get_finished_spans()
 
