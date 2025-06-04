@@ -31,6 +31,7 @@ dev = [
     "langchain-openai>=0.3.4",
     "langgraph>=0.3.20",
     "litellm>=1.72.0",
+    "mcp>=1.9.0",
     "openai-agents>=0.0.7",
     "openinference-instrumentation-agno>=0.1.4",
     "openinference-instrumentation-anthropic>=0.1.18",

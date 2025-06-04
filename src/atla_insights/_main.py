@@ -97,13 +97,30 @@ class AtlaInsights:
         """Instrument Anthropic."""
         try:
             from openinference.instrumentation.anthropic import AnthropicInstrumentor
+            from openinference.instrumentation.anthropic._wrappers import (
+                _AsyncMessagesWrapper,
+                _MessagesWrapper,
+            )
+            from wrapt import wrap_function_wrapper
         except ImportError as e:
             raise ImportError(
                 "Anthropic instrumentation needs to be installed. "
                 "Please install it via `pip install atla-insights[anthropic]`."
             ) from e
 
-        AnthropicInstrumentor().instrument()
+        instrumentor = AnthropicInstrumentor()
+        instrumentor.instrument()
+
+        wrap_function_wrapper(
+            module="anthropic.resources.beta.messages",
+            name="Messages.create",
+            wrapper=_MessagesWrapper(tracer=instrumentor._tracer),
+        )
+        wrap_function_wrapper(
+            module="anthropic.resources.beta.messages",
+            name="AsyncMessages.create",
+            wrapper=_AsyncMessagesWrapper(tracer=instrumentor._tracer),
+        )
 
     def instrument_openai(
         self,
