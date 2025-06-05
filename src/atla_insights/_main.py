@@ -2,8 +2,8 @@
 
 import logging
 import os
+from contextlib import contextmanager
 from typing import (
-    TYPE_CHECKING,
     ContextManager,
     Optional,
     Sequence,
@@ -11,6 +11,9 @@ from typing import (
 )
 
 import logfire
+from opentelemetry.instrumentation.instrumentor import (
+    BaseInstrumentor,  # type: ignore[attr-defined]
+)
 from opentelemetry.sdk.trace import SpanProcessor
 
 from ._constants import SUPPORTED_LLM_PROVIDER
@@ -21,9 +24,6 @@ from ._span_processors import (
 )
 from ._utils import validate_metadata
 
-if TYPE_CHECKING:
-    from openai import AsyncOpenAI, OpenAI
-
 logger = logging.getLogger("atla_insights")
 
 
@@ -32,6 +32,7 @@ class AtlaInsights:
 
     def __init__(self) -> None:
         """Initialize Atla insights."""
+        self._active_instrumentors: dict[str, Sequence[BaseInstrumentor]] = {}
         self._root_span_processor: Optional[AtlaRootSpanProcessor] = None
         self.configured = False
 
@@ -93,77 +94,77 @@ class AtlaInsights:
         self._root_span_processor.mark_root(value=0)
         logger.info("Marked trace as failure ❌")
 
-    def instrument_anthropic(self) -> None:
+    def _instrument_provider(
+        self, provider: str, instrumentors: Sequence[BaseInstrumentor]
+    ) -> ContextManager[None]:
+        if provider in self._active_instrumentors:
+            logger.warning(f"Attempting to instrument already instrumented {provider}")
+            self._uninstrument_provider(provider)
+
+        for instrumentor in instrumentors:
+            instrumentor.instrument()
+
+        self._active_instrumentors[provider] = instrumentors
+
+        @contextmanager
+        def instrumented_context():
+            try:
+                yield
+            finally:
+                self._uninstrument_provider(provider)
+
+        return instrumented_context()
+
+    def _uninstrument_provider(self, provider: str) -> None:
+        if provider not in self._active_instrumentors.keys():
+            logger.warning(
+                f"Attempting to uninstrument {provider} which was not instrumented."
+            )
+            return
+
+        instrumentors = self._active_instrumentors.pop(provider)
+        for instrumentor in instrumentors:
+            instrumentor.uninstrument()
+
+    def instrument_anthropic(self) -> ContextManager[None]:
         """Instrument Anthropic."""
         try:
             from openinference.instrumentation.anthropic import AnthropicInstrumentor
-            from openinference.instrumentation.anthropic._wrappers import (
-                _AsyncMessagesWrapper,
-                _MessagesWrapper,
-            )
-            from wrapt import wrap_function_wrapper
         except ImportError as e:
             raise ImportError(
                 "Anthropic instrumentation needs to be installed. "
                 "Please install it via `pip install atla-insights[anthropic]`."
             ) from e
 
-        instrumentor = AnthropicInstrumentor()
-        instrumentor.instrument()
-
-        wrap_function_wrapper(
-            module="anthropic.resources.beta.messages",
-            name="Messages.create",
-            wrapper=_MessagesWrapper(tracer=instrumentor._tracer),
-        )
-        wrap_function_wrapper(
-            module="anthropic.resources.beta.messages",
-            name="AsyncMessages.create",
-            wrapper=_AsyncMessagesWrapper(tracer=instrumentor._tracer),
+        return self._instrument_provider(
+            provider="anthropic",
+            instrumentors=[AnthropicInstrumentor()],
         )
 
-    def instrument_openai(
-        self,
-        openai_client: Union[
-            "OpenAI",
-            "AsyncOpenAI",
-            type["OpenAI"],
-            type["AsyncOpenAI"],
-            None,
-        ] = None,
-        openai_client_id: Optional[str] = None,
-    ) -> ContextManager[None]:
-        """Instrument OpenAI so that spans are automatically created for each request.
+    def uninstrument_anthropic(self) -> None:
+        """Uninstrument Anthropic."""
+        return self._uninstrument_provider("anthropic")
 
-        :param openai_client: The OpenAI client to instrument. Defaults to `None`.
-        :param openai_client_id (Optional[str]): The ID of the OpenAI client.
-            Defaults to `None`.
-        :return (ContextManager[None]): A context manager that instruments the OpenAI
-            client.
-        """
-        if openai_client_id is None:
-            return logfire.instrument_openai(openai_client)
-        return logfire.with_settings(tags=[openai_client_id]).instrument_openai(
-            openai_client
-        )
-
-    def instrument_openai_agents(self) -> None:
-        """Instrument OpenAI agents."""
+    def instrument_openai(self) -> ContextManager[None]:
+        """Instrument OpenAI."""
         try:
             from openinference.instrumentation.openai import OpenAIInstrumentor
-            from openinference.instrumentation.openai_agents import (
-                OpenAIAgentsInstrumentor,
-            )
         except ImportError as e:
             raise ImportError(
-                "OpenAI agents instrumentation needs to be installed. "
-                "Please install it via `pip install atla-insights[openai-agents]`."
+                "OpenAI instrumentation needs to be installed. "
+                "Please install it via `pip install atla-insights[openai]`."
             ) from e
 
-        OpenAIAgentsInstrumentor().instrument()
-        OpenAIInstrumentor().instrument()
+        return self._instrument_provider(
+            provider="openai",
+            instrumentors=[OpenAIInstrumentor()],
+        )
 
-    def instrument_langchain(self) -> None:
+    def uninstrument_openai(self) -> None:
+        """Uninstrument OpenAI."""
+        return self._uninstrument_provider("openai")
+
+    def instrument_langchain(self) -> ContextManager[None]:
         """Instrument the Langchain framework."""
         try:
             from openinference.instrumentation.langchain import LangChainInstrumentor
@@ -173,69 +174,124 @@ class AtlaInsights:
                 "Please install it via `pip install atla-insights[langchain]`."
             ) from e
 
-        LangChainInstrumentor().instrument()
+        return self._instrument_provider(
+            provider="langchain",
+            instrumentors=[LangChainInstrumentor()],
+        )
 
-    def instrument_litellm(self) -> None:
+    def uninstrument_langchain(self) -> None:
+        """Uninstrument LangChain."""
+        return self._uninstrument_provider("langchain")
+
+    def instrument_litellm(self) -> ContextManager[None]:
         """Instrument litellm."""
         try:
-            import litellm
+            from ._litellm import AtlaLiteLLMIntrumentor
         except ImportError as e:
             raise ImportError(
                 "Litellm needs to be installed. "
                 "Please install it via `pip install atla-insights[litellm]`."
             ) from e
 
-        from ._litellm import AtlaLiteLLMOpenTelemetry
+        return self._instrument_provider(
+            provider="litellm",
+            instrumentors=[AtlaLiteLLMIntrumentor()],
+        )
 
-        atla_otel_logger = AtlaLiteLLMOpenTelemetry()
-        if atla_otel_logger not in litellm.callbacks:
-            litellm.callbacks.append(atla_otel_logger)
+    def uninstrument_litellm(self) -> None:
+        """Uninstrument LiteLLM."""
+        return self._uninstrument_provider("litellm")
 
-    def _instrument_llm_provider(
+    def _get_instrumentors_for_provider(
         self,
         llm_provider: Union[Sequence[SUPPORTED_LLM_PROVIDER], SUPPORTED_LLM_PROVIDER],
-    ) -> None:
-        """Instrument an LLM provider.
-
-        :param llm_provider (Union[Sequence[SUPPORTED_LLM_PROVIDER],
-            SUPPORTED_LLM_PROVIDER]): The LLM provider(s) to instrument.
-        :raises (ValueError): If the LLM provider is invalid.
-        """
+    ) -> list[BaseInstrumentor]:
         if isinstance(llm_provider, str):
             llm_provider = [llm_provider]
 
-        for provider in set(llm_provider):
+        instrumentors = []
+        for provider in llm_provider:
             match provider:
                 case "anthropic":
-                    self.instrument_anthropic()
+                    from openinference.instrumentation.anthropic import (
+                        AnthropicInstrumentor,
+                    )
+
+                    instrumentors.append(AnthropicInstrumentor())
                 case "openai":
-                    self.instrument_openai()
+                    from openinference.instrumentation.openai import OpenAIInstrumentor
+
+                    instrumentors.append(OpenAIInstrumentor())
                 case "litellm":
-                    self.instrument_litellm()
+                    from ._litellm import AtlaLiteLLMIntrumentor
+
+                    instrumentors.append(AtlaLiteLLMIntrumentor())
                 case _:
                     raise ValueError(f"Invalid LLM provider: {provider}")
+        return instrumentors
 
     def instrument_agno(
         self,
         llm_provider: Union[Sequence[SUPPORTED_LLM_PROVIDER], SUPPORTED_LLM_PROVIDER],
-    ) -> None:
+    ) -> ContextManager[None]:
         """Instrument the Agno framework.
 
         :param llm_provider (Union[Sequence[SUPPORTED_LLM_PROVIDER],
             SUPPORTED_LLM_PROVIDER]): The LLM provider(s) to instrument.
         """
         try:
-            from openinference.instrumentation.agno import AgnoInstrumentor
+            from ._agno import AtlaAgnoInstrumentor
         except ImportError as e:
             raise ImportError(
                 "Agno instrumentation needs to be installed. "
                 "Please install it via `pip install atla-insights[agno]`."
             ) from e
 
-        AgnoInstrumentor().instrument()
-        self._instrument_llm_provider(llm_provider)
+        return self._instrument_provider(
+            provider="agno",
+            instrumentors=[
+                *self._get_instrumentors_for_provider(llm_provider),
+                AtlaAgnoInstrumentor(),
+            ],
+        )
 
-    def instrument_mcp(self) -> None:
+    def uninstrument_agno(self) -> None:
+        """Uninstrument Agno."""
+        return self._uninstrument_provider("agno")
+
+    def instrument_openai_agents(
+        self,
+        llm_provider: Union[
+            Sequence[SUPPORTED_LLM_PROVIDER], SUPPORTED_LLM_PROVIDER
+        ] = "openai",
+    ) -> ContextManager[None]:
+        """Instrument OpenAI agents.
+
+        :param llm_provider (Union[Sequence[SUPPORTED_LLM_PROVIDER],
+            SUPPORTED_LLM_PROVIDER]): The LLM provider(s) to instrument.
+            Defaults to "openai".
+        """
+        try:
+            from ._openai_agents import AtlaOpenAIAgentsInstrumentor
+        except ImportError as e:
+            raise ImportError(
+                "OpenAI agents instrumentation needs to be installed. "
+                "Please install it via `pip install atla-insights[openai-agents]`."
+            ) from e
+
+        return self._instrument_provider(
+            provider="openai-agents",
+            instrumentors=[
+                *self._get_instrumentors_for_provider(llm_provider),
+                AtlaOpenAIAgentsInstrumentor(),
+            ],
+        )
+
+    def uninstrument_openai_agents(self) -> None:
+        """Uninstrument OpenAI Agents."""
+        return self._uninstrument_provider("openai-agents")
+
+    def instrument_mcp(self) -> ContextManager[None]:
         """Instrument MCP."""
         try:
             from openinference.instrumentation.mcp import MCPInstrumentor
@@ -245,12 +301,19 @@ class AtlaInsights:
                 "Please install it via `pip install atla-insights[mcp]`."
             ) from e
 
-        MCPInstrumentor().instrument()
+        return self._instrument_provider(
+            provider="mcp",
+            instrumentors=[MCPInstrumentor()],
+        )
+
+    def uninstrument_mcp(self) -> None:
+        """Uninstrument MCP."""
+        return self._uninstrument_provider("mcp")
 
     def instrument_smolagents(
         self,
         llm_provider: Union[Sequence[SUPPORTED_LLM_PROVIDER], SUPPORTED_LLM_PROVIDER],
-    ) -> None:
+    ) -> ContextManager[None]:
         """Instrument the HuggingFace Smolagents framework.
 
         :param llm_provider (Union[Sequence[SUPPORTED_LLM_PROVIDER],
@@ -264,8 +327,17 @@ class AtlaInsights:
                 "Please install it via `pip install atla-insights[smolagents]`."
             ) from e
 
-        SmolagentsInstrumentor().instrument()
-        self._instrument_llm_provider(llm_provider)
+        return self._instrument_provider(
+            provider="smolagents",
+            instrumentors=[
+                *self._get_instrumentors_for_provider(llm_provider),
+                SmolagentsInstrumentor(),
+            ],
+        )
+
+    def uninstrument_smolagents(self) -> None:
+        """Uninstrument smolagents."""
+        return self._uninstrument_provider("smolagents")
 
 
 _ATLA = AtlaInsights()
@@ -273,11 +345,27 @@ _ATLA = AtlaInsights()
 configure = _ATLA.configure
 mark_success = _ATLA.mark_success
 mark_failure = _ATLA.mark_failure
+
 instrument_agno = _ATLA.instrument_agno
+uninstrument_agno = _ATLA.uninstrument_agno
+
 instrument_anthropic = _ATLA.instrument_anthropic
+uninstrument_anthropic = _ATLA.uninstrument_anthropic
+
 instrument_langchain = _ATLA.instrument_langchain
+uninstrument_langchain = _ATLA.uninstrument_langchain
+
 instrument_litellm = _ATLA.instrument_litellm
+uninstrument_litellm = _ATLA.uninstrument_litellm
+
 instrument_mcp = _ATLA.instrument_mcp
+uninstrument_mcp = _ATLA.uninstrument_mcp
+
 instrument_openai = _ATLA.instrument_openai
+uninstrument_openai = _ATLA.uninstrument_openai
+
 instrument_openai_agents = _ATLA.instrument_openai_agents
+uninstrument_openai_agents = _ATLA.uninstrument_openai_agents
+
 instrument_smolagents = _ATLA.instrument_smolagents
+uninstrument_smolagents = _ATLA.uninstrument_smolagents

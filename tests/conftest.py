@@ -3,7 +3,7 @@
 from typing import Generator
 
 import pytest
-from anthropic import Anthropic
+from anthropic import Anthropic, AsyncAnthropic
 from openai import AsyncOpenAI, OpenAI
 from pytest_httpserver import HTTPServer
 
@@ -43,6 +43,14 @@ _MOCK_OPENAI_RESPONSES_RESPONSE = {
             ],
         }
     ],
+}
+
+_MOCK_ANTHROPIC_MESSAGES_RESPONSE = {
+    "id": "msg_abc123",
+    "content": [{"text": "Hi! My name is Claude.", "type": "text"}],
+    "model": "claude-3-7-sonnet-20250219",
+    "role": "assistant",
+    "usage": {"input_tokens": 2095, "output_tokens": 503},
 }
 
 
@@ -93,12 +101,17 @@ def mock_failing_openai_client() -> Generator[OpenAI, None, None]:
 def mock_anthropic_client() -> Generator[Anthropic, None, None]:
     """Mock the Anthropic client."""
     with HTTPServer() as httpserver:
-        mock_response = {
-            "id": "msg_abc123",
-            "content": [{"text": "Hi! My name is Claude.", "type": "text"}],
-            "model": "claude-3-7-sonnet-20250219",
-            "role": "assistant",
-            "usage": {"input_tokens": 2095, "output_tokens": 503},
-        }
-        httpserver.expect_request("/v1/messages").respond_with_json(mock_response)
+        httpserver.expect_request("/v1/messages").respond_with_json(
+            _MOCK_ANTHROPIC_MESSAGES_RESPONSE
+        )
         yield Anthropic(api_key="unit-test", base_url=httpserver.url_for(""))
+
+
+@pytest.fixture(scope="class")
+def mock_async_anthropic_client() -> Generator[AsyncAnthropic, None, None]:
+    """Mock the Async Anthropic client."""
+    with HTTPServer() as httpserver:
+        httpserver.expect_request("/v1/messages").respond_with_json(
+            _MOCK_ANTHROPIC_MESSAGES_RESPONSE
+        )
+        yield AsyncAnthropic(api_key="unit-test", base_url=httpserver.url_for(""))

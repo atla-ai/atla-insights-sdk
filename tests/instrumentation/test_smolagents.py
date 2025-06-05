@@ -4,7 +4,6 @@ import time
 
 import pytest
 from openai import OpenAI
-from openinference.instrumentation.smolagents import SmolagentsInstrumentor
 from smolagents import CodeAgent, LiteLLMModel, OpenAIServerModel
 
 from tests._otel import BaseLocalOtel
@@ -16,7 +15,7 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
 
     def test_basic_with_openai(self, mock_openai_client: OpenAI) -> None:
         """Test the SmolAgents instrumentation with OpenAI."""
-        from src.atla_insights import instrument_openai
+        from src.atla_insights import instrument_smolagents
 
         agent = CodeAgent(
             model=OpenAIServerModel(
@@ -27,9 +26,7 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
             tools=[],
         )
 
-        # NOTE: testing workaround because of a lack of OpenAI .uninstrument() support.
-        SmolagentsInstrumentor().instrument()
-        with instrument_openai():
+        with instrument_smolagents("openai"):
             agent.run("Hello world!", max_steps=1)
 
         time.sleep(1)  # addresses span creation race condition
@@ -40,14 +37,54 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
         run, llm_call_1, llm_call_2 = finished_spans
 
         assert run.name == "CodeAgent.run"
-        assert llm_call_1.name == "Chat Completion with {request_data[model]!r}"
-        assert llm_call_2.name == "Chat Completion with {request_data[model]!r}"
+        assert llm_call_1.name == "ChatCompletion"
+        assert llm_call_2.name == "ChatCompletion"
 
         assert llm_call_1.attributes is not None
-        assert llm_call_1.attributes.get("request_data")
+        assert llm_call_1.attributes.get("llm.input_messages.0.message.role") == "system"
+        assert (
+            llm_call_1.attributes.get(
+                "llm.input_messages.0.message.contents.0.message_content.text"
+            )
+            is not None
+        )
+        assert llm_call_1.attributes.get("llm.input_messages.1.message.role") == "user"
+        assert (
+            llm_call_1.attributes.get(
+                "llm.input_messages.1.message.contents.0.message_content.text"
+            )
+            is not None
+        )
+        assert (
+            llm_call_1.attributes.get("llm.output_messages.0.message.role") == "assistant"
+        )
+        assert (
+            llm_call_1.attributes.get("llm.output_messages.0.message.content")
+            == "hello world"
+        )
 
         assert llm_call_2.attributes is not None
-        assert llm_call_2.attributes.get("request_data")
+        assert llm_call_2.attributes.get("llm.input_messages.0.message.role") == "system"
+        assert (
+            llm_call_2.attributes.get(
+                "llm.input_messages.0.message.contents.0.message_content.text"
+            )
+            is not None
+        )
+        assert llm_call_2.attributes.get("llm.input_messages.1.message.role") == "user"
+        assert (
+            llm_call_2.attributes.get(
+                "llm.input_messages.1.message.contents.0.message_content.text"
+            )
+            is not None
+        )
+        assert (
+            llm_call_2.attributes.get("llm.output_messages.0.message.role") == "assistant"
+        )
+        assert (
+            llm_call_2.attributes.get("llm.output_messages.0.message.content")
+            == "hello world"
+        )
 
     def test_basic_with_litellm(self, mock_openai_client: OpenAI) -> None:
         """Test the SmolAgents instrumentation with LiteLLM."""
@@ -62,9 +99,8 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
             tools=[],
         )
 
-        instrument_smolagents("litellm")
-
-        agent.run("Hello world!", max_steps=1)
+        with instrument_smolagents("litellm"):
+            agent.run("Hello world!", max_steps=1)
 
         time.sleep(1)  # addresses span creation race condition
 

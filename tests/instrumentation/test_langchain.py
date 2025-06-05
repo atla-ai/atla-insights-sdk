@@ -19,16 +19,15 @@ class TestLangChainInstrumentation(BaseLocalOtel):
         """Test basic Langchain instrumentation."""
         from src.atla_insights import instrument_langchain
 
-        instrument_langchain()
+        with instrument_langchain():
+            chat = ChatOpenAI(  # type: ignore[call-arg]
+                api_key=SecretStr("unit-test"),
+                base_url=str(mock_openai_client.base_url),
+                model="some-model",
+            )
 
-        chat = ChatOpenAI(  # type: ignore[call-arg]
-            api_key=SecretStr("unit-test"),
-            base_url=str(mock_openai_client.base_url),
-            model="some-model",
-        )
-
-        messages = [HumanMessage(content="Hello, world!")]
-        chat.invoke(messages)
+            messages = [HumanMessage(content="Hello, world!")]
+            chat.invoke(messages)
 
         finished_spans = self.get_finished_spans()
 
@@ -53,30 +52,29 @@ class TestLangChainInstrumentation(BaseLocalOtel):
         """Test basic Langgraph instrumentation."""
         from src.atla_insights import instrument_langchain
 
-        instrument_langchain()
+        with instrument_langchain():
+            chat = ChatOpenAI(  # type: ignore[call-arg]
+                api_key=SecretStr("unit-test"),
+                base_url=str(mock_openai_client.base_url),
+                model="some-model",
+            )
 
-        chat = ChatOpenAI(  # type: ignore[call-arg]
-            api_key=SecretStr("unit-test"),
-            base_url=str(mock_openai_client.base_url),
-            model="some-model",
-        )
+            def generate_message(state):
+                messages = [HumanMessage(content="Hello, world!")]
+                response = chat.invoke(messages)
+                state["messages"] = [*messages, response]
+                return state
 
-        def generate_message(state):
-            messages = [HumanMessage(content="Hello, world!")]
-            response = chat.invoke(messages)
-            state["messages"] = [*messages, response]
-            return state
+            class TestState(TypedDict):
+                messages: list
 
-        class TestState(TypedDict):
-            messages: list
+            workflow = StateGraph(TestState)
+            workflow.add_node("generate", generate_message)
+            workflow.set_entry_point("generate")
+            workflow.add_edge("generate", END)
 
-        workflow = StateGraph(TestState)
-        workflow.add_node("generate", generate_message)
-        workflow.set_entry_point("generate")
-        workflow.add_edge("generate", END)
-
-        app = workflow.compile()
-        app.invoke({"messages": []})
+            app = workflow.compile()
+            app.invoke({"messages": []})
 
         finished_spans = self.get_finished_spans()
 

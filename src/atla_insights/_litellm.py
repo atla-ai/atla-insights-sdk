@@ -2,6 +2,7 @@
 
 import json
 from datetime import datetime
+from typing import Collection
 
 try:
     from litellm.integrations.custom_logger import CustomLogger
@@ -9,11 +10,14 @@ try:
     from litellm.proxy._types import SpanAttributes
 except ImportError as e:
     raise ImportError(
-        "Litellm needs to be installed in order to use the litellm integration. "
-        "Please install it via `pip install litellm`."
+        "Litellm needs to be installed. "
+        "Please install it via `pip install atla-insights[litellm]`."
     ) from e
 
 from opentelemetry import trace
+from opentelemetry.instrumentation.instrumentor import (
+    BaseInstrumentor,  # type: ignore[attr-defined]
+)
 from opentelemetry.trace import SpanKind, Status, StatusCode
 
 
@@ -83,3 +87,38 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
 
         if parent_otel_span is not None:
             parent_otel_span.end(end_time=self._to_ns(datetime.now()))
+
+
+class AtlaLiteLLMIntrumentor(BaseInstrumentor):
+    """Atla instrumentor for LitelLLM."""
+
+    def instrumentation_dependencies(self) -> Collection[str]:
+        return ("litellm >= 1.72.0",)
+
+    def _instrument(self) -> None:
+        try:
+            import litellm
+        except ImportError as e:
+            raise ImportError(
+                "Litellm needs to be installed. "
+                "Please install it via `pip install atla-insights[litellm]`."
+            ) from e
+
+        atla_otel_logger = AtlaLiteLLMOpenTelemetry()
+        if atla_otel_logger not in litellm.callbacks:
+            litellm.callbacks.append(atla_otel_logger)
+
+    def _uninstrument(self) -> None:
+        try:
+            import litellm
+        except ImportError as e:
+            raise ImportError(
+                "Litellm needs to be installed. "
+                "Please install it via `pip install atla-insights[litellm]`."
+            ) from e
+
+        litellm.callbacks = [
+            callback
+            for callback in litellm.callbacks
+            if not isinstance(callback, AtlaLiteLLMOpenTelemetry)
+        ]

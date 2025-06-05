@@ -5,7 +5,6 @@ from agno.agent import Agent
 from agno.models.litellm import LiteLLM
 from agno.models.openai import OpenAIChat
 from openai import OpenAI
-from openinference.instrumentation.agno import AgnoInstrumentor
 
 from tests._otel import BaseLocalOtel
 
@@ -16,20 +15,17 @@ class TestAgnoInstrumentation(BaseLocalOtel):
 
     def test_basic_with_openai(self, mock_openai_client: OpenAI) -> None:
         """Test the Agno instrumentation with OpenAI."""
-        from src.atla_insights import instrument_openai
+        from src.atla_insights import instrument_agno
 
-        agent = Agent(
-            model=OpenAIChat(
-                id="mock-model",
-                base_url=str(mock_openai_client.base_url),
-                api_key="unit-test",
-            ),
-        )
-
-        # NOTE: testing workaround because of a lack of OpenAI .uninstrument() support.
-        AgnoInstrumentor().instrument()
-        with instrument_openai():
-            agent.print_response("Hello world!")
+        with instrument_agno("openai"):
+            agent = Agent(
+                model=OpenAIChat(
+                    id="mock-model",
+                    base_url=str(mock_openai_client.base_url),
+                    api_key="unit-test",
+                ),
+            )
+            agent.run("Hello world!")
 
         finished_spans = self.get_finished_spans()
 
@@ -38,10 +34,19 @@ class TestAgnoInstrumentation(BaseLocalOtel):
 
         assert run.name == "Agent.run"
         assert llm_call.name == "OpenAIChat.invoke"
-        assert request.name == "Chat Completion with {request_data[model]!r}"
+        assert request.name == "ChatCompletion"
 
         assert request.attributes is not None
-        assert request.attributes.get("request_data")
+        assert request.attributes.get("llm.input_messages.0.message.role") == "user"
+        assert (
+            request.attributes.get("llm.input_messages.0.message.content")
+            == "Hello world!"
+        )
+        assert request.attributes.get("llm.output_messages.0.message.role") == "assistant"
+        assert (
+            request.attributes.get("llm.output_messages.0.message.content")
+            == "hello world"
+        )
 
     def test_basic_with_litellm(self, mock_openai_client: OpenAI) -> None:
         """Test the Agno instrumentation with LiteLLM."""
@@ -55,9 +60,8 @@ class TestAgnoInstrumentation(BaseLocalOtel):
             ),
         )
 
-        instrument_agno("litellm")
-
-        agent.print_response("Hello world!")
+        with instrument_agno("litellm"):
+            agent.run("Hello world!")
 
         finished_spans = self.get_finished_spans()
 

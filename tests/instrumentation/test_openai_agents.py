@@ -5,8 +5,6 @@ import time
 import pytest
 from agents import Agent, OpenAIChatCompletionsModel, Runner, set_default_openai_client
 from openai import AsyncOpenAI
-from openinference.instrumentation.openai import OpenAIInstrumentor
-from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
 
 from tests._otel import BaseLocalOtel
 
@@ -18,15 +16,13 @@ class TestOpenaiAgentsInstrumentation(BaseLocalOtel):
     @pytest.mark.asyncio
     async def test_basic(self, mock_async_openai_client: AsyncOpenAI) -> None:
         """Test the OpenAI Agents integration."""
+        from src.atla_insights import instrument_openai_agents
+
         set_default_openai_client(mock_async_openai_client, use_for_tracing=False)
 
-        OpenAIAgentsInstrumentor().instrument()
-        openai_instrumentor = OpenAIInstrumentor()
-        openai_instrumentor.instrument()
-
-        agent = Agent(name="Hello world", instructions="You are a helpful agent.")
-        result = await Runner.run(agent, "Hello world")
-        openai_instrumentor._uninstrument()
+        with instrument_openai_agents():
+            agent = Agent(name="Hello world", instructions="You are a helpful agent.")
+            result = await Runner.run(agent, "Hello world")
 
         assert result.final_output == "hello world"
 
@@ -64,21 +60,18 @@ class TestOpenaiAgentsInstrumentation(BaseLocalOtel):
     @pytest.mark.asyncio
     async def test_chat_completion(self, mock_async_openai_client: AsyncOpenAI) -> None:
         """Test the OpenAI Agents integration with chat completions."""
-        OpenAIAgentsInstrumentor().instrument()
-        openai_instrumentor = OpenAIInstrumentor()
-        openai_instrumentor.instrument()
+        from src.atla_insights import instrument_openai_agents
 
-        agent = Agent(
-            name="Hello world",
-            instructions="You are a helpful agent.",
-            model=OpenAIChatCompletionsModel(
-                model="some-model",
-                openai_client=mock_async_openai_client,
-            ),
-        )
-        result = await Runner.run(agent, "Hello world")
-
-        openai_instrumentor._uninstrument()
+        with instrument_openai_agents():
+            agent = Agent(
+                name="Hello world",
+                instructions="You are a helpful agent.",
+                model=OpenAIChatCompletionsModel(
+                    model="some-model",
+                    openai_client=mock_async_openai_client,
+                ),
+            )
+            result = await Runner.run(agent, "Hello world")
 
         assert result.final_output == "hello world"
 
@@ -86,12 +79,13 @@ class TestOpenaiAgentsInstrumentation(BaseLocalOtel):
 
         finished_spans = self.get_finished_spans()
 
-        assert len(finished_spans) == 3
-        workflow, trace, request = finished_spans
+        assert len(finished_spans) == 4
+        workflow, trace, run, request = finished_spans
 
         assert workflow.name == "Agent workflow"
         assert trace.name == "Hello world"
-        assert request.name == "generation"
+        assert run.name == "generation"
+        assert request.name == "ChatCompletion"
 
         assert request.attributes is not None
 

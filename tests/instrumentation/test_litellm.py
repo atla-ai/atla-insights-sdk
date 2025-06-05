@@ -21,13 +21,12 @@ class TestLitellmInstrumentation(BaseLocalOtel):
         from src.atla_insights import instrument_litellm
         from src.atla_insights._constants import SUCCESS_MARK
 
-        instrument_litellm()
-
-        completion(
-            model="openai/gpt-3.5-turbo",
-            messages=[{"role": "user", "content": "hello world"}],
-            mock_response="hello world",
-        )
+        with instrument_litellm():
+            completion(
+                model="openai/gpt-3.5-turbo",
+                messages=[{"role": "user", "content": "hello world"}],
+                mock_response="hello world",
+            )
 
         time.sleep(1)  # litellm otel logging is async which leads to a race condition
 
@@ -46,13 +45,12 @@ class TestLitellmInstrumentation(BaseLocalOtel):
         from src.atla_insights import instrument_litellm
         from src.atla_insights._constants import SUCCESS_MARK
 
-        instrument_litellm()
-
-        await acompletion(
-            model="openai/gpt-3.5-turbo",
-            messages=[{"role": "user", "content": "hello world"}],
-            mock_response="hello world",
-        )
+        with instrument_litellm():
+            await acompletion(
+                model="openai/gpt-3.5-turbo",
+                messages=[{"role": "user", "content": "hello world"}],
+                mock_response="hello world",
+            )
 
         await asyncio.sleep(1)  # litellm otel logging leads to a race condition
 
@@ -85,13 +83,12 @@ class TestLitellmInstrumentation(BaseLocalOtel):
         """Test the Litellm integration."""
         from src.atla_insights import instrument_litellm
 
-        instrument_litellm()
-
-        completion(
-            **completion_kwargs,
-            api_base=str(mock_openai_client.base_url),
-            api_key="unit-test",
-        )
+        with instrument_litellm():
+            completion(
+                **completion_kwargs,
+                api_base=str(mock_openai_client.base_url),
+                api_key="unit-test",
+            )
 
         time.sleep(1)  # litellm otel logging is async which leads to a race condition
 
@@ -131,13 +128,12 @@ class TestLitellmInstrumentation(BaseLocalOtel):
         """Test the Litellm integration."""
         from src.atla_insights import instrument_litellm
 
-        instrument_litellm()
-
-        await acompletion(
-            **completion_kwargs,
-            api_base=str(mock_openai_client.base_url),
-            api_key="unit-test",
-        )
+        with instrument_litellm():
+            await acompletion(
+                **completion_kwargs,
+                api_base=str(mock_openai_client.base_url),
+                api_key="unit-test",
+            )
 
         await asyncio.sleep(1)  # litellm otel logging leads to a race condition
 
