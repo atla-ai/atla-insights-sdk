@@ -1,7 +1,5 @@
 """Unit tests for the SmolAgents instrumentation."""
 
-import time
-
 import pytest
 from openai import OpenAI
 from smolagents import CodeAgent, LiteLLMModel, OpenAIServerModel
@@ -28,8 +26,6 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
 
         with instrument_smolagents("openai"):
             agent.run("Hello world!", max_steps=1)
-
-        time.sleep(1)  # addresses span creation race condition
 
         finished_spans = self.get_finished_spans()
 
@@ -101,8 +97,6 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
 
         with instrument_smolagents("litellm"):
             agent.run("Hello world!", max_steps=1)
-
-        time.sleep(1)  # addresses span creation race condition
 
         finished_spans = self.get_finished_spans()
 

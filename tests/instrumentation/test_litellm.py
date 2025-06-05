@@ -2,7 +2,6 @@
 
 import asyncio
 import json
-import time
 
 import pytest
 from litellm import acompletion, completion
@@ -28,9 +27,7 @@ class TestLitellmInstrumentation(BaseLocalOtel):
                 mock_response="hello world",
             )
 
-        time.sleep(1)  # litellm otel logging is async which leads to a race condition
-
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 1
         [litellm_request] = spans
@@ -52,9 +49,8 @@ class TestLitellmInstrumentation(BaseLocalOtel):
                 mock_response="hello world",
             )
 
-        await asyncio.sleep(1)  # litellm otel logging leads to a race condition
-
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        await asyncio.sleep(0.001)  # wait for spans to get collected
+        spans = self.get_finished_spans()
 
         assert len(spans) == 1
         [litellm_request] = spans
@@ -89,8 +85,6 @@ class TestLitellmInstrumentation(BaseLocalOtel):
                 api_base=str(mock_openai_client.base_url),
                 api_key="unit-test",
             )
-
-        time.sleep(1)  # litellm otel logging is async which leads to a race condition
 
         finished_spans = self.get_finished_spans()
 
@@ -135,8 +129,7 @@ class TestLitellmInstrumentation(BaseLocalOtel):
                 api_key="unit-test",
             )
 
-        await asyncio.sleep(1)  # litellm otel logging leads to a race condition
-
+        await asyncio.sleep(0.001)  # wait for spans to get collected
         finished_spans = self.get_finished_spans()
 
         assert len(finished_spans) == 1
@@ -151,3 +144,24 @@ class TestLitellmInstrumentation(BaseLocalOtel):
         }
 
         assert genai_attributes == expected_genai_attributes
+
+    def test_ctx(self) -> None:
+        """Test that the Litellm instrumentation is traced."""
+        from src.atla_insights import instrument_litellm
+
+        with instrument_litellm():
+            completion(
+                model="openai/gpt-3.5-turbo",
+                messages=[{"role": "user", "content": "hello world"}],
+                mock_response="hello world",
+            )
+
+        completion(
+            model="openai/gpt-3.5-turbo",
+            messages=[{"role": "user", "content": "hello world"}],
+            mock_response="hello world",
+        )
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 1

@@ -1,7 +1,5 @@
 """Unit tests for the OpenAI Agents instrumentation."""
 
-import time
-
 import pytest
 from agents import Agent, OpenAIChatCompletionsModel, Runner, set_default_openai_client
 from openai import AsyncOpenAI
@@ -25,8 +23,6 @@ class TestOpenaiAgentsInstrumentation(BaseLocalOtel):
             result = await Runner.run(agent, "Hello world")
 
         assert result.final_output == "hello world"
-
-        time.sleep(1)  # wait for the spans to be finished
 
         finished_spans = self.get_finished_spans()
 
@@ -74,8 +70,6 @@ class TestOpenaiAgentsInstrumentation(BaseLocalOtel):
             result = await Runner.run(agent, "Hello world")
 
         assert result.final_output == "hello world"
-
-        time.sleep(1)  # wait for the spans to be finished
 
         finished_spans = self.get_finished_spans()
 

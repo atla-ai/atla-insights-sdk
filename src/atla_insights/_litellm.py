@@ -1,8 +1,10 @@
 """LiteLLM integration."""
 
 import json
+import logging
+import time
 from datetime import datetime
-from typing import Collection
+from typing import Collection, Optional
 
 try:
     from litellm.integrations.custom_logger import CustomLogger
@@ -19,6 +21,8 @@ from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-de
     BaseInstrumentor,
 )
 from opentelemetry.trace import SpanKind, Status, StatusCode
+
+logger = logging.getLogger(__name__)
 
 
 class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
@@ -92,6 +96,8 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
 class AtlaLiteLLMIntrumentor(BaseInstrumentor):
     """Atla instrumentor for LitelLLM."""
 
+    atla_otel_logger: Optional[AtlaLiteLLMOpenTelemetry] = None
+
     def instrumentation_dependencies(self) -> Collection[str]:
         return ("litellm >= 1.72.0",)
 
@@ -104,9 +110,15 @@ class AtlaLiteLLMIntrumentor(BaseInstrumentor):
                 "Please install it via `pip install atla-insights[litellm]`."
             ) from e
 
-        atla_otel_logger = AtlaLiteLLMOpenTelemetry()
-        if atla_otel_logger not in litellm.callbacks:
-            litellm.callbacks.append(atla_otel_logger)
+        if any(
+            isinstance(callback, AtlaLiteLLMOpenTelemetry)
+            for callback in litellm.callbacks
+        ):
+            logger.warning("Attempting to instrument already instrumented litellm")
+            return
+
+        self.atla_otel_logger = AtlaLiteLLMOpenTelemetry()
+        litellm.callbacks.append(self.atla_otel_logger)
 
     def _uninstrument(self) -> None:
         try:
@@ -117,8 +129,21 @@ class AtlaLiteLLMIntrumentor(BaseInstrumentor):
                 "Please install it via `pip install atla-insights[litellm]`."
             ) from e
 
-        litellm.callbacks = [
-            callback
-            for callback in litellm.callbacks
-            if not isinstance(callback, AtlaLiteLLMOpenTelemetry)
-        ]
+        if self.atla_otel_logger is None:
+            logger.warning("Attempting to uninstrument not instrumented litellm")
+            return
+
+        # Wait existing Atla callbacks to trigger before removing them.
+        time.sleep(0.001)
+
+        if self.atla_otel_logger in litellm.callbacks:
+            litellm.callbacks.remove(self.atla_otel_logger)
+
+        if self.atla_otel_logger in litellm.success_callback:
+            litellm.success_callback.remove(self.atla_otel_logger)
+
+        if self.atla_otel_logger in litellm.failure_callback:
+            litellm.failure_callback.remove(self.atla_otel_logger)
+
+        if self.atla_otel_logger in litellm.service_callback:
+            litellm.service_callback.remove(self.atla_otel_logger)

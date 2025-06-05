@@ -1,5 +1,6 @@
 """OpenTelemetry assets to be used in instrumentation tests."""
 
+import time
 from unittest.mock import patch
 
 import litellm
@@ -38,6 +39,7 @@ class BaseLocalOtel:
 
         :return (list[ReadableSpan]): The finished spans.
         """
+        time.sleep(0.001)  # wait for spans to get collected
         return sorted(
             self.in_memory_span_exporter.get_finished_spans(),
             key=lambda x: x.start_time if x.start_time is not None else 0,
