@@ -15,8 +15,8 @@ except ImportError as e:
     ) from e
 
 from opentelemetry import trace
-from opentelemetry.instrumentation.instrumentor import (
-    BaseInstrumentor,  # type: ignore[attr-defined]
+from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
+    BaseInstrumentor,
 )
 from opentelemetry.trace import SpanKind, Status, StatusCode
 

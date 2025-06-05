@@ -11,8 +11,8 @@ from typing import (
 )
 
 import logfire
-from opentelemetry.instrumentation.instrumentor import (
-    BaseInstrumentor,  # type: ignore[attr-defined]
+from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
+    BaseInstrumentor,
 )
 from opentelemetry.sdk.trace import SpanProcessor
 
