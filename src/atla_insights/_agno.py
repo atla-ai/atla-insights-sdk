@@ -15,6 +15,8 @@ class AtlaAgnoInstrumentor(AgnoInstrumentor):
     """Atla Agno instrumentor class."""
 
     def _uninstrument(self, **kwargs: Any) -> None:
+        # Custom uninstrumentation to ensure Agno framework remains fully functional
+        # afterwards.
         from agno.agent import Agent
         from agno.team import Team
         from agno.tools.function import FunctionCall
