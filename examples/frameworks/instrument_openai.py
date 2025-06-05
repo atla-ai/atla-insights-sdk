@@ -1,4 +1,4 @@
-"""Nested instrumentation example."""
+"""OpenAI example."""
 
 import os
 
@@ -24,8 +24,8 @@ def main() -> None:
     # Create an OpenAI client
     client = OpenAI()
 
-    # Instrument the OpenAI client
-    instrument_openai(client, "my-agent")
+    # Instrument OpenAI
+    instrument_openai()
 
     # Calling the instrumented OpenAI client will create spans behind the scenes
     my_app(client)

@@ -1,0 +1,45 @@
+{
+    "openai_chat_completions": {
+        "id": "chatcmpl-abc123",
+        "object": "chat.completion",
+        "created": 1677858242,
+        "model": "some-model",
+        "choices": [
+            {
+                "index": 0,
+                "message": { "role": "assistant", "content": "hello world" },
+                "finish_reason": "stop"
+            }
+        ],
+        "usage": { "prompt_tokens": 9, "completion_tokens": 12, "total_tokens": 21 }
+    },
+    "openai_responses": {
+        "id": "resp_abc123",
+        "object": "response",
+        "created_at": 1677858242,
+        "status": "completed",
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": null,
+        "model": "some-model",
+        "output": [
+            {
+                "type": "message",
+                "id": "msg_abc123",
+                "status": "completed",
+                "role": "assistant",
+                "content": [
+                    { "type": "output_text", "text": "hello world", "annotations": [] }
+                ]
+            }
+        ]
+    },
+    "anthropic_messages": {
+        "id": "msg_abc123",
+        "content": [{ "text": "Hi! My name is Claude.", "type": "text" }],
+        "model": "claude-3-7-sonnet-20250219",
+        "role": "assistant",
+        "usage": { "input_tokens": 2095, "output_tokens": 503 }
+    }
+}

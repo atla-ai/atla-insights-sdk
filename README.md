@@ -45,58 +45,54 @@ need to add some form of instrumentation.
 
 As a starting point, you will want to instrument your GenAI library of choice.
 
-We currently support the following:
+See the section below to find out which frameworks & providers we currently support.
 
-#### OpenAI chat completions
-You can instrument the entire OpenAI library via
+All instrumentation methods share a common interface, which allows you to do the following:
 
-```python
-from atla_insights import configure, instrument_openai
-from openai import OpenAI
-
-configure(...)
-
-instrument_openai()
-
-# Every subsequent OpenAI or AsyncOpenAI SDK chat completions call will be automatically instrumented.
-client = OpenAI()
-client.chat.completions.create(...)
-```
-
-> ℹ️ Note that you can run `instrument_openai()` anywhere in your application, before the
-first time you call its chat completion function.
-
-Alternatively, you can also instrument an individual client.
+- **Session-wide (un)instrumentation**:
+You can manually enable/disable instrumentation throughout your application.
 
 ```python
-from atla_insights import configure, instrument_openai
-from openai import OpenAI
+from atla_insights import configure, instrument_my_framework, uninstrument_my_framework
 
 configure(...)
+instrument_my_framework()
 
-client_1 = OpenAI()
-client_2 = OpenAI()
+# All framework code from this point onwards will be instrumented
 
-instrument_openai(client_1)
+uninstrument_my_framework()
 
-client_1.chat.completions.create(...)  # this call will be instrumented
-client_2.chat.completions.create(...)  # this call will not
+# All framework code from this point onwards will **no longer** be instrumented
 ```
 
-#### LiteLLM
-You can instrument litellm (sync and async) completions via:
+- **Instrumented contexts**:
+All instrumentation methods also behave as context managers that automatically handle (un)instrumentation.
 
 ```python
-from atla_insights import configure, instrument_litellm
-from litellm import completion
+from atla_insights import configure, instrument_my_framework
 
-configure(...)
+configure()
 
-instrument_litellm()
+with instrument_my_framework():
+    # All framework code inside the context will be instrumented
 
-# Every subsequent litellm completion or acompletion call will be automatically instrumented.
-completion(...)
+# All framework code outside the context **not** be instrumented
 ```
+
+### Instrumentation Support
+
+We currently support the following frameworks / providers:
+
+| Framework / Provider          | Instrumentation Function   | Notes |
+|-------------------------------|----------------------------|-------|
+| **Agno**                      | `instrument_agno`          | Supported with `openai`, `litellm` and/or `anthropic` models |
+| **Anthropic**                 | `instrument_anthropic`     | |
+| **LangChain**                 | `instrument_langchain`     | This includes e.g. LangGraph as well |
+| **LiteLLM**                   | `instrument_litellm`       | Supports all available models in the LiteLLM framework |
+| **MCP**                       | `instrument_mcp`           | Only includes context propagation. You will need to instrument the model calling MCP function separately. |
+| **OpenAI**                    | `instrument_openai`        | |
+| **OpenAI Agents**             | `instrument_openai_agents` | Supported with `openai`, `litellm` and/or `anthropic` models |
+| **Smolagents**                | `instrument_smolagents`    | Supported with `openai`, `litellm` and/or `anthropic` models |
 
 ⚠️ Note that, by default, instrumented LLM calls will be treated independently from one
 another. In order to logically group LLM calls into a trace, you will need to group them
@@ -109,33 +105,18 @@ from litellm import completion
 configure(...)
 instrument_litellm()
 
+# The LiteLLM calls below will belong to **separate traces**
+result_1 = completion(...)
+result_2 = completion(...)
+
 @instrument("My agent doing its thing")
 def run_my_agent() -> None:
-    """The LiteLLM calls within this function will belong to the same trace and treated
-    as subsequent steps in a single logical flow."""
+    # The LiteLLM calls within this function will belong to the **same trace**
     result_1 = completion(...)
     result_2 = completion(...)
     ...
 ```
 
-#### Agno
-You will need to install the Atla Insights Agno integration via:
-
-```bash
-pip install "atla-insights[agno]"
-```
-
-Then, you can instrument Agno via:
-
-```python
-from atla_insights import configure, instrument_agno
-from agno.agent import Agent
-from agno.models.openai import OpenAIChat
-
-instrument_agno("openai")
-
-agent = Agent(model=OpenAIChat(id="gpt-4o"))
-```
 
 ### Adding metadata
 
