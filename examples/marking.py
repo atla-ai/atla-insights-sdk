@@ -1,4 +1,4 @@
-"""Nested instrumentation example."""
+"""Marking a trace as fail/success example."""
 
 import os
 

@@ -1,4 +1,4 @@
-"""Nested instrumentation example."""
+"""Async OpenAI example."""
 
 import asyncio
 import os
@@ -25,8 +25,8 @@ async def main() -> None:
     # Create an async OpenAI client
     client = AsyncOpenAI()
 
-    # Instrument the async OpenAI client
-    instrument_openai(client)
+    # Instrument OpenAI
+    instrument_openai()
 
     # Calling the instrumented async OpenAI client will create spans behind the scenes
     await my_async_app(client)

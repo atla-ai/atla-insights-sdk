@@ -1,24 +1,23 @@
-"""Nested instrumentation example."""
+"""LiteLLM example."""
 
-import asyncio
 import os
 
-from litellm import acompletion
+from litellm import completion
 
 from atla_insights import configure, instrument, instrument_litellm
 
 
 @instrument("My GenAI application")
-async def my_async_app() -> None:
-    """My async application."""
-    await acompletion(
+def my_app() -> None:
+    """My application."""
+    completion(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": "Hello, world!"}],
         mock_response="Hello, world!",
     )
 
 
-async def main() -> None:
+def main() -> None:
     """Main function."""
     # Configure the client
     configure(token=os.environ["ATLA_INSIGHTS_TOKEN"])
@@ -27,12 +26,8 @@ async def main() -> None:
     instrument_litellm()
 
     # Calling the instrumented liteLLM function will create spans behind the scenes
-    await my_async_app()
-
-    # NOTE: litellm callbacks are invoked asynchronously, leading to a race condition
-    # with program termination. This is open issue in litellm.
-    await asyncio.sleep(1)
+    my_app()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
