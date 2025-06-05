@@ -160,3 +160,37 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
 
         assert root_span.attributes is not None
         assert root_span.attributes.get(SUCCESS_MARK) == 1
+
+    def test_responses_api(self, mock_openai_client: OpenAI) -> None:
+        """Test responses API."""
+        from src.atla_insights import instrument_openai
+
+        with instrument_openai():
+            mock_openai_client.responses.create(
+                model="some-model",
+                input="hello world",
+            )
+
+        spans = self.in_memory_span_exporter.get_finished_spans()
+
+        assert len(spans) == 1
+        [span] = spans
+
+        assert span.attributes is not None
+        assert span.attributes.get("llm.input_messages.1.message.role") == "user"
+        assert (
+            span.attributes.get("llm.input_messages.1.message.content") == "hello world"
+        )
+        assert span.attributes.get("llm.output_messages.0.message.role") == "assistant"
+        assert (
+            span.attributes.get(
+                "llm.output_messages.0.message.contents.0.message_content.type"
+            )
+            == "text"
+        )
+        assert (
+            span.attributes.get(
+                "llm.output_messages.0.message.contents.0.message_content.text"
+            )
+            == "hello world"
+        )

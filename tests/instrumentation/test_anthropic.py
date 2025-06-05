@@ -41,6 +41,27 @@ class TestAnthropicInstrumentation(BaseLocalOtel):
             == "Hi! My name is Claude."
         )
 
+    def test_ctx(self, mock_anthropic_client: Anthropic) -> None:
+        """Test basic Anthropic instrumentation."""
+        from src.atla_insights import instrument_anthropic
+
+        with instrument_anthropic():
+            mock_anthropic_client.messages.create(
+                model="some-model",
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Hello, Claude"}],
+            )
+
+        mock_anthropic_client.messages.create(
+            model="some-model",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Hello, Claude"}],
+        )
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 1
+
     @pytest.mark.asyncio
     async def test_async(self, mock_async_anthropic_client: AsyncAnthropic) -> None:
         """Test basic Anthropic instrumentation."""
