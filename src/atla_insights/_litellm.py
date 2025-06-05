@@ -25,6 +25,7 @@ from opentelemetry.trace import SpanKind, Status, StatusCode
 logger = logging.getLogger(__name__)
 
 
+# TODO(mathias): This can be re-worked to be based off OpenInference instrumentation.
 class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
     """An Atla LiteLLM OpenTelemetry integration."""
 
