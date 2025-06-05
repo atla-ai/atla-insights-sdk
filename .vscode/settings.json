@@ -1,0 +1,37 @@
+{
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "files.exclude": {
+        ".tach": true,
+        "**/__pycache__": true,
+        "**/.mypy_cache": true,
+        "**/.ruff_cache": true,
+        "**/*.egg-info": true,
+        "**/.pytest_cache": true
+    },
+    "search.exclude": {
+        "**/.venv": true
+    },
+
+    "mypy-type-checker.importStrategy": "fromEnvironment",
+    "mypy-type-checker.preferDaemon": true,
+
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit"
+        }
+    },
+    "python.analysis.extraPaths": ["./package", "./pipeline"],
+    "python.analysis.typeCheckingMode": "off",
+    "python.defaultInterpreterPath": "./.venv/bin/python",
+
+    "ruff.importStrategy": "fromEnvironment",
+    "ruff.nativeServer": "on",
+
+    "[toml]": {
+        "editor.defaultFormatter": "tamasfe.even-better-toml"
+    }
+}

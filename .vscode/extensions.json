@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "charliermarsh.ruff",
+        "esbenp.prettier-vscode",
+        "ms-python.mypy-type-checker",
+        "tamasfe.even-better-toml"
+    ]
+}
