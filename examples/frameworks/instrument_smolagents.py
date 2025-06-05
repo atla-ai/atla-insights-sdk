@@ -11,7 +11,7 @@ from atla_insights import configure, instrument, instrument_smolagents
 def my_app() -> None:
     """My application."""
     model = LiteLLMModel(model_id="gpt-4o-mini")
-    agent = CodeAgent(tools=[WebSearchTool()], model=model, stream_outputs=True)
+    agent = CodeAgent(model=model, tools=[WebSearchTool()], stream_outputs=True)
 
     agent.run(
         "How many seconds would it take for a leopard at full speed to run through "
