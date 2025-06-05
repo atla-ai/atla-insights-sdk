@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Collection, Optional
 
 try:
+    import litellm
     from litellm.integrations.custom_logger import CustomLogger
     from litellm.integrations.opentelemetry import OpenTelemetry
     from litellm.proxy._types import SpanAttributes
@@ -103,14 +104,6 @@ class AtlaLiteLLMIntrumentor(BaseInstrumentor):
         return ("litellm >= 1.72.0",)
 
     def _instrument(self) -> None:
-        try:
-            import litellm
-        except ImportError as e:
-            raise ImportError(
-                "Litellm needs to be installed. "
-                "Please install it via `pip install atla-insights[litellm]`."
-            ) from e
-
         if any(
             isinstance(callback, AtlaLiteLLMOpenTelemetry)
             for callback in litellm.callbacks
@@ -122,14 +115,6 @@ class AtlaLiteLLMIntrumentor(BaseInstrumentor):
         litellm.callbacks.append(self.atla_otel_logger)
 
     def _uninstrument(self) -> None:
-        try:
-            import litellm
-        except ImportError as e:
-            raise ImportError(
-                "Litellm needs to be installed. "
-                "Please install it via `pip install atla-insights[litellm]`."
-            ) from e
-
         if self.atla_otel_logger is None:
             logger.warning("Attempting to uninstrument not instrumented litellm")
             return
