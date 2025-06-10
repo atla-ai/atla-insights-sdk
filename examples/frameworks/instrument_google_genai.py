@@ -1,4 +1,4 @@
-"""Anthropic example."""
+"""Google GenAI example."""
 
 import os
 
