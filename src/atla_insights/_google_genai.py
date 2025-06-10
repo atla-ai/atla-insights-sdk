@@ -3,6 +3,8 @@
 import json
 from typing import Any, Iterable, Iterator, Mapping, Tuple
 
+from openai.types.chat import ChatCompletionToolParam
+from openai.types.shared_params.function_definition import FunctionDefinition
 from openinference.semconv.trace import (
     MessageAttributes,
     SpanAttributes,
@@ -116,15 +118,15 @@ def get_tools_from_request(
                     else:
                         parameters = {}
 
-                    tool_schema = {
-                        "type": "function",
-                        "function": {
-                            "name": name,
-                            "description": description,
-                            "parameters": parameters,
-                            "strict": None,
-                        },
-                    }
+                    tool_schema = ChatCompletionToolParam(
+                        type="function",
+                        function=FunctionDefinition(
+                            name=name,
+                            description=description,
+                            parameters=parameters,
+                            strict=None,
+                        ),
+                    )
                     tool_schema_json = json.dumps(tool_schema)
 
                     yield tool_attr_name, tool_schema_json
