@@ -1,4 +1,4 @@
-"""Test the Anthropic instrumentation."""
+"""Test the Google GenAI instrumentation."""
 
 import pytest
 from google.genai import Client, types
