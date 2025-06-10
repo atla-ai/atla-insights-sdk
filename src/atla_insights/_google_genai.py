@@ -8,7 +8,7 @@ from opentelemetry.util.types import AttributeValue
 
 try:
     from openinference.instrumentation.google_genai import GoogleGenAIInstrumentor
-    from openinference.instrumentation.google_genai._response_attributes_extractor import (  # noqa
+    from openinference.instrumentation.google_genai._response_attributes_extractor import (  # noqa: E501
         _ResponseAttributesExtractor,
     )
 except ImportError as e:
