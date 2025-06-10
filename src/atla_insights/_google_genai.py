@@ -110,12 +110,10 @@ def get_tools_from_request(
                     description = getattr(function_declaration, "description", "")
                     parameters = getattr(function_declaration, "parameters", None)
 
-                    if (
-                        parameters
-                        and hasattr(parameters, "to_json_dict")
-                        and callable(parameters.to_json_dict)
-                    ):
-                        parameters = parameters.to_json_dict()
+                    if parameters:
+                        parameters = parameters.json_schema.model_dump(
+                            mode="json", exclude_none=True
+                        )
 
                     tool_schema = {
                         "type": "function",
