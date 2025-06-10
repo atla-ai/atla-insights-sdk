@@ -39,6 +39,15 @@ def _get_tool_calls_from_content_parts(
     """
     function_call_idx = 0
     for part in content_parts:
+        if function_response := getattr(part, "function_response", None):
+            if hasattr(function_response, "response") and isinstance(
+                function_response.response, Mapping
+            ):
+                response = function_response.response.get(
+                    "result", function_response.response
+                )
+                yield MessageAttributes.MESSAGE_CONTENT, json.dumps(response)
+
         if function_call := getattr(part, "function_call", None):
             function_call_prefix = (
                 f"{MessageAttributes.MESSAGE_TOOL_CALLS}.{function_call_idx}"
@@ -111,9 +120,20 @@ def get_tools_from_request(
                     name = getattr(function_declaration, "name", "")
                     description = getattr(function_declaration, "description", "")
 
-                    if parameters := getattr(function_declaration, "parameters", None):
-                        parameters = parameters.json_schema.model_dump(
-                            mode="json", exclude_none=True
+                    if (
+                        hasattr(function_declaration, "parameters")
+                        and hasattr(function_declaration.parameters, "json_schema")
+                        and hasattr(
+                            function_declaration.parameters.json_schema, "model_dump"
+                        )
+                        and callable(
+                            function_declaration.parameters.json_schema.model_dump
+                        )
+                    ):
+                        parameters = (
+                            function_declaration.parameters.json_schema.model_dump(
+                                mode="json", exclude_none=True
+                            )
                         )
                     else:
                         parameters = {}
