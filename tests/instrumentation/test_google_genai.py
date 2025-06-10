@@ -151,3 +151,12 @@ class TestGoogleGenAIInstrumentation(BaseLocalOtel):
             )
             == "other_tool"
         )
+
+        assert (
+            span.attributes.get("llm.tools.0.tool.json_schema")
+            == '{"type": "function", "function": {"name": "some_tool", "description": "Some mock tool for unit testing.", "parameters": {"properties": {"some_arg": {"description": "Some mock argument", "type": "STRING"}}, "required": ["some_arg"], "type": "OBJECT"}, "strict": null}}'  # noqa: E501
+        )
+        assert (
+            span.attributes.get("llm.tools.1.tool.json_schema")
+            == '{"type": "function", "function": {"name": "other_tool", "description": "Another mock tool for unit testing.", "parameters": {"properties": {"other_arg": {"description": "Another mock argument", "type": "STRING"}}, "required": ["other_arg"], "type": "OBJECT"}, "strict": null}}'  # noqa: E501
+        )

@@ -1,13 +1,21 @@
 """Google GenAI instrumentation."""
 
 import json
-from typing import Iterable, Iterator, Tuple
+from typing import Any, Iterable, Iterator, Mapping, Tuple
 
-from openinference.semconv.trace import MessageAttributes, ToolCallAttributes
+from openinference.semconv.trace import (
+    MessageAttributes,
+    SpanAttributes,
+    ToolAttributes,
+    ToolCallAttributes,
+)
 from opentelemetry.util.types import AttributeValue
 
 try:
     from openinference.instrumentation.google_genai import GoogleGenAIInstrumentor
+    from openinference.instrumentation.google_genai._request_attributes_extractor import (
+        _RequestAttributesExtractor,
+    )
     from openinference.instrumentation.google_genai._response_attributes_extractor import (  # noqa: E501
         _ResponseAttributesExtractor,
     )
@@ -18,21 +26,17 @@ except ImportError as e:
     ) from e
 
 
-def _get_attributes_from_content_parts(
-    self: _ResponseAttributesExtractor,
+def _get_tool_calls_from_content_parts(
     content_parts: Iterable[object],
 ) -> Iterator[Tuple[str, AttributeValue]]:
-    """Custom response attribute override to include structured tool call information.
+    """Custom response extractor method for structured tool call information.
 
     TODO(mathias): Add support for built-in, Google-native tools (e.g. search).
 
-    :param self (_ResponseAttributesExtractor): Original response attributes extractor.
     :param content_parts (Iterable[object]): Content parts to extract from.
     """
     function_call_idx = 0
     for part in content_parts:
-        if text := getattr(part, "text", None):
-            yield MessageAttributes.MESSAGE_CONTENT, text
         if function_call := getattr(part, "function_call", None):
             function_call_prefix = (
                 f"{MessageAttributes.MESSAGE_TOOL_CALLS}.{function_call_idx}"
@@ -66,11 +70,102 @@ def _get_attributes_from_content_parts(
             function_call_idx += 1
 
 
+def get_tools_from_request(
+    request_parameters: Mapping[str, Any],
+) -> Iterator[Tuple[str, AttributeValue]]:
+    """Custom request extractor method for structured information about available tools.
+
+    TODO(mathias): Add support for built-in, Google-native tools (e.g. search).
+
+    :param request_parameters (Mapping[str, Any]): Request params to extract tools from.
+    """
+    if not isinstance(request_parameters, Mapping):
+        return
+
+    request_params_dict = dict(request_parameters)
+    if config := request_params_dict.get("config", None):
+        if tools := getattr(config, "tools", None):
+            if not isinstance(tools, Iterable):
+                return
+
+            tool_idx = 0
+            for tool in tools:
+                if not getattr(tool, "function_declarations", None):
+                    continue
+
+                function_declarations = tool.function_declarations
+
+                if not isinstance(function_declarations, Iterable):
+                    continue
+
+                for function_declaration in function_declarations:
+                    tool_attr_name = ".".join(
+                        [
+                            SpanAttributes.LLM_TOOLS,
+                            str(tool_idx),
+                            ToolAttributes.TOOL_JSON_SCHEMA,
+                        ]
+                    )
+                    name = getattr(function_declaration, "name", "")
+                    description = getattr(function_declaration, "description", "")
+                    parameters = getattr(function_declaration, "parameters", None)
+
+                    if (
+                        parameters
+                        and hasattr(parameters, "to_json_dict")
+                        and callable(parameters.to_json_dict)
+                    ):
+                        parameters = parameters.to_json_dict()
+
+                    tool_schema = {
+                        "type": "function",
+                        "function": {
+                            "name": name,
+                            "description": description,
+                            "parameters": parameters,
+                            "strict": None,
+                        },
+                    }
+                    tool_schema_json = json.dumps(tool_schema)
+
+                    yield tool_attr_name, tool_schema_json
+
+                    tool_idx += 1
+
+
 class AtlaGoogleGenAIInstrumentor(GoogleGenAIInstrumentor):
     """Atla Google GenAI instrumentor class."""
 
     def _instrument(self, **kwargs) -> None:
+        original_get_extra_attributes_from_request = (
+            _RequestAttributesExtractor.get_extra_attributes_from_request
+        )
+
+        def get_extra_attributes_from_request(
+            self: _RequestAttributesExtractor, request_parameters: Mapping[str, Any]
+        ) -> Iterator[Tuple[str, AttributeValue]]:
+            yield from original_get_extra_attributes_from_request(
+                self, request_parameters
+            )
+            yield from get_tools_from_request(request_parameters)
+
+        _RequestAttributesExtractor.get_extra_attributes_from_request = (  # type: ignore[method-assign]
+            get_extra_attributes_from_request
+        )
+
+        original_get_attributes_from_content_parts = (
+            _ResponseAttributesExtractor._get_attributes_from_content_parts
+        )
+
+        def _get_attributes_from_content_parts(
+            self: _ResponseAttributesExtractor,
+            content_parts: Iterable[object],
+        ) -> Iterator[Tuple[str, AttributeValue]]:
+            yield from original_get_attributes_from_content_parts(self, content_parts)
+            yield from _get_tool_calls_from_content_parts(content_parts)
+
         _ResponseAttributesExtractor._get_attributes_from_content_parts = (  # type: ignore[method-assign]
             _get_attributes_from_content_parts
         )
+
         super()._instrument(**kwargs)
