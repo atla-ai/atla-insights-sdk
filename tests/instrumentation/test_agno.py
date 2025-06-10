@@ -1,6 +1,5 @@
 """Unit tests for the Agno instrumentation."""
 
-import pytest
 from agno.agent import Agent
 from agno.models.anthropic import Claude
 from agno.models.google import Gemini
@@ -13,7 +12,6 @@ from openai import OpenAI
 from tests._otel import BaseLocalOtel
 
 
-@pytest.mark.usefixtures("mock_openai_client")
 class TestAgnoInstrumentation(BaseLocalOtel):
     """Test the Agno instrumentation."""
 

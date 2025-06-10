@@ -6,7 +6,6 @@ from anthropic import Anthropic, AsyncAnthropic
 from tests._otel import BaseLocalOtel
 
 
-@pytest.mark.usefixtures("mock_anthropic_client", "mock_async_anthropic_client")
 class TestAnthropicInstrumentation(BaseLocalOtel):
     """Test the Anthropic instrumentation."""
 

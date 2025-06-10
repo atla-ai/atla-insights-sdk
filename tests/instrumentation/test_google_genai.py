@@ -6,7 +6,6 @@ from google.genai import Client, types
 from tests._otel import BaseLocalOtel
 
 
-@pytest.mark.usefixtures("mock_google_genai_client")
 class TestGoogleGenAIInstrumentation(BaseLocalOtel):
     """Test the Google GenAI instrumentation."""
 
