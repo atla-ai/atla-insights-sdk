@@ -11,4 +11,4 @@ SUCCESS_MARK = "atla.mark.success"
 
 LOGFIRE_OTEL_TRACES_ENDPOINT = "https://logfire-eu.pydantic.dev/v1/traces"
 
-SUPPORTED_LLM_PROVIDER = Literal["anthropic", "litellm", "openai"]
+SUPPORTED_LLM_PROVIDER = Literal["anthropic", "google-genai", "litellm", "openai"]

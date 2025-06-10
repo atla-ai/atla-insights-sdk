@@ -3,9 +3,11 @@
 import pytest
 from agno.agent import Agent
 from agno.models.anthropic import Claude
+from agno.models.google import Gemini
 from agno.models.litellm import LiteLLM
 from agno.models.openai import OpenAIChat
 from anthropic import Anthropic
+from google.genai import Client
 from openai import OpenAI
 
 from tests._otel import BaseLocalOtel
@@ -81,7 +83,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
         )
 
     def test_basic_with_anthropic(self, mock_anthropic_client: Anthropic) -> None:
-        """Test the Agno instrumentation with LiteLLM."""
+        """Test the Agno instrumentation with Anthropic."""
         from src.atla_insights import instrument_agno
 
         agent = Agent(
@@ -113,6 +115,41 @@ class TestAgnoInstrumentation(BaseLocalOtel):
         assert (
             request.attributes.get("llm.output_messages.0.message.content")
             == "Hi! My name is Claude."
+        )
+
+    def test_basic_with_google_genai(self, mock_google_genai_client: Client) -> None:
+        """Test the Agno instrumentation with Google GenAI."""
+        from src.atla_insights import instrument_agno
+
+        agent = Agent(
+            model=Gemini(
+                id="some-model",
+                client=mock_google_genai_client,
+            ),
+        )
+
+        with instrument_agno("google-genai"):
+            agent.run("Hello world!")
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 3
+        run, llm_call, request = finished_spans
+
+        assert run.name == "Agent.run"
+        assert llm_call.name == "Gemini.invoke"
+        assert request.name == "GenerateContent"
+
+        assert request.attributes is not None
+        assert request.attributes.get("llm.input_messages.0.message.role") == "user"
+        assert (
+            request.attributes.get("llm.input_messages.0.message.content")
+            == "Hello world!"
+        )
+        assert request.attributes.get("llm.output_messages.0.message.role") == "model"
+        assert (
+            request.attributes.get("llm.output_messages.0.message.content")
+            == "hello world"
         )
 
     def test_multi(

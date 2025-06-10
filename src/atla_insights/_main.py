@@ -145,6 +145,19 @@ class AtlaInsights:
         """Uninstrument Anthropic."""
         return self._uninstrument_provider("anthropic")
 
+    def instrument_google_genai(self) -> ContextManager[None]:
+        """Instrument Google GenAI."""
+        from ._google_genai import AtlaGoogleGenAIInstrumentor
+
+        return self._instrument_provider(
+            provider="google-genai",
+            instrumentors=[AtlaGoogleGenAIInstrumentor()],
+        )
+
+    def uninstrument_google_genai(self) -> None:
+        """Uninstrument Anthropic."""
+        return self._uninstrument_provider("google-genai")
+
     def instrument_openai(self) -> ContextManager[None]:
         """Instrument OpenAI."""
         try:
@@ -185,13 +198,7 @@ class AtlaInsights:
 
     def instrument_litellm(self) -> ContextManager[None]:
         """Instrument litellm."""
-        try:
-            from ._litellm import AtlaLiteLLMIntrumentor
-        except ImportError as e:
-            raise ImportError(
-                "Litellm needs to be installed. "
-                "Please install it via `pip install atla-insights[litellm]`."
-            ) from e
+        from ._litellm import AtlaLiteLLMIntrumentor
 
         return self._instrument_provider(
             provider="litellm",
@@ -218,14 +225,18 @@ class AtlaInsights:
                     )
 
                     instrumentors.append(AnthropicInstrumentor())
-                case "openai":
-                    from openinference.instrumentation.openai import OpenAIInstrumentor
+                case "google-genai":
+                    from ._google_genai import AtlaGoogleGenAIInstrumentor
 
-                    instrumentors.append(OpenAIInstrumentor())
+                    instrumentors.append(AtlaGoogleGenAIInstrumentor())
                 case "litellm":
                     from ._litellm import AtlaLiteLLMIntrumentor
 
                     instrumentors.append(AtlaLiteLLMIntrumentor())
+                case "openai":
+                    from openinference.instrumentation.openai import OpenAIInstrumentor
+
+                    instrumentors.append(OpenAIInstrumentor())
                 case _:
                     raise ValueError(f"Invalid LLM provider: {provider}")
         return instrumentors
@@ -239,13 +250,7 @@ class AtlaInsights:
         :param llm_provider (Union[Sequence[SUPPORTED_LLM_PROVIDER],
             SUPPORTED_LLM_PROVIDER]): The LLM provider(s) to instrument.
         """
-        try:
-            from ._agno import AtlaAgnoInstrumentor
-        except ImportError as e:
-            raise ImportError(
-                "Agno instrumentation needs to be installed. "
-                "Please install it via `pip install atla-insights[agno]`."
-            ) from e
+        from ._agno import AtlaAgnoInstrumentor
 
         return self._instrument_provider(
             provider="agno",
@@ -271,13 +276,7 @@ class AtlaInsights:
             SUPPORTED_LLM_PROVIDER]): The LLM provider(s) to instrument.
             Defaults to "openai".
         """
-        try:
-            from ._openai_agents import AtlaOpenAIAgentsInstrumentor
-        except ImportError as e:
-            raise ImportError(
-                "OpenAI agents instrumentation needs to be installed. "
-                "Please install it via `pip install atla-insights[openai-agents]`."
-            ) from e
+        from ._openai_agents import AtlaOpenAIAgentsInstrumentor
 
         return self._instrument_provider(
             provider="openai-agents",
@@ -351,6 +350,9 @@ uninstrument_agno = _ATLA.uninstrument_agno
 
 instrument_anthropic = _ATLA.instrument_anthropic
 uninstrument_anthropic = _ATLA.uninstrument_anthropic
+
+instrument_google_genai = _ATLA.instrument_google_genai
+uninstrument_google_genai = _ATLA.uninstrument_google_genai
 
 instrument_langchain = _ATLA.instrument_langchain
 uninstrument_langchain = _ATLA.uninstrument_langchain
