@@ -85,14 +85,15 @@ We currently support the following frameworks / providers:
 
 | Framework / Provider          | Instrumentation Function   | Notes |
 |-------------------------------|----------------------------|-------|
-| **Agno**                      | `instrument_agno`          | Supported with `openai`, `litellm` and/or `anthropic` models |
+| **Agno**                      | `instrument_agno`          | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models |
 | **Anthropic**                 | `instrument_anthropic`     | |
+| **Google GenAI**              | `instrument_google_genai`  | |
 | **LangChain**                 | `instrument_langchain`     | This includes e.g. LangGraph as well |
 | **LiteLLM**                   | `instrument_litellm`       | Supports all available models in the LiteLLM framework |
 | **MCP**                       | `instrument_mcp`           | Only includes context propagation. You will need to instrument the model calling MCP function separately. |
 | **OpenAI**                    | `instrument_openai`        | |
-| **OpenAI Agents**             | `instrument_openai_agents` | Supported with `openai`, `litellm` and/or `anthropic` models |
-| **Smolagents**                | `instrument_smolagents`    | Supported with `openai`, `litellm` and/or `anthropic` models |
+| **OpenAI Agents**             | `instrument_openai_agents` | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models |
+| **Smolagents**                | `instrument_smolagents`    | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models |
 
 ⚠️ Note that, by default, instrumented LLM calls will be treated independently from one
 another. In order to logically group LLM calls into a trace, you will need to group them
