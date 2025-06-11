@@ -1,7 +1,10 @@
 """Test the Google GenAI instrumentation."""
 
+from typing import Iterable, Tuple
+
 import pytest
 from google.genai import Client, types
+from opentelemetry.util.types import AttributeValue
 
 from tests._otel import BaseLocalOtel
 
@@ -160,3 +163,41 @@ class TestGoogleGenAIInstrumentation(BaseLocalOtel):
             span.attributes.get("llm.tools.1.tool.json_schema")
             == '{"type": "function", "function": {"name": "other_tool", "description": "Another mock tool for unit testing.", "parameters": {"type": "object", "properties": {"other_arg": {"type": "string", "description": "Another mock argument"}}, "required": ["other_arg"]}, "strict": null}}'  # noqa: E501
         )
+
+
+class TestGoogleGenAIInstrumentationHelpers:
+    """Test the Google GenAI instrumentation helpers."""
+
+    @pytest.mark.parametrize(
+        "content_parts, expected",
+        [
+            pytest.param(
+                [
+                    types.Part(
+                        function_call=types.FunctionCall(
+                            name="some_tool", args={"some_arg": "some value"}
+                        )
+                    )
+                ],
+                [
+                    (
+                        "message.tool_calls.0.tool_call.function.arguments",
+                        '{"some_arg": "some value"}',
+                    ),
+                    ("message.tool_calls.0.tool_call.function.name", "some_tool"),
+                ],
+                id="single_tool_call",
+            ),
+        ],
+    )
+    def test_get_tool_calls_from_content_parts(
+        self,
+        content_parts: Iterable[object],
+        expected: Iterable[Tuple[str, AttributeValue]],
+    ) -> None:
+        """Test the get_tool_calls_from_content_parts function."""
+        from src.atla_insights._google_genai import _get_tool_calls_from_content_parts
+
+        tool_calls = _get_tool_calls_from_content_parts(content_parts)
+
+        assert sorted(tool_calls) == sorted(expected)
