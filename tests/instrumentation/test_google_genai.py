@@ -1,6 +1,6 @@
 """Test the Google GenAI instrumentation."""
 
-from typing import Iterable, Tuple
+from typing import Any, Iterable, Iterator, Mapping, Tuple
 
 import pytest
 from google.genai import Client, types
@@ -226,5 +226,197 @@ class TestGoogleGenAIInstrumentationHelpers:
         from src.atla_insights._google_genai import _get_tool_calls_from_content_parts
 
         tool_calls = _get_tool_calls_from_content_parts(content_parts)
-
         assert sorted(tool_calls) == sorted(expected)
+
+    @pytest.mark.parametrize(
+        "request_parameters, expected",
+        [
+            pytest.param(
+                {
+                    "config": types.GenerateContentConfig(
+                        tools=[
+                            types.Tool(
+                                function_declarations=[
+                                    types.FunctionDeclaration(
+                                        name="some_tool",
+                                        description="Some mock tool for unit testing.",
+                                        parameters=types.Schema(
+                                            type=types.Type("object"),
+                                        ),
+                                    )
+                                ]
+                            )
+                        ]
+                    )
+                },
+                [
+                    (
+                        "llm.tools.0.tool.json_schema",
+                        '{"type": "function", "function": {"name": "some_tool", "description": "Some mock tool for unit testing.", "parameters": {"type": "object"}, "strict": null}}',  # noqa: E501
+                    ),
+                ],
+                id="single_function_declaration",
+            ),
+            pytest.param(
+                {
+                    "config": types.GenerateContentConfig(
+                        tools=[
+                            types.Tool(
+                                function_declarations=[
+                                    types.FunctionDeclaration(
+                                        name="tool_1",
+                                        description="First test tool",
+                                        parameters=types.Schema(
+                                            type=types.Type("object"),
+                                        ),
+                                    ),
+                                    types.FunctionDeclaration(
+                                        name="tool_2",
+                                        description="Second test tool",
+                                        parameters=types.Schema(
+                                            type=types.Type("object"),
+                                        ),
+                                    ),
+                                ]
+                            )
+                        ]
+                    )
+                },
+                [
+                    (
+                        "llm.tools.0.tool.json_schema",
+                        '{"type": "function", "function": {"name": "tool_1", "description": "First test tool", "parameters": {"type": "object"}, "strict": null}}',  # noqa: E501
+                    ),
+                    (
+                        "llm.tools.1.tool.json_schema",
+                        '{"type": "function", "function": {"name": "tool_2", "description": "Second test tool", "parameters": {"type": "object"}, "strict": null}}',  # noqa: E501
+                    ),
+                ],
+                id="multiple_function_declarations",
+            ),
+            pytest.param(
+                {
+                    "contents": [
+                        types.Content(
+                            parts=[
+                                types.Part(
+                                    function_call=types.FunctionCall(
+                                        name="test_function", args={"arg1": "value1"}
+                                    )
+                                )
+                            ]
+                        )
+                    ]
+                },
+                [
+                    ("llm.input_messages.0.message.role", "model"),
+                    (
+                        "llm.input_messages.0.message.tool_calls.0.tool_call.function.name",
+                        "test_function",
+                    ),
+                    (
+                        "llm.input_messages.0.message.tool_calls.0.tool_call.function.arguments",
+                        '{"arg1": "value1"}',
+                    ),
+                ],
+                id="single_function_call",
+            ),
+            pytest.param(
+                {
+                    "contents": [
+                        types.Content(
+                            parts=[
+                                types.Part(
+                                    function_response=types.FunctionResponse(
+                                        response={"result": "test result"}
+                                    )
+                                )
+                            ]
+                        )
+                    ]
+                },
+                [
+                    ("llm.input_messages.0.message.role", "tool"),
+                    ("llm.input_messages.0.message.content", "test result"),
+                ],
+                id="function_response",
+            ),
+            pytest.param(
+                {
+                    "contents": [
+                        types.Content(
+                            parts=[
+                                types.Part(
+                                    function_response=types.FunctionResponse(
+                                        response={"result": "test result"}
+                                    )
+                                ),
+                                types.Part(
+                                    function_response=types.FunctionResponse(
+                                        response={"result": "other result"}
+                                    )
+                                ),
+                            ]
+                        )
+                    ]
+                },
+                [
+                    ("llm.input_messages.0.message.role", "tool"),
+                    ("llm.input_messages.0.message.content", "test result"),
+                    ("llm.input_messages.1.message.role", "tool"),
+                    ("llm.input_messages.1.message.content", "other result"),
+                ],
+                id="multiple_function_responses",
+            ),
+            pytest.param(
+                {
+                    "contents": [
+                        types.Content(
+                            parts=[
+                                types.Part(
+                                    function_call=types.FunctionCall(
+                                        name="func1", args={"x": 1}
+                                    )
+                                ),
+                                types.Part(
+                                    function_call=types.FunctionCall(
+                                        name="func2", args={"y": 2}
+                                    )
+                                ),
+                            ]
+                        )
+                    ]
+                },
+                [
+                    ("llm.input_messages.0.message.role", "model"),
+                    (
+                        "llm.input_messages.0.message.tool_calls.0.tool_call.function.name",
+                        "func1",
+                    ),
+                    (
+                        "llm.input_messages.0.message.tool_calls.0.tool_call.function.arguments",
+                        '{"x": 1}',
+                    ),
+                    (
+                        "llm.input_messages.0.message.tool_calls.1.tool_call.function.name",
+                        "func2",
+                    ),
+                    (
+                        "llm.input_messages.0.message.tool_calls.1.tool_call.function.arguments",
+                        '{"y": 2}',
+                    ),
+                ],
+                id="multiple_function_calls",
+            ),
+        ],
+    )
+    def test_get_tools_from_request(
+        self,
+        request_parameters: Mapping[str, Any],
+        expected: Iterator[Tuple[str, AttributeValue]],
+    ) -> None:
+        """Test the get_tools_from_request function."""
+        from src.atla_insights._google_genai import get_tools_from_request
+
+        tools = get_tools_from_request(request_parameters)
+        assert sorted(tools) == sorted(expected)
