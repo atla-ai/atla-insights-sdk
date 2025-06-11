@@ -39,15 +39,6 @@ def _get_tool_calls_from_content_parts(
     """
     function_call_idx = 0
     for part in content_parts:
-        if function_response := getattr(part, "function_response", None):
-            if hasattr(function_response, "response") and isinstance(
-                function_response.response, Mapping
-            ):
-                response = function_response.response.get(
-                    "result", function_response.response
-                )
-                yield MessageAttributes.MESSAGE_CONTENT, json.dumps(response)
-
         if function_call := getattr(part, "function_call", None):
             function_call_prefix = (
                 f"{MessageAttributes.MESSAGE_TOOL_CALLS}.{function_call_idx}"
@@ -81,7 +72,7 @@ def _get_tool_calls_from_content_parts(
             function_call_idx += 1
 
 
-def get_tools_from_request(
+def get_tools_from_request(  # noqa: C901
     request_parameters: Mapping[str, Any],
 ) -> Iterator[Tuple[str, AttributeValue]]:
     """Custom request extractor method for structured information about available tools.
@@ -93,8 +84,99 @@ def get_tools_from_request(
     if not isinstance(request_parameters, Mapping):
         return
 
-    request_params_dict = dict(request_parameters)
-    if config := request_params_dict.get("config", None):
+    input_messages_index = 0
+
+    # If there is a system instruction, this will get counted as a system message.
+    if config := request_parameters.get("config"):
+        if getattr(config, "system_instruction", None):
+            input_messages_index += 1
+
+    if input_contents := request_parameters.get("contents"):
+        if isinstance(input_contents, list):
+            for input_content in input_contents:
+                if not (
+                    hasattr(input_content, "parts")
+                    and isinstance(input_content.parts, list)
+                ):
+                    input_messages_index += 1
+                    continue
+
+                part_idx = 0
+                has_function_response = False
+                for input_part in input_content.parts:
+                    if function_call := getattr(input_part, "function_call", None):
+                        yield (
+                            f"{SpanAttributes.LLM_INPUT_MESSAGES}.{input_messages_index}.{MessageAttributes.MESSAGE_ROLE}",
+                            "model",
+                        )
+                        function_call_prefix = f"{SpanAttributes.LLM_INPUT_MESSAGES}.{input_messages_index}.{MessageAttributes.MESSAGE_TOOL_CALLS}.{part_idx}"  # noqa: E501
+                        if function_name := getattr(function_call, "name", None):
+                            yield (
+                                ".".join(
+                                    [
+                                        function_call_prefix,
+                                        ToolCallAttributes.TOOL_CALL_FUNCTION_NAME,
+                                    ]
+                                ),
+                                function_name,
+                            )
+                        if function_id := getattr(function_call, "id", None):
+                            yield (
+                                ".".join(
+                                    [
+                                        function_call_prefix,
+                                        ToolCallAttributes.TOOL_CALL_ID,
+                                    ]
+                                ),
+                                function_id,
+                            )
+                        if function_args := getattr(function_call, "args", None):
+                            function_args_json = json.dumps(function_args)
+                        else:
+                            function_args_json = ""
+                        yield (
+                            ".".join(
+                                [
+                                    function_call_prefix,
+                                    ToolCallAttributes.TOOL_CALL_FUNCTION_ARGUMENTS_JSON,
+                                ]
+                            ),
+                            function_args_json,
+                        )
+                        part_idx += 1
+
+                    if function_response := getattr(
+                        input_part, "function_response", None
+                    ):
+                        if hasattr(function_response, "response") and isinstance(
+                            function_response.response, Mapping
+                        ):
+                            yield (
+                                f"{SpanAttributes.LLM_INPUT_MESSAGES}.{input_messages_index}.{MessageAttributes.MESSAGE_ROLE}",
+                                "tool",
+                            )
+                            yield (
+                                ".".join(
+                                    [
+                                        SpanAttributes.LLM_INPUT_MESSAGES,
+                                        str(input_messages_index),
+                                        MessageAttributes.MESSAGE_CONTENT,
+                                    ]
+                                ),
+                                function_response.response.get(
+                                    "result", function_response.response
+                                ),
+                            )
+
+                            # function response parts should be counted as
+                            # separate input messages instead
+                            input_messages_index += 1
+                            has_function_response = True
+
+                if not has_function_response:
+                    input_messages_index += 1
+
+    if config := request_parameters.get("config"):
         if tools := getattr(config, "tools", None):
             if not isinstance(tools, Iterable):
                 return
