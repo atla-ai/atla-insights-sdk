@@ -87,12 +87,10 @@ def _parse_function_declaration(function_declaration: object) -> str:
     name = getattr(function_declaration, "name", "")
     description = getattr(function_declaration, "description", "")
 
-    try:
-        function_parameters = function_declaration.parameters
-        function_json_schema = function_parameters.json_schema
-        parameters = function_json_schema.model_dump(mode="json", exclude_none=True)
-    except AttributeError:
-        parameters = {}
+    parameters = {}
+    if function_parameters := getattr(function_declaration, "parameters", None):
+        if json_schema := getattr(function_parameters, "json_schema", None):
+            parameters = json_schema.model_dump(mode="json", exclude_none=True)
 
     tool_schema = ChatCompletionToolParam(
         type="function",
@@ -222,7 +220,7 @@ def get_tools_from_request(  # noqa: C901
                         ),
                     )
 
-                    # Each function declaration is seen as aseparate tool.
+                    # Each function declaration is seen as a separate tool.
                     tool_idx += 1
 
 
