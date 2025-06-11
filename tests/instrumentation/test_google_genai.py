@@ -188,6 +188,33 @@ class TestGoogleGenAIInstrumentationHelpers:
                 ],
                 id="single_tool_call",
             ),
+            pytest.param(
+                [
+                    types.Part(
+                        function_call=types.FunctionCall(
+                            name="some_tool", args={"some_arg": "some value"}
+                        )
+                    ),
+                    types.Part(
+                        function_call=types.FunctionCall(
+                            name="other_tool", args={"other_arg": "other value"}
+                        )
+                    ),
+                ],
+                [
+                    (
+                        "message.tool_calls.0.tool_call.function.arguments",
+                        '{"some_arg": "some value"}',
+                    ),
+                    ("message.tool_calls.0.tool_call.function.name", "some_tool"),
+                    (
+                        "message.tool_calls.1.tool_call.function.arguments",
+                        '{"other_arg": "other value"}',
+                    ),
+                    ("message.tool_calls.1.tool_call.function.name", "other_tool"),
+                ],
+                id="multi_tool_call",
+            ),
         ],
     )
     def test_get_tool_calls_from_content_parts(
