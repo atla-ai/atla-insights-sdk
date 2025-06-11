@@ -82,6 +82,31 @@ def _get_tool_calls_from_content_parts(
             function_call_idx += 1
 
 
+def _parse_function_declaration(function_declaration: object) -> str:
+    """Parse a function declaration and return the attribute JSON schema value."""
+    name = getattr(function_declaration, "name", "")
+    description = getattr(function_declaration, "description", "")
+
+    try:
+        function_parameters = function_declaration.parameters
+        function_json_schema = function_parameters.json_schema
+        parameters = function_json_schema.model_dump(mode="json", exclude_none=True)
+    except AttributeError:
+        parameters = {}
+
+    tool_schema = ChatCompletionToolParam(
+        type="function",
+        function=FunctionDefinition(
+            name=name,
+            description=description,
+            parameters=parameters,
+            strict=None,
+        ),
+    )
+    tool_schema_json = json.dumps(tool_schema)
+    return tool_schema_json
+
+
 def get_tools_from_request(  # noqa: C901
     request_parameters: Mapping[str, Any],
 ) -> Iterator[Tuple[str, AttributeValue]]:
@@ -190,40 +215,14 @@ def get_tools_from_request(  # noqa: C901
                             ToolAttributes.TOOL_JSON_SCHEMA,
                         ]
                     )
-                    name = getattr(function_declaration, "name", "")
-                    description = getattr(function_declaration, "description", "")
-
-                    if (
-                        hasattr(function_declaration, "parameters")
-                        and hasattr(function_declaration.parameters, "json_schema")
-                        and hasattr(
-                            function_declaration.parameters.json_schema, "model_dump"
-                        )
-                        and callable(
-                            function_declaration.parameters.json_schema.model_dump
-                        )
-                    ):
-                        parameters = (
-                            function_declaration.parameters.json_schema.model_dump(
-                                mode="json", exclude_none=True
-                            )
-                        )
-                    else:
-                        parameters = {}
-
-                    tool_schema = ChatCompletionToolParam(
-                        type="function",
-                        function=FunctionDefinition(
-                            name=name,
-                            description=description,
-                            parameters=parameters,
-                            strict=None,
+                    yield (
+                        tool_attr_name,
+                        _parse_function_declaration(
+                            function_declaration=function_declaration,
                         ),
                     )
-                    tool_schema_json = json.dumps(tool_schema)
 
-                    yield tool_attr_name, tool_schema_json
-
+                    # Each function declaration is seen as aseparate tool.
                     tool_idx += 1
 
 
