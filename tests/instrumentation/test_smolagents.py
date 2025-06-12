@@ -1,13 +1,11 @@
 """Unit tests for the SmolAgents instrumentation."""
 
-import pytest
 from openai import OpenAI
 from smolagents import CodeAgent, LiteLLMModel, OpenAIServerModel
 
 from tests._otel import BaseLocalOtel
 
 
-@pytest.mark.usefixtures("mock_openai_client")
 class TestSmolAgentsInstrumentation(BaseLocalOtel):
     """Test the SmolAgents instrumentation."""
 

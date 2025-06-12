@@ -6,6 +6,8 @@ from typing import Generator
 
 import pytest
 from anthropic import Anthropic, AsyncAnthropic
+from google.genai import Client
+from google.genai.types import HttpOptions
 from openai import AsyncOpenAI, OpenAI
 from pytest_httpserver import HTTPServer
 
@@ -74,3 +76,20 @@ def mock_async_anthropic_client() -> Generator[AsyncAnthropic, None, None]:
             _MOCK_RESPONSES["anthropic_messages"]
         )
         yield AsyncAnthropic(api_key="unit-test", base_url=httpserver.url_for(""))
+
+
+@pytest.fixture(scope="class")
+def mock_google_genai_client() -> Generator[Client, None, None]:
+    """Mock the Google GenAI client."""
+    with HTTPServer() as httpserver:
+        httpserver.expect_request(
+            "/v1beta/models/some-model:generateContent"
+        ).respond_with_json(_MOCK_RESPONSES["google_genai_content"])
+        httpserver.expect_request(
+            "/v1beta/models/some-tool-call-model:generateContent"
+        ).respond_with_json(_MOCK_RESPONSES["google_genai_tool_calls"])
+
+        yield Client(
+            api_key="unit-test",
+            http_options=HttpOptions(base_url=httpserver.url_for("")),
+        )

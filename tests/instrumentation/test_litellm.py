@@ -11,7 +11,6 @@ from openai import OpenAI
 from tests._otel import BaseLocalOtel
 
 
-@pytest.mark.usefixtures("mock_openai_client")
 class TestLitellmInstrumentation(BaseLocalOtel):
     """Test the Litellm instrumentation."""
 

@@ -41,5 +41,88 @@
         "model": "claude-3-7-sonnet-20250219",
         "role": "assistant",
         "usage": { "input_tokens": 2095, "output_tokens": 503 }
+    },
+    "google_genai_content": {
+        "candidates": [
+            {
+                "content": {
+                    "parts": [
+                        {
+                            "text": "hello world"
+                        }
+                    ],
+                    "role": "model"
+                },
+                "finishReason": "STOP",
+                "avgLogprobs": -0.123456789
+            }
+        ],
+        "usageMetadata": {
+            "promptTokenCount": 1,
+            "candidatesTokenCount": 1,
+            "totalTokenCount": 1,
+            "promptTokensDetails": [
+                {
+                    "modality": "TEXT",
+                    "tokenCount": 1
+                }
+            ],
+            "candidatesTokensDetails": [
+                {
+                    "modality": "TEXT",
+                    "tokenCount": 1
+                }
+            ]
+        },
+        "modelVersion": "some-model",
+        "responseId": "abc123"
+    },
+    "google_genai_tool_calls": {
+        "candidates": [
+            {
+                "content": {
+                    "parts": [
+                        {
+                            "functionCall": {
+                                "name": "some_tool",
+                                "args": {
+                                    "some_arg": "some value"
+                                }
+                            }
+                        },
+                        {
+                            "functionCall": {
+                                "name": "other_tool",
+                                "args": {
+                                    "other_arg": "other value"
+                                }
+                            }
+                        }
+                    ],
+                    "role": "model"
+                },
+                "finishReason": "STOP",
+                "avgLogprobs": -0.123456789
+            }
+        ],
+        "usageMetadata": {
+            "promptTokenCount": 1,
+            "candidatesTokenCount": 1,
+            "totalTokenCount": 1,
+            "promptTokensDetails": [
+                {
+                    "modality": "TEXT",
+                    "tokenCount": 1
+                }
+            ],
+            "candidatesTokensDetails": [
+                {
+                    "modality": "TEXT",
+                    "tokenCount": 1
+                }
+            ]
+        },
+        "modelVersion": "some-tool-call-model",
+        "responseId": "abc123"
     }
 }

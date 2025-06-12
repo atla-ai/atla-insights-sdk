@@ -7,7 +7,6 @@ from openai import AsyncOpenAI
 from tests._otel import BaseLocalOtel
 
 
-@pytest.mark.usefixtures("mock_async_openai_client")
 class TestOpenaiAgentsInstrumentation(BaseLocalOtel):
     """Test the OpenAI Agents instrumentation."""
 

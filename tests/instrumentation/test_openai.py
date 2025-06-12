@@ -1,12 +1,10 @@
 """Test the OpenAI instrumentation."""
 
-import pytest
 from openai import OpenAI
 
 from tests._otel import BaseLocalOtel
 
 
-@pytest.mark.usefixtures("mock_openai_client", "mock_failing_openai_client")
 class TestOpenAIInstrumentation(BaseLocalOtel):
     """Test the OpenAI instrumentation."""
 

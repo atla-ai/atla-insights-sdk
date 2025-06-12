@@ -1,6 +1,5 @@
 """Test the LangChain instrumentation."""
 
-import pytest
 from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph
@@ -11,7 +10,6 @@ from typing_extensions import TypedDict
 from tests._otel import BaseLocalOtel
 
 
-@pytest.mark.usefixtures("mock_openai_client")
 class TestLangChainInstrumentation(BaseLocalOtel):
     """Test the LangChain instrumentation."""
 
