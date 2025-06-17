@@ -190,7 +190,7 @@ wheels = [
 
 [[package]]
 name = "atla-insights"
-version = "0.0.1a12"
+version = "0.0.1a13"
 source = { editable = "." }
 dependencies = [
     { name = "logfire" },
