@@ -14,9 +14,10 @@ import logfire
 from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
     BaseInstrumentor,
 )
+from opentelemetry.sdk.environment_variables import OTEL_ATTRIBUTE_COUNT_LIMIT
 from opentelemetry.sdk.trace import SpanProcessor
 
-from ._constants import SUPPORTED_LLM_PROVIDER
+from ._constants import DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT, SUPPORTED_LLM_PROVIDER
 from ._span_processors import (
     AtlaRootSpanProcessor,
     get_atla_root_span_processor,
@@ -25,6 +26,13 @@ from ._span_processors import (
 from ._utils import validate_metadata
 
 logger = logging.getLogger("atla_insights")
+
+
+# Override the OTEL default attribute count limit (128), if not user-specified. This is
+# because we use separate attributes to store e.g. message history, available tools, etc.
+# see: https://opentelemetry-python.readthedocs.io/en/latest/sdk/environment_variables.html#opentelemetry.sdk.environment_variables.OTEL_ATTRIBUTE_COUNT_LIMIT
+if os.environ.get(OTEL_ATTRIBUTE_COUNT_LIMIT) is None:
+    os.environ[OTEL_ATTRIBUTE_COUNT_LIMIT] = str(DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT)
 
 
 class AtlaInsights:
