@@ -14,9 +14,13 @@ import logfire
 from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
     BaseInstrumentor,
 )
+from opentelemetry.sdk.environment_variables import (
+    OTEL_ATTRIBUTE_COUNT_LIMIT,
+    OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT,
+)
 from opentelemetry.sdk.trace import SpanProcessor
 
-from ._constants import SUPPORTED_LLM_PROVIDER
+from ._constants import MAX_ATTRIBUTE_COUNT, SUPPORTED_LLM_PROVIDER
 from ._span_processors import (
     AtlaRootSpanProcessor,
     get_atla_root_span_processor,
@@ -25,6 +29,13 @@ from ._span_processors import (
 from ._utils import validate_metadata
 
 logger = logging.getLogger("atla_insights")
+
+
+if os.environ.get(OTEL_ATTRIBUTE_COUNT_LIMIT) is None:
+    os.environ[OTEL_ATTRIBUTE_COUNT_LIMIT] = str(MAX_ATTRIBUTE_COUNT)
+
+if os.environ.get(OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT) is None:
+    os.environ[OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT] = str(MAX_ATTRIBUTE_COUNT)
 
 
 class AtlaInsights:
