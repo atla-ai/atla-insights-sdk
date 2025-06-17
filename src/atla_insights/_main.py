@@ -14,9 +14,7 @@ import logfire
 from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
     BaseInstrumentor,
 )
-from opentelemetry.sdk.environment_variables import (
-    OTEL_ATTRIBUTE_COUNT_LIMIT,
-)
+from opentelemetry.sdk.environment_variables import OTEL_ATTRIBUTE_COUNT_LIMIT
 from opentelemetry.sdk.trace import SpanProcessor
 
 from ._constants import DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT, SUPPORTED_LLM_PROVIDER
