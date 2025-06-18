@@ -51,6 +51,7 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
             value="litellm",
         )
 
+        # Set tool calls for assistant messages in the request
         if messages := kwargs.get("messages"):
             for idx, prompt in enumerate(messages):
                 if tool_calls := prompt.get("tool_calls"):
@@ -60,6 +61,7 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
                         value=json.dumps(tool_calls),
                     )
 
+        # Set tool call IDs (if present) in a tool call response
         if response_obj is not None:
             if response_obj.get("choices"):
                 for idx, choice in enumerate(response_obj.get("choices")):
