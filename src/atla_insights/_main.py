@@ -1,5 +1,6 @@
 """Core functionality for the atla_package."""
 
+import json
 import logging
 import os
 from contextlib import contextmanager
@@ -17,7 +18,11 @@ from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-de
 from opentelemetry.sdk.environment_variables import OTEL_ATTRIBUTE_COUNT_LIMIT
 from opentelemetry.sdk.trace import SpanProcessor
 
-from ._constants import DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT, SUPPORTED_LLM_PROVIDER
+from ._constants import (
+    DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT,
+    METADATA_MARK,
+    SUPPORTED_LLM_PROVIDER,
+)
 from ._span_processors import (
     AtlaRootSpanProcessor,
     get_atla_root_span_processor,
@@ -101,6 +106,36 @@ class AtlaInsights:
             )
         self._root_span_processor.mark_root(value=0)
         logger.info("Marked trace as failure ❌")
+
+    def get_metadata(self) -> Optional[dict[str, str]]:
+        """Get the metadata for the current trace."""
+        if (
+            not self.configured
+            or self._root_span_processor is None
+            or self._root_span_processor._root_span is None
+            or self._root_span_processor._root_span.attributes is None
+        ):
+            return None
+
+        if metadata := self._root_span_processor._root_span.attributes.get(METADATA_MARK):
+            return json.loads(str(metadata))
+        return None
+
+    def set_metadata(self, metadata: dict[str, str]) -> None:
+        """Set the metadata for the current trace."""
+        if (
+            not self.configured
+            or self._root_span_processor is None
+            or self._root_span_processor._root_span is None
+        ):
+            raise ValueError(
+                "Cannot set metadata before running the atla `configure` method."
+            )
+
+        validate_metadata(metadata)
+        self._root_span_processor._root_span.set_attribute(
+            METADATA_MARK, json.dumps(metadata)
+        )
 
     def _instrument_provider(
         self, provider: str, instrumentors: Sequence[BaseInstrumentor]
@@ -350,6 +385,10 @@ class AtlaInsights:
 _ATLA = AtlaInsights()
 
 configure = _ATLA.configure
+
+get_metadata = _ATLA.get_metadata
+set_metadata = _ATLA.set_metadata
+
 mark_success = _ATLA.mark_success
 mark_failure = _ATLA.mark_failure
 
