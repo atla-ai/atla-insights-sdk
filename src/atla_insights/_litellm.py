@@ -60,6 +60,19 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
                         value=json.dumps(tool_calls),
                     )
 
+        if response_obj is not None:
+            if response_obj.get("choices"):
+                for idx, choice in enumerate(response_obj.get("choices")):
+                    if message := choice.get("message"):
+                        if tool_calls := message.get("tool_calls"):
+                            for idx, tool_call in enumerate(tool_calls):
+                                if tool_call_id := tool_call.get("id"):
+                                    self.safe_set_attribute(
+                                        span=span,
+                                        key=f"{SpanAttributes.LLM_COMPLETIONS.value}.{idx}.function_call.id",
+                                        value=tool_call_id,
+                                    )
+
     def _handle_sucess(self, kwargs, response_obj, start_time, end_time) -> None:
         _parent_context, parent_otel_span = self._get_span_context(kwargs)
 
