@@ -4,6 +4,7 @@ from logfire import instrument
 
 from ._main import (
     configure,
+    get_metadata,
     instrument_agno,
     instrument_anthropic,
     instrument_google_genai,
@@ -15,6 +16,7 @@ from ._main import (
     instrument_smolagents,
     mark_failure,
     mark_success,
+    set_metadata,
     uninstrument_agno,
     uninstrument_anthropic,
     uninstrument_google_genai,
@@ -28,6 +30,7 @@ from ._main import (
 
 __all__ = [
     "configure",
+    "get_metadata",
     "instrument",
     "instrument_agno",
     "instrument_anthropic",
@@ -40,6 +43,7 @@ __all__ = [
     "instrument_smolagents",
     "mark_failure",
     "mark_success",
+    "set_metadata",
     "uninstrument_agno",
     "uninstrument_anthropic",
     "uninstrument_google_genai",
