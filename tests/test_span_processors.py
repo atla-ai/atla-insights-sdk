@@ -72,6 +72,30 @@ class TestSpanProcessors(BaseLocalOtel):
         metadata = json.loads(cast(str, span.attributes.get(METADATA_MARK)))
         assert metadata == {"environment": "unit-testing"}
 
+    def test_get_set_metadata(self) -> None:
+        """Test that the metadata is set and retrieved correctly."""
+        from src.atla_insights import get_metadata, instrument, set_metadata
+        from src.atla_insights._constants import METADATA_MARK
+
+        @instrument()
+        def test_function():
+            set_metadata({"some_key": "some-value"})
+            assert get_metadata() == {"some_key": "some-value"}
+
+            set_metadata({"environment": "unit-testing"})
+            assert get_metadata() == {"environment": "unit-testing"}
+
+            return "test result"
+
+        test_function()
+        spans = self.in_memory_span_exporter.get_finished_spans()
+
+        assert len(spans) == 1
+        span = spans[0]
+
+        assert span.attributes is not None
+        assert span.attributes.get(METADATA_MARK) is not None
+
     def test_no_manual_marking(self) -> None:
         """Test that the instrumented function is traced."""
         from src.atla_insights import instrument
