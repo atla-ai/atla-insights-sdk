@@ -1,5 +1,6 @@
 """Core functionality for the atla_insights package."""
 
+import importlib
 import json
 import logging
 import os
@@ -12,11 +13,13 @@ from typing import (
 )
 
 import logfire
+import opentelemetry.trace
+from opentelemetry import trace
 from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
     BaseInstrumentor,
 )
 from opentelemetry.sdk.environment_variables import OTEL_ATTRIBUTE_COUNT_LIMIT
-from opentelemetry.sdk.trace import SpanProcessor
+from opentelemetry.sdk.trace import SpanProcessor, TracerProvider
 
 from ._constants import (
     DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT,
@@ -66,6 +69,10 @@ class AtlaInsights:
         :param verbose (bool): Whether to print verbose output to console.
             Defaults to `True`.
         """
+        # Unset existing tracer provider, if exists.
+        if isinstance(trace.get_tracer_provider(), TracerProvider):
+            importlib.reload(opentelemetry.trace)
+
         validate_metadata(metadata)
 
         additional_span_processors = additional_span_processors or []
@@ -310,13 +317,14 @@ class AtlaInsights:
     def instrument_crewai(self) -> ContextManager[None]:
         """Instrument CrewAI."""
         from ._crewai import AtlaCrewAIInstrumentor
+        from ._litellm import AtlaLiteLLMIntrumentor
 
+        tracer = self.logfire_instance._get_tracer(is_span_tracer=True)
         return self._instrument_provider(
             provider="crewai",
             instrumentors=[
-                AtlaCrewAIInstrumentor(
-                    tracer=self.logfire_instance._get_tracer(is_span_tracer=True)
-                )
+                AtlaLiteLLMIntrumentor(),
+                AtlaCrewAIInstrumentor(tracer=tracer),
             ],
         )
 
