@@ -81,7 +81,20 @@ class AtlaCrewAIInstrumentor(CrewAIInstrumentor):
     def _uninstrument(self, **kwargs: Any) -> None:
         from crewai.llm import LLM
 
-        super()._uninstrument(**kwargs)
+        if self._original_execute_core is not None:
+            task_module = import_module("crewai")
+            task_module.Task._execute_core = self._original_execute_core
+            self._original_execute_core = None
+
+        if self._original_kickoff is not None:
+            crew_module = import_module("crewai")
+            crew_module.Crew.kickoff = self._original_kickoff
+            self._original_kickoff = None
+
+        if self._original_tool_use is not None:
+            tool_usage_module = import_module("crewai.tools.tool_usage")
+            tool_usage_module.ToolUsage._use = self._original_tool_use
+            self._original_tool_use = None
 
         if self._original_set_callbacks is not None:
             LLM.set_callbacks = self._original_set_callbacks  # type: ignore[method-assign]
