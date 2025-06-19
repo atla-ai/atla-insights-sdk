@@ -1,4 +1,4 @@
-"""Core functionality for the atla_package."""
+"""Core functionality for the atla_insights package."""
 
 import json
 import logging
@@ -78,7 +78,7 @@ class AtlaInsights:
             *additional_span_processors,
         ]
 
-        logfire.configure(
+        self.logfire_instance = logfire.configure(
             additional_span_processors=span_processors,
             console=None if verbose else False,
             environment=os.getenv("_ATLA_ENV", "prod"),
@@ -307,6 +307,23 @@ class AtlaInsights:
         """Uninstrument Agno."""
         return self._uninstrument_provider("agno")
 
+    def instrument_crewai(self) -> ContextManager[None]:
+        """Instrument CrewAI."""
+        from ._crewai import AtlaCrewAIInstrumentor
+
+        return self._instrument_provider(
+            provider="crewai",
+            instrumentors=[
+                AtlaCrewAIInstrumentor(
+                    tracer=self.logfire_instance._get_tracer(is_span_tracer=True)
+                )
+            ],
+        )
+
+    def uninstrument_crewai(self) -> None:
+        """Uninstrument CrewAI."""
+        return self._uninstrument_provider("crewai")
+
     def instrument_openai_agents(
         self,
         llm_provider: Union[
@@ -397,6 +414,9 @@ uninstrument_agno = _ATLA.uninstrument_agno
 
 instrument_anthropic = _ATLA.instrument_anthropic
 uninstrument_anthropic = _ATLA.uninstrument_anthropic
+
+instrument_crewai = _ATLA.instrument_crewai
+uninstrument_crewai = _ATLA.uninstrument_crewai
 
 instrument_google_genai = _ATLA.instrument_google_genai
 uninstrument_google_genai = _ATLA.uninstrument_google_genai
