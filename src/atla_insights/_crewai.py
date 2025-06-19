@@ -38,12 +38,12 @@ class AtlaCrewAIInstrumentor(CrewAIInstrumentor):
 
     def __init__(self, tracer: Tracer) -> None:
         super().__init__()
-        self._tracer = tracer
+        self.tracer = tracer
 
     def _instrument(self, **kwargs: Any) -> None:
         from crewai.llm import LLM
 
-        execute_core_wrapper = _ExecuteCoreWrapper(tracer=self._tracer)
+        execute_core_wrapper = _ExecuteCoreWrapper(tracer=self.tracer)
         self._original_execute_core = getattr(
             import_module("crewai").Task, "_execute_core", None
         )
@@ -53,7 +53,7 @@ class AtlaCrewAIInstrumentor(CrewAIInstrumentor):
             wrapper=execute_core_wrapper,
         )
 
-        kickoff_wrapper = _KickoffWrapper(tracer=self._tracer)
+        kickoff_wrapper = _KickoffWrapper(tracer=self.tracer)
         self._original_kickoff = getattr(import_module("crewai").Crew, "kickoff", None)
         wrap_function_wrapper(
             module="crewai",
@@ -61,7 +61,7 @@ class AtlaCrewAIInstrumentor(CrewAIInstrumentor):
             wrapper=kickoff_wrapper,
         )
 
-        use_wrapper = _ToolUseWrapper(tracer=self._tracer)
+        use_wrapper = _ToolUseWrapper(tracer=self.tracer)
         self._original_tool_use = getattr(
             import_module("crewai.tools.tool_usage").ToolUsage, "_use", None
         )
@@ -84,5 +84,5 @@ class AtlaCrewAIInstrumentor(CrewAIInstrumentor):
         super()._uninstrument(**kwargs)
 
         if self._original_set_callbacks is not None:
-            LLM.set_callbacks = self._original_set_callbacks
+            LLM.set_callbacks = self._original_set_callbacks  # type: ignore[method-assign]
             self._original_set_callbacks = None
