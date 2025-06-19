@@ -69,9 +69,7 @@ class AtlaInsights:
         :param verbose (bool): Whether to print verbose output to console.
             Defaults to `True`.
         """
-        # Unset existing tracer provider, if exists.
-        if isinstance(trace.get_tracer_provider(), TracerProvider):
-            importlib.reload(opentelemetry.trace)
+        self._maybe_reset_tracer()
 
         validate_metadata(metadata)
 
@@ -95,6 +93,11 @@ class AtlaInsights:
         self.configured = True
 
         logger.info("Atla insights configured correctly ✅")
+
+    def _maybe_reset_tracer(self) -> None:
+        """Reset the existing OpenTelemetry tracer, if one exists."""
+        if isinstance(trace.get_tracer_provider(), TracerProvider):
+            importlib.reload(opentelemetry.trace)
 
     def mark_success(self) -> None:
         """Mark the root span in the current trace as successful."""

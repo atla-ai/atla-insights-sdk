@@ -1,5 +1,6 @@
 """CrewAI instrumentation."""
 
+import os
 from importlib import import_module
 from typing import Any, Callable, Mapping, Tuple
 
@@ -8,6 +9,8 @@ from wrapt import wrap_function_wrapper
 
 try:
     import litellm
+    from crewai.telemetry.telemetry import Telemetry
+    from crewai.utilities.events.event_listener import event_listener
     from openinference.instrumentation.crewai import CrewAIInstrumentor
     from openinference.instrumentation.crewai._wrappers import (
         _ExecuteCoreWrapper,
@@ -39,6 +42,12 @@ class AtlaCrewAIInstrumentor(CrewAIInstrumentor):
     def __init__(self, tracer: Tracer) -> None:
         super().__init__()
         self.tracer = tracer
+        self.disable_crewai_telemetry()
+
+    def disable_crewai_telemetry(self) -> None:
+        """Disable the built-in CrewAI telemetry to avoid interfering with Atla."""
+        os.environ["CREWAI_DISABLE_TELEMETRY"] = "true"
+        event_listener._telemetry = Telemetry()
 
     def _instrument(self, **kwargs: Any) -> None:
         from crewai.llm import LLM
