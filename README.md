@@ -87,6 +87,7 @@ We currently support the following frameworks / providers:
 |-------------------------------|----------------------------|-------|
 | **Agno**                      | `instrument_agno`          | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models |
 | **Anthropic**                 | `instrument_anthropic`     | |
+| **CrewAI**                    | `instrument_crewai`        | |
 | **Google GenAI**              | `instrument_google_genai`  | |
 | **LangChain**                 | `instrument_langchain`     | This includes e.g. LangGraph as well |
 | **LiteLLM**                   | `instrument_litellm`       | Supports all available models in the LiteLLM framework |

@@ -27,11 +27,13 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
 
         finished_spans = self.get_finished_spans()
 
-        assert len(finished_spans) == 3
-        run, llm_call_1, llm_call_2 = finished_spans
+        assert len(finished_spans) == 5
+        run, invoke_1, llm_call_1, invoke_2, llm_call_2 = finished_spans
 
         assert run.name == "CodeAgent.run"
+        assert invoke_1.name == "OpenAIServerModel.generate"
         assert llm_call_1.name == "ChatCompletion"
+        assert invoke_2.name == "OpenAIServerModel.generate"
         assert llm_call_2.name == "ChatCompletion"
 
         assert llm_call_1.attributes is not None
@@ -98,11 +100,13 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
 
         finished_spans = self.get_finished_spans()
 
-        assert len(finished_spans) == 3
-        run, llm_call_1, llm_call_2 = finished_spans
+        assert len(finished_spans) == 5
+        run, invoke_1, llm_call_1, invoke_2, llm_call_2 = finished_spans
 
         assert run.name == "CodeAgent.run"
+        assert invoke_1.name == "LiteLLMModel.generate"
         assert llm_call_1.name == "litellm_request"
+        assert invoke_2.name == "LiteLLMModel.generate"
         assert llm_call_2.name == "litellm_request"
 
         assert llm_call_1.attributes is not None
