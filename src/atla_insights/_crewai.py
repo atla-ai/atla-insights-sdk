@@ -107,3 +107,5 @@ class AtlaCrewAIInstrumentor(CrewAIInstrumentor):
         if self._original_set_callbacks is not None:
             LLM.set_callbacks = self._original_set_callbacks  # type: ignore[method-assign]
             self._original_set_callbacks = None
+
+        # TODO(mathias): Reset CrewAI telemetry to original settings.
