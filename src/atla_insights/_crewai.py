@@ -42,11 +42,12 @@ class AtlaCrewAIInstrumentor(CrewAIInstrumentor):
     def __init__(self, tracer: Tracer) -> None:
         super().__init__()
         self.tracer = tracer
-        self.disable_crewai_telemetry()
 
-    def disable_crewai_telemetry(self) -> None:
-        """Disable the built-in CrewAI telemetry to avoid interfering with Atla."""
+        self._original_telemetry_setting = os.getenv("CREWAI_DISABLE_TELEMETRY")
+
+        # Disable the built-in CrewAI telemetry to avoid interfering with instrumentation.
         os.environ["CREWAI_DISABLE_TELEMETRY"] = "true"
+        # Re-initialize telemetry to ensure the new settings are propagated.
         event_listener._telemetry = Telemetry()
 
     def _instrument(self, **kwargs: Any) -> None:
@@ -108,3 +109,15 @@ class AtlaCrewAIInstrumentor(CrewAIInstrumentor):
         if self._original_set_callbacks is not None:
             LLM.set_callbacks = self._original_set_callbacks  # type: ignore[method-assign]
             self._original_set_callbacks = None
+
+        if self._original_telemetry_setting is None:
+            os.environ.pop("CREWAI_DISABLE_TELEMETRY", None)
+        else:
+            os.environ["CREWAI_DISABLE_TELEMETRY"] = self._original_telemetry_setting
+
+        if (
+            self._original_telemetry_setting
+            and self._original_telemetry_setting.lower() != "true"
+        ):
+            # Re-initialize telemetry to ensure the new settings are propagated.
+            event_listener._telemetry = Telemetry()
