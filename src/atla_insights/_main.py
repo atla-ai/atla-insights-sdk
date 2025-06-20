@@ -69,7 +69,7 @@ class AtlaInsights:
         :param verbose (bool): Whether to print verbose output to console.
             Defaults to `True`.
         """
-        self._maybe_reset_tracer()
+        self._maybe_reset_tracer_provider()
 
         validate_metadata(metadata)
 
@@ -94,8 +94,13 @@ class AtlaInsights:
 
         logger.info("Atla insights configured correctly ✅")
 
-    def _maybe_reset_tracer(self) -> None:
-        """Reset the existing OpenTelemetry tracer, if one exists."""
+    def _maybe_reset_tracer_provider(self) -> None:
+        """Reset the existing OpenTelemetry tracer provider, if one exists.
+
+        Removes any existing tracer provider to allow the Atla tracer provider to get
+        initialized correctly. OpenTelemetry tracer providers cannot be re-initialized, so
+        we need to reload the module.
+        """
         if isinstance(trace.get_tracer_provider(), TracerProvider):
             importlib.reload(opentelemetry.trace)
 
