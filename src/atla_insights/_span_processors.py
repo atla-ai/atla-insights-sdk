@@ -6,7 +6,6 @@ from opentelemetry.context import Context
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-from opentelemetry.util import types
 
 from ._constants import LOGFIRE_OTEL_TRACES_ENDPOINT, METADATA_MARK, SUCCESS_MARK
 
@@ -29,27 +28,6 @@ class AtlaRootSpanProcessor(SpanProcessor):
 
     def on_end(self, span: ReadableSpan) -> None:
         pass
-
-    def mark_root(self, value: types.AttributeValue) -> None:
-        """Mark the root span in the current trace with a value.
-
-        Args:
-            value: The value to mark the root span with.
-
-        Raises:
-            ValueError: If the root span is not found or is already marked.
-        """
-        root_span = _root_span.get()
-        if root_span is None:
-            raise ValueError(
-                "Atla marking can only be done within an instrumented function."
-            )
-        if root_span.attributes is None:
-            raise ValueError("Root span attributes are not set.")
-        if root_span.attributes.get(SUCCESS_MARK) != -1:
-            raise ValueError("Cannot mark the same instrumented function twice.")
-
-        root_span.set_attribute(SUCCESS_MARK, value)
 
 
 def get_atla_span_processor(token: str) -> SpanProcessor:

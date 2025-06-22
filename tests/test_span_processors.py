@@ -3,8 +3,6 @@
 import json
 from typing import cast
 
-import pytest
-
 from tests._otel import BaseLocalOtel
 
 
@@ -187,19 +185,6 @@ class TestSpanProcessors(BaseLocalOtel):
 
         assert span.attributes is not None
         assert span.attributes.get(SUCCESS_MARK) == 1
-
-    def test_manual_marking_nok(self) -> None:
-        """Test that the instrumented function with a manual mark is traced."""
-        from src.atla_insights import instrument, mark_failure, mark_success
-
-        @instrument()
-        def test_function():
-            mark_success()
-            mark_failure()  # can only call once
-            return "test result"
-
-        with pytest.raises(ValueError):
-            test_function()
 
     def test_manual_marking_nested(self) -> None:
         """Test that the nested instrumented function with a manual mark is traced."""
