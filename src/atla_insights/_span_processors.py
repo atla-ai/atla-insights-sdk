@@ -41,11 +41,3 @@ def get_atla_span_processor(token: str) -> SpanProcessor:
         headers={"Authorization": f"Bearer {token}"},
     )
     return SimpleSpanProcessor(span_exporter)
-
-
-def get_atla_root_span_processor() -> AtlaRootSpanProcessor:
-    """Get an Atla root span processor.
-
-    :return (AtlaRootSpanProcessor): An Atla root span processor.
-    """
-    return AtlaRootSpanProcessor()

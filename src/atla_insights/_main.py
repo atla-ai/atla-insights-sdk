@@ -26,9 +26,9 @@ from ._constants import (
     SUPPORTED_LLM_PROVIDER,
 )
 from ._span_processors import (
+    AtlaRootSpanProcessor,
     _metadata,
     _root_span,
-    get_atla_root_span_processor,
     get_atla_span_processor,
 )
 from ._utils import validate_metadata
@@ -74,7 +74,7 @@ class AtlaInsights:
         additional_span_processors = additional_span_processors or []
         span_processors = [
             get_atla_span_processor(token),
-            get_atla_root_span_processor(),
+            AtlaRootSpanProcessor(),
             *additional_span_processors,
         ]
 
