@@ -25,7 +25,8 @@ from ._constants import (
 )
 from ._span_processors import (
     AtlaRootSpanProcessor,
-    _root_span_context,
+    _metadata,
+    _root_span,
     get_atla_root_span_processor,
     get_atla_span_processor,
 )
@@ -68,10 +69,11 @@ class AtlaInsights:
             Defaults to `True`.
         """
         validate_metadata(metadata)
+        _metadata.set(metadata)
 
         additional_span_processors = additional_span_processors or []
 
-        self._root_span_processor = get_atla_root_span_processor(metadata)
+        self._root_span_processor = get_atla_root_span_processor()
 
         span_processors = [
             get_atla_span_processor(token),
@@ -110,25 +112,15 @@ class AtlaInsights:
 
     def get_metadata(self) -> Optional[dict[str, str]]:
         """Get the metadata for the current trace."""
-        root_span = _root_span_context.get()
-
-        if root_span is None or root_span.attributes is None:
-            return None
-
-        if metadata := root_span.attributes.get(METADATA_MARK):
-            return json.loads(str(metadata))
-        return None
+        return _metadata.get()
 
     def set_metadata(self, metadata: dict[str, str]) -> None:
         """Set the metadata for the current trace."""
-        root_span = _root_span_context.get()
-        if not self.configured or root_span is None or root_span.attributes is None:
-            raise ValueError(
-                "Cannot set metadata before running the atla `configure` method."
-            )
-
         validate_metadata(metadata)
-        root_span.set_attribute(METADATA_MARK, json.dumps(metadata))
+
+        _metadata.set(metadata)
+        if root_span := _root_span.get():
+            root_span.set_attribute(METADATA_MARK, json.dumps(metadata))
 
     def _instrument_provider(
         self, provider: str, instrumentors: Sequence[BaseInstrumentor]

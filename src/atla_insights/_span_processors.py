@@ -10,29 +10,22 @@ from opentelemetry.util import types
 
 from ._constants import LOGFIRE_OTEL_TRACES_ENDPOINT, METADATA_MARK, SUCCESS_MARK
 
-_root_span_context: ContextVar[Optional[Span]] = ContextVar("_root_span", default=None)
+_metadata: ContextVar[Optional[dict[str, str]]] = ContextVar("_metadata", default=None)
+_root_span: ContextVar[Optional[Span]] = ContextVar("_root_span", default=None)
 
 
 class AtlaRootSpanProcessor(SpanProcessor):
     """An Atla root span processor."""
 
-    def __init__(self, metadata: Optional[dict[str, str]]) -> None:
-        """Initialize the Atla root span processor.
-
-        :param metadata (Optional[dict[str, str]]): A dictionary of metadata to be added
-            to the trace. Defaults to `None`.
-        """
-        self._metadata = metadata
-
     def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
         if span.parent is not None:
             return
 
-        _root_span_context.set(span)
+        _root_span.set(span)
         span.set_attribute(SUCCESS_MARK, -1)
 
-        if self._metadata is not None:
-            span.set_attribute(METADATA_MARK, json.dumps(self._metadata))
+        if metadata := _metadata.get():
+            span.set_attribute(METADATA_MARK, json.dumps(metadata))
 
     def on_end(self, span: ReadableSpan) -> None:
         pass
@@ -46,7 +39,7 @@ class AtlaRootSpanProcessor(SpanProcessor):
         Raises:
             ValueError: If the root span is not found or is already marked.
         """
-        root_span = _root_span_context.get()
+        root_span = _root_span.get()
         if root_span is None:
             raise ValueError(
                 "Atla marking can only be done within an instrumented function."
@@ -72,13 +65,9 @@ def get_atla_span_processor(token: str) -> SpanProcessor:
     return SimpleSpanProcessor(span_exporter)
 
 
-def get_atla_root_span_processor(
-    metadata: Optional[dict[str, str]],
-) -> AtlaRootSpanProcessor:
+def get_atla_root_span_processor() -> AtlaRootSpanProcessor:
     """Get an Atla root span processor.
 
-    :param metadata (Optional[dict[str, str]]): A dictionary of metadata to be added to
-        the trace.
     :return (AtlaRootSpanProcessor): An Atla root span processor.
     """
-    return AtlaRootSpanProcessor(metadata)
+    return AtlaRootSpanProcessor()
