@@ -122,6 +122,8 @@ class AtlaInsights:
 
         _metadata.set(metadata)
         if root_span := _root_span.get():
+            # If the root span already exists, we can assign the metadata to it.
+            # If not, it will be assigned the `_metadata` context var on creation.
             root_span.set_attribute(METADATA_MARK, json.dumps(metadata))
 
     def _instrument_provider(
