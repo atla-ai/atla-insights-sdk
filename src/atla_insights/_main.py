@@ -1,5 +1,6 @@
-"""Core functionality for the atla_package."""
+"""Core functionality for the atla_insights package."""
 
+import importlib
 import json
 import logging
 import os
@@ -13,11 +14,13 @@ from typing import (
 )
 
 import logfire
+import opentelemetry.trace
+from opentelemetry import trace
 from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
     BaseInstrumentor,
 )
 from opentelemetry.sdk.environment_variables import OTEL_ATTRIBUTE_COUNT_LIMIT
-from opentelemetry.sdk.trace import SpanProcessor
+from opentelemetry.sdk.trace import SpanProcessor, TracerProvider
 
 from ._constants import (
     DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT,
@@ -68,6 +71,8 @@ class AtlaInsights:
         :param verbose (bool): Whether to print verbose output to console.
             Defaults to `True`.
         """
+        self._maybe_reset_tracer_provider()
+
         validate_metadata(metadata)
         _metadata.set(metadata)
 
@@ -78,7 +83,7 @@ class AtlaInsights:
             *additional_span_processors,
         ]
 
-        logfire.configure(
+        self.logfire_instance = logfire.configure(
             additional_span_processors=span_processors,
             console=None if verbose else False,
             environment=os.getenv("_ATLA_ENV", "prod"),
@@ -88,6 +93,16 @@ class AtlaInsights:
         self.configured = True
 
         logger.info("Atla insights configured correctly ✅")
+
+    def _maybe_reset_tracer_provider(self) -> None:
+        """Reset the existing OpenTelemetry tracer provider, if one exists.
+
+        Removes any existing tracer provider to allow the Atla tracer provider to get
+        initialized correctly. OpenTelemetry tracer providers cannot be re-initialized, so
+        we need to reload the module.
+        """
+        if isinstance(trace.get_tracer_provider(), TracerProvider):
+            importlib.reload(opentelemetry.trace)
 
     def _mark_root_span(self, value: Literal[0, 1]) -> None:
         """Mark the root span in the current trace with a value."""
@@ -296,6 +311,24 @@ class AtlaInsights:
         """Uninstrument Agno."""
         return self._uninstrument_provider("agno")
 
+    def instrument_crewai(self) -> ContextManager[None]:
+        """Instrument CrewAI."""
+        from ._crewai import AtlaCrewAIInstrumentor
+        from ._litellm import AtlaLiteLLMIntrumentor
+
+        tracer = self.logfire_instance._get_tracer(is_span_tracer=True)
+        return self._instrument_provider(
+            provider="crewai",
+            instrumentors=[
+                AtlaLiteLLMIntrumentor(),
+                AtlaCrewAIInstrumentor(tracer=tracer),
+            ],
+        )
+
+    def uninstrument_crewai(self) -> None:
+        """Uninstrument CrewAI."""
+        return self._uninstrument_provider("crewai")
+
     def instrument_openai_agents(
         self,
         llm_provider: Union[
@@ -386,6 +419,9 @@ uninstrument_agno = _ATLA.uninstrument_agno
 
 instrument_anthropic = _ATLA.instrument_anthropic
 uninstrument_anthropic = _ATLA.uninstrument_anthropic
+
+instrument_crewai = _ATLA.instrument_crewai
+uninstrument_crewai = _ATLA.uninstrument_crewai
 
 instrument_google_genai = _ATLA.instrument_google_genai
 uninstrument_google_genai = _ATLA.uninstrument_google_genai

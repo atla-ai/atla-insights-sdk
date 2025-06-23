@@ -37,13 +37,13 @@ def main() -> None:
     # Configure the client
     configure(token=os.environ["ATLA_INSIGHTS_TOKEN"])
 
-    # Create an async Anthropic client
+    # Create a ChatOpenAI client
     client = ChatOpenAI(model="gpt-4o-mini")
 
-    # Instrument Anthropic
+    # Instrument LangChain
     instrument_langchain()
 
-    # Calling the instrumented async Anthropic client will create spans behind the scenes
+    # Invoking the instrumented LangGraph graph will create spans behind the scenes
     my_app(client)
 
 
