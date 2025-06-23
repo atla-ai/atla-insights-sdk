@@ -7,6 +7,7 @@ import os
 from contextlib import contextmanager
 from typing import (
     ContextManager,
+    Literal,
     Optional,
     Sequence,
     Union,
@@ -24,11 +25,13 @@ from opentelemetry.sdk.trace import SpanProcessor, TracerProvider
 from ._constants import (
     DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT,
     METADATA_MARK,
+    SUCCESS_MARK,
     SUPPORTED_LLM_PROVIDER,
 )
 from ._span_processors import (
     AtlaRootSpanProcessor,
-    get_atla_root_span_processor,
+    _metadata,
+    _root_span,
     get_atla_span_processor,
 )
 from ._utils import validate_metadata
@@ -49,7 +52,6 @@ class AtlaInsights:
     def __init__(self) -> None:
         """Initialize Atla insights."""
         self._active_instrumentors: dict[str, Sequence[BaseInstrumentor]] = {}
-        self._root_span_processor: Optional[AtlaRootSpanProcessor] = None
         self.configured = False
 
     def configure(
@@ -72,14 +74,12 @@ class AtlaInsights:
         self._maybe_reset_tracer_provider()
 
         validate_metadata(metadata)
+        _metadata.set(metadata)
 
         additional_span_processors = additional_span_processors or []
-
-        self._root_span_processor = get_atla_root_span_processor(metadata)
-
         span_processors = [
             get_atla_span_processor(token),
-            self._root_span_processor,
+            AtlaRootSpanProcessor(),
             *additional_span_processors,
         ]
 
@@ -104,53 +104,42 @@ class AtlaInsights:
         if isinstance(trace.get_tracer_provider(), TracerProvider):
             importlib.reload(opentelemetry.trace)
 
-    def mark_success(self) -> None:
-        """Mark the root span in the current trace as successful."""
-        if not self.configured or self._root_span_processor is None:
+    def _mark_root_span(self, value: Literal[0, 1]) -> None:
+        """Mark the root span in the current trace with a value."""
+        if not self.configured:
             raise ValueError(
                 "Cannot mark trace before running the atla `configure` method."
             )
-        self._root_span_processor.mark_root(value=1)
+        root_span = _root_span.get()
+        if root_span is None:
+            raise ValueError(
+                "Atla marking can only be done within an instrumented function."
+            )
+        root_span.set_attribute(SUCCESS_MARK, value)
+
+    def mark_success(self) -> None:
+        """Mark the root span in the current trace as successful."""
+        self._mark_root_span(1)
         logger.info("Marked trace as success ✅")
 
     def mark_failure(self) -> None:
         """Mark the root span in the current trace as failed."""
-        if not self.configured or self._root_span_processor is None:
-            raise ValueError(
-                "Cannot mark trace before running the atla `configure` method."
-            )
-        self._root_span_processor.mark_root(value=0)
+        self._mark_root_span(0)
         logger.info("Marked trace as failure ❌")
 
     def get_metadata(self) -> Optional[dict[str, str]]:
         """Get the metadata for the current trace."""
-        if (
-            not self.configured
-            or self._root_span_processor is None
-            or self._root_span_processor._root_span is None
-            or self._root_span_processor._root_span.attributes is None
-        ):
-            return None
-
-        if metadata := self._root_span_processor._root_span.attributes.get(METADATA_MARK):
-            return json.loads(str(metadata))
-        return None
+        return _metadata.get()
 
     def set_metadata(self, metadata: dict[str, str]) -> None:
         """Set the metadata for the current trace."""
-        if (
-            not self.configured
-            or self._root_span_processor is None
-            or self._root_span_processor._root_span is None
-        ):
-            raise ValueError(
-                "Cannot set metadata before running the atla `configure` method."
-            )
-
         validate_metadata(metadata)
-        self._root_span_processor._root_span.set_attribute(
-            METADATA_MARK, json.dumps(metadata)
-        )
+
+        _metadata.set(metadata)
+        if root_span := _root_span.get():
+            # If the root span already exists, we can assign the metadata to it.
+            # If not, it will be assigned the `_metadata` context var on creation.
+            root_span.set_attribute(METADATA_MARK, json.dumps(metadata))
 
     def _instrument_provider(
         self, provider: str, instrumentors: Sequence[BaseInstrumentor]

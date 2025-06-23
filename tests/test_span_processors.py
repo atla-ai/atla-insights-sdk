@@ -1,5 +1,6 @@
 """Test the span processors."""
 
+import asyncio
 import json
 from typing import cast
 
@@ -188,19 +189,6 @@ class TestSpanProcessors(BaseLocalOtel):
         assert span.attributes is not None
         assert span.attributes.get(SUCCESS_MARK) == 1
 
-    def test_manual_marking_nok(self) -> None:
-        """Test that the instrumented function with a manual mark is traced."""
-        from src.atla_insights import instrument, mark_failure, mark_success
-
-        @instrument()
-        def test_function():
-            mark_success()
-            mark_failure()  # can only call once
-            return "test result"
-
-        with pytest.raises(ValueError):
-            test_function()
-
     def test_manual_marking_nested(self) -> None:
         """Test that the nested instrumented function with a manual mark is traced."""
         from src.atla_insights import instrument, mark_success
@@ -283,3 +271,74 @@ class TestSpanProcessors(BaseLocalOtel):
         assert span_1.attributes.get(SUCCESS_MARK) == 1
         assert span_2.attributes is not None
         assert span_2.attributes.get(SUCCESS_MARK) == -1
+
+    def test_metadata_fastapi_context_simulation(self) -> None:
+        """Test metadata functionality in a server context."""
+        from src.atla_insights import get_metadata, instrument, set_metadata
+
+        @instrument("mock_api_request")
+        def simulate_fastapi_request(user_id: str, session_id: str) -> bool:
+            """Simulate a API request handler."""
+            # Set request metadata
+            request_metadata = {
+                "user_id": user_id,
+                "session_id": session_id,
+                "endpoint": "test_api",
+            }
+            set_metadata(request_metadata)
+
+            # Verify metadata was set correctly
+            current = get_metadata()
+            assert current == request_metadata
+
+            # Update metadata during processing
+            updated = request_metadata.copy()
+            updated["status"] = "processed"
+            set_metadata(updated)
+
+            # Verify final metadata
+            final = get_metadata()
+            return final == updated
+
+        # Test multiple "requests" in sequence
+        assert simulate_fastapi_request("user1", "session1")
+        assert simulate_fastapi_request("user2", "session2")
+
+    @pytest.mark.asyncio
+    async def test_metadata_fastapi_context_simulation_async(self) -> None:
+        """Test metadata functionality in async server context."""
+        from src.atla_insights import get_metadata, instrument, set_metadata
+
+        @instrument("mock_async_api_request")
+        async def simulate_async_fastapi_request(user_id: str, session_id: str) -> bool:
+            """Simulate an async API request handler."""
+            # Set request metadata
+            request_metadata = {
+                "user_id": user_id,
+                "session_id": session_id,
+                "endpoint": "test_async_api",
+            }
+            set_metadata(request_metadata)
+
+            # Simulate some async operation
+            await asyncio.sleep(0.01)
+
+            # Verify metadata was preserved across await
+            current = get_metadata()
+            assert current == request_metadata
+
+            # Update metadata during processing
+            updated = request_metadata.copy()
+            updated["status"] = "processed"
+            set_metadata(updated)
+
+            # Another async operation
+            await asyncio.sleep(0.01)
+
+            # Verify final metadata after async operations
+            final = get_metadata()
+            return final == updated
+
+        # Test multiple async "requests"
+        assert await simulate_async_fastapi_request("user1", "session1")
+        assert await simulate_async_fastapi_request("user2", "session2")
