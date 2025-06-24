@@ -27,8 +27,8 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
 
         finished_spans = self.get_finished_spans()
 
-        assert len(finished_spans) == 5
-        run, invoke_1, llm_call_1, invoke_2, llm_call_2 = finished_spans
+        assert len(finished_spans) == 7
+        run, _, invoke_1, llm_call_1, _, invoke_2, llm_call_2 = finished_spans
 
         assert run.name == "CodeAgent.run"
         assert invoke_1.name == "OpenAIServerModel.generate"
