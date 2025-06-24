@@ -259,8 +259,12 @@ class TestAgnoInstrumentation(BaseLocalOtel):
         assert span.name == "test_function"
 
         assert span.attributes is not None
+
         assert span.attributes.get("openinference.span.kind") == "TOOL"
+
         assert span.attributes.get("tool.name") == "test_function"
         assert span.attributes.get("tool.description") == "Test function"
         assert span.attributes.get("tool.parameters") == '{"some-arg": "some-value"}'
+
+        assert span.attributes.get("input.value") == '{"some-arg": "some-value"}'
         assert span.attributes.get("output.value") == "some-result"
