@@ -2,7 +2,7 @@
 
 import os
 from importlib import import_module
-from typing import Any, Callable, Mapping, Tuple
+from typing import Any, Callable, Mapping
 
 from opentelemetry import context as context_api
 from opentelemetry import trace as trace_api
@@ -36,7 +36,7 @@ except ImportError as e:
 def _set_callbacks(
     wrapped: Callable[..., Any],
     instance: Any,
-    args: Tuple[Any, ...],
+    args: tuple[Any, ...],
     kwargs: Mapping[str, Any],
 ) -> None:
     if callbacks := kwargs.get("callbacks"):
@@ -53,7 +53,7 @@ class _ToolUseWrapper:
         self,
         wrapped: Callable[..., Any],
         instance: Any,
-        args: Tuple[Any, Any, Any],
+        args: tuple[Any, Any, Any],
         kwargs: Mapping[str, Any],
     ) -> Any:
         if context_api.get_value(context_api._SUPPRESS_INSTRUMENTATION_KEY):
