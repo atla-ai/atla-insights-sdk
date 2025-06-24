@@ -197,7 +197,7 @@ with our instrumentation / observability providers.
 `atla_insights` instrumentation is generally compatible with most popular observability
 platforms.
 
-E.g. the following code snippet will make tracing available in both Atla and LangFuse.
+E.g. the following code snippet will make tracing available in both Atla and Langfuse.
 
 ```python
 from atla_insights import configure, instrument_openai
