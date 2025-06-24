@@ -237,7 +237,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
         with instrument_agno("openai"):
             fn = Function(
                 name="test_function",
-                description="Test function",
+                description="Test function.",
                 parameters={
                     "type": "object",
                     "properties": {"some-arg": {"type": "string"}},
@@ -263,7 +263,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
         assert span.attributes.get("openinference.span.kind") == "TOOL"
 
         assert span.attributes.get("tool.name") == "test_function"
-        assert span.attributes.get("tool.description") == "Test function"
+        assert span.attributes.get("tool.description") == "Test function."
         assert span.attributes.get("tool.parameters") == '{"some-arg": "some-value"}'
 
         assert span.attributes.get("input.value") == '{"some-arg": "some-value"}'
