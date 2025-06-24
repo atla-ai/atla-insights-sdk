@@ -99,7 +99,7 @@ class AtlaSmolAgentsInstrumentor(SmolagentsInstrumentor):
         super()._instrument(**kwargs)
 
         if self._original_tool_call_method is not None:
-            Tool.__call__ = self._original_tool_call_method
+            Tool.__call__ = self._original_tool_call_method  # type: ignore[method-assign]
 
         wrap_function_wrapper(
             module="smolagents",
