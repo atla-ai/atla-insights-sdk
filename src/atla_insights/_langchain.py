@@ -34,9 +34,12 @@ class AtlaLangChainInstrumentor(LangChainInstrumentor):
     """Atla instrumentor for LangChain."""
 
     def _instrument(self, **kwargs: Any) -> None:
+        # Wrap original _tools functionality that includes tool parameters information.
         wrap_function_wrapper(
             "openinference.instrumentation.langchain._tracer",
             "_tools",
             _tools,
         )
+
+        # Run original instrumentation which uses the wrapped _tools function.
         super()._instrument(**kwargs)
