@@ -14,7 +14,7 @@ from openinference.semconv.trace import (
 
 def _get_invocation_parameters(args: tuple[Any, ...], kwargs: dict[str, Any]) -> str:
     """Get the invocation parameters from the arguments and keyword arguments."""
-    invocation_parameters = {**kwargs, **dict(enumerate(args))}
+    invocation_parameters: dict = {**kwargs, **dict(enumerate(args))}
     invocation_parameters = {
         k: v for k, v in invocation_parameters.items() if k not in {"self", "cls"}
     }
