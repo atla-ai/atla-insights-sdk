@@ -45,7 +45,8 @@ def _tool_parameters(
 
     tool_parameters = {**arguments.get("kwargs", {})}
     if tool_args := arguments.get("args"):
-        tool_parameters["args"] = tool_args
+        for tool_arg_idx, tool_arg in enumerate(tool_args):
+            tool_parameters[tool_arg_idx] = tool_arg
 
     yield SpanAttributes.TOOL_PARAMETERS, safe_json_dumps(tool_parameters)
 
