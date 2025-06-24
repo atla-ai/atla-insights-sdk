@@ -227,7 +227,7 @@ class AtlaInsights:
     def instrument_langchain(self) -> ContextManager[None]:
         """Instrument the Langchain framework."""
         try:
-            from openinference.instrumentation.langchain import LangChainInstrumentor
+            from ._langchain import AtlaLangChainInstrumentor
         except ImportError as e:
             raise ImportError(
                 "Langchain instrumentation needs to be installed. "
@@ -236,7 +236,7 @@ class AtlaInsights:
 
         return self._instrument_provider(
             provider="langchain",
-            instrumentors=[LangChainInstrumentor()],
+            instrumentors=[AtlaLangChainInstrumentor()],
         )
 
     def uninstrument_langchain(self) -> None:

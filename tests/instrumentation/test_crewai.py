@@ -119,7 +119,7 @@ class TestCrewAIInstrumentation(BaseLocalOtel):
         assert request.name == "litellm_request"
 
     def test_tool_invocation(self) -> None:
-        """Test the Agno instrumentation with tool invocation."""
+        """Test the CrewAI instrumentation with tool invocation."""
         from src.atla_insights import instrument_crewai
 
         with instrument_crewai():
@@ -146,11 +146,14 @@ class TestCrewAIInstrumentation(BaseLocalOtel):
 
         [span] = finished_spans
 
-        assert span.name == "ToolUsage._use"
+        assert span.name == "test_function"
 
         assert span.attributes is not None
         assert span.attributes.get("openinference.span.kind") == "TOOL"
+
         assert span.attributes.get("tool.name") == "test_function"
         assert span.attributes.get("tool.description") == "Test function."
         assert span.attributes.get("tool.parameters") == '{"some_arg": "some-value"}'
+
+        assert span.attributes.get("input.value") is not None
         assert span.attributes.get("output.value") == "some-result"

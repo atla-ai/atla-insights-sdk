@@ -58,7 +58,10 @@ class _ToolUseWrapper:
     ) -> Any:
         if context_api.get_value(context_api._SUPPRESS_INSTRUMENTATION_KEY):
             return wrapped(*args, **kwargs)
-        if instance:
+        if kwargs.get("tool") or len(args) > 1:
+            tool = kwargs.get("tool") or args[1]
+            span_name = tool.name
+        elif instance:
             span_name = f"{instance.__class__.__name__}.{wrapped.__name__}"
         else:
             span_name = wrapped.__name__

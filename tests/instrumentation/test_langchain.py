@@ -1,6 +1,7 @@
 """Test the LangChain instrumentation."""
 
 from langchain_core.messages import HumanMessage
+from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph
 from openai import OpenAI
@@ -96,3 +97,33 @@ class TestLangChainInstrumentation(BaseLocalOtel):
             request.attributes.get("llm.output_messages.0.message.content")
             == "hello world"
         )
+
+    def test_tool_invocation(self) -> None:
+        """Test the LangChain instrumentation with tool invocation."""
+        from src.atla_insights import instrument_langchain
+
+        with instrument_langchain():
+
+            @tool
+            def test_function(some_arg: str) -> str:
+                """Test function."""
+                return "some-result"
+
+            test_function.invoke({"some_arg": "some-value"})
+
+        finished_spans = self.get_finished_spans()
+        assert len(finished_spans) == 1
+
+        [span] = finished_spans
+
+        assert span.name == "test_function"
+
+        assert span.attributes is not None
+        assert span.attributes.get("openinference.span.kind") == "TOOL"
+
+        assert span.attributes.get("tool.name") == "test_function"
+        assert span.attributes.get("tool.description") == "Test function."
+        assert span.attributes.get("tool.parameters") == '{"some_arg": "some-value"}'
+
+        assert span.attributes.get("input.value") == "{'some_arg': 'some-value'}"
+        assert span.attributes.get("output.value") == "some-result"
