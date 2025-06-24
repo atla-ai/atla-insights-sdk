@@ -3,7 +3,16 @@
 from typing import Any, cast
 
 import pytest
-from agents import Agent, OpenAIChatCompletionsModel, Runner, set_default_openai_client
+from agents import (
+    Agent,
+    OpenAIChatCompletionsModel,
+    RunConfig,
+    RunHooks,
+    Runner,
+    set_default_openai_client,
+)
+from agents._run_impl import RunImpl, ToolRunFunction, TraceCtxManager
+from agents.run_context import RunContextWrapper
 from agents.tool import function_tool
 from openai import AsyncOpenAI
 from openai.types.responses import ResponseFunctionToolCall
@@ -98,10 +107,6 @@ class TestOpenaiAgentsInstrumentation(BaseLocalOtel):
     @pytest.mark.asyncio
     async def test_tool_invocation(self, mock_async_openai_client: AsyncOpenAI) -> None:
         """Test the OpenAI Agents SDK instrumentation with tool invocation."""
-        from agents import RunConfig, RunHooks
-        from agents._run_impl import RunImpl, ToolRunFunction, TraceCtxManager
-        from agents.run_context import RunContextWrapper
-
         from src.atla_insights import instrument_openai_agents
 
         with instrument_openai_agents():

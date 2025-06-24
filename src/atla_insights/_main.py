@@ -226,13 +226,7 @@ class AtlaInsights:
 
     def instrument_langchain(self) -> ContextManager[None]:
         """Instrument the Langchain framework."""
-        try:
-            from ._langchain import AtlaLangChainInstrumentor
-        except ImportError as e:
-            raise ImportError(
-                "Langchain instrumentation needs to be installed. "
-                "Please install it via `pip install atla-insights[langchain]`."
-            ) from e
+        from ._langchain import AtlaLangChainInstrumentor
 
         return self._instrument_provider(
             provider="langchain",
@@ -383,19 +377,13 @@ class AtlaInsights:
         :param llm_provider (Union[Sequence[SUPPORTED_LLM_PROVIDER],
             SUPPORTED_LLM_PROVIDER]): The LLM provider(s) to instrument.
         """
-        try:
-            from openinference.instrumentation.smolagents import SmolagentsInstrumentor
-        except ImportError as e:
-            raise ImportError(
-                "Smolagents instrumentation needs to be installed. "
-                "Please install it via `pip install atla-insights[smolagents]`."
-            ) from e
+        from ._smolagents import AtlaSmolAgentsInstrumentor
 
         return self._instrument_provider(
             provider="smolagents",
             instrumentors=[
                 *self._get_instrumentors_for_provider(llm_provider),
-                SmolagentsInstrumentor(),
+                AtlaSmolAgentsInstrumentor(),
             ],
         )
 

@@ -245,7 +245,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
             )
             function_call = FunctionCall(
                 function=fn,
-                arguments={"some-arg": "some-value"},
+                arguments={"some_arg": "some-value"},
                 result="some-result",
                 call_id="abc123",
             )
@@ -264,7 +264,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
 
         assert span.attributes.get("tool.name") == "test_function"
         assert span.attributes.get("tool.description") == "Test function."
-        assert span.attributes.get("tool.parameters") == '{"some-arg": "some-value"}'
+        assert span.attributes.get("tool.parameters") == '{"some_arg": "some-value"}'
 
-        assert span.attributes.get("input.value") == '{"some-arg": "some-value"}'
+        assert span.attributes.get("input.value") == '{"some_arg": "some-value"}'
         assert span.attributes.get("output.value") == "some-result"

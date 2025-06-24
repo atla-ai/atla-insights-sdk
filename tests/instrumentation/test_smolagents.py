@@ -1,7 +1,7 @@
 """Unit tests for the SmolAgents instrumentation."""
 
 from openai import OpenAI
-from smolagents import CodeAgent, LiteLLMModel, OpenAIServerModel
+from smolagents import CodeAgent, LiteLLMModel, OpenAIServerModel, tool
 
 from tests._otel import BaseLocalOtel
 
@@ -120,3 +120,41 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
         assert llm_call_2.attributes.get("gen_ai.prompt.0.content") is not None
         assert llm_call_2.attributes.get("gen_ai.completion.0.role") == "assistant"
         assert llm_call_2.attributes.get("gen_ai.completion.0.content") == "hello world"
+
+    def test_tool_invocation(self) -> None:
+        """Test the SmolAgents instrumentation with tool invocation."""
+        from src.atla_insights import instrument_smolagents
+
+        with instrument_smolagents("openai"):
+
+            @tool
+            def test_function(some_arg: str) -> str:
+                """Test function.
+
+                Args:
+                    some_arg: Some arg.
+
+                Returns:
+                    Some result.
+                """
+                return "some-result"
+
+            test_function(some_arg="some-value")
+
+        finished_spans = self.get_finished_spans()
+        assert len(finished_spans) == 1
+
+        [span] = finished_spans
+
+        assert span.name == "test_function"
+
+        assert span.attributes is not None
+
+        assert span.attributes.get("openinference.span.kind") == "TOOL"
+
+        assert span.attributes.get("tool.name") == "test_function"
+        assert span.attributes.get("tool.description") == "Test function."
+        assert span.attributes.get("tool.parameters") == '{"some_arg": "some-value"}'
+
+        assert span.attributes.get("input.value") is not None
+        assert span.attributes.get("output.value") == "some-result"
