@@ -224,56 +224,10 @@ dependencies = [
 
 [package.optional-dependencies]
 agno = [
+    { name = "agno" },
     { name = "openinference-instrumentation-agno" },
 ]
 all = [
-    { name = "litellm" },
-    { name = "openinference-instrumentation-agno" },
-    { name = "openinference-instrumentation-anthropic" },
-    { name = "openinference-instrumentation-crewai" },
-    { name = "openinference-instrumentation-google-genai" },
-    { name = "openinference-instrumentation-langchain" },
-    { name = "openinference-instrumentation-mcp" },
-    { name = "openinference-instrumentation-openai" },
-    { name = "openinference-instrumentation-openai-agents" },
-    { name = "openinference-instrumentation-smolagents" },
-]
-anthropic = [
-    { name = "openinference-instrumentation-anthropic" },
-]
-ci = [
-    { name = "mypy" },
-    { name = "ruff" },
-]
-crewai = [
-    { name = "litellm" },
-    { name = "openinference-instrumentation-crewai" },
-]
-google-genai = [
-    { name = "openinference-instrumentation-google-genai" },
-]
-langchain = [
-    { name = "openinference-instrumentation-langchain" },
-]
-litellm = [
-    { name = "litellm" },
-]
-mcp = [
-    { name = "openinference-instrumentation-mcp" },
-]
-openai = [
-    { name = "openinference-instrumentation-openai" },
-]
-openai-agents = [
-    { name = "openinference-instrumentation-openai" },
-    { name = "openinference-instrumentation-openai-agents" },
-]
-smolagents = [
-    { name = "openinference-instrumentation-smolagents" },
-]
-
-[package.dev-dependencies]
-dev = [
     { name = "agno" },
     { name = "anthropic" },
     { name = "crewai" },
@@ -293,20 +247,76 @@ dev = [
     { name = "openinference-instrumentation-openai" },
     { name = "openinference-instrumentation-openai-agents" },
     { name = "openinference-instrumentation-smolagents" },
+    { name = "smolagents" },
+]
+anthropic = [
+    { name = "anthropic" },
+    { name = "openinference-instrumentation-anthropic" },
+]
+ci = [
+    { name = "mypy" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-httpserver" },
+    { name = "ruff" },
+]
+crewai = [
+    { name = "crewai" },
+    { name = "litellm" },
+    { name = "openinference-instrumentation-crewai" },
+]
+google-genai = [
+    { name = "google-genai" },
+    { name = "openinference-instrumentation-google-genai" },
+]
+langchain = [
+    { name = "langchain" },
+    { name = "langchain-openai" },
+    { name = "langgraph" },
+    { name = "openinference-instrumentation-langchain" },
+]
+litellm = [
+    { name = "litellm" },
+]
+mcp = [
+    { name = "mcp" },
+    { name = "openinference-instrumentation-mcp" },
+]
+openai = [
+    { name = "openinference-instrumentation-openai" },
+]
+openai-agents = [
+    { name = "openai-agents" },
+    { name = "openinference-instrumentation-openai" },
+    { name = "openinference-instrumentation-openai-agents" },
+]
+smolagents = [
+    { name = "openinference-instrumentation-smolagents" },
     { name = "smolagents" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "atla-insights", extra = ["all", "ci"] },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "agno", marker = "extra == 'agno'", specifier = ">=1.5.0" },
+    { name = "anthropic", marker = "extra == 'anthropic'", specifier = ">=0.52.1" },
     { name = "atla-insights", extras = ["agno", "anthropic", "crewai", "google-genai", "langchain", "litellm", "mcp", "openai", "openai-agents", "smolagents"], marker = "extra == 'all'" },
+    { name = "crewai", marker = "extra == 'crewai'", specifier = ">=0.130.0" },
+    { name = "google-genai", marker = "extra == 'google-genai'", specifier = ">=1.19.0" },
+    { name = "langchain", marker = "extra == 'langchain'", specifier = ">=0.3.18" },
+    { name = "langchain-openai", marker = "extra == 'langchain'", specifier = ">=0.3.4" },
+    { name = "langgraph", marker = "extra == 'langchain'", specifier = ">=0.3.20" },
     { name = "litellm", marker = "extra == 'crewai'", specifier = ">=1.72.0" },
     { name = "litellm", marker = "extra == 'litellm'", specifier = ">=1.72.0" },
     { name = "logfire", specifier = ">=3.14.1" },
+    { name = "mcp", marker = "extra == 'mcp'", specifier = ">=1.9.0" },
     { name = "mypy", marker = "extra == 'ci'", specifier = ">=1.15.0" },
     { name = "openai", specifier = ">=1.77.0" },
+    { name = "openai-agents", marker = "extra == 'openai-agents'", specifier = ">=0.0.7" },
     { name = "openinference-instrumentation", specifier = ">=0.1.32" },
     { name = "openinference-instrumentation-agno", marker = "extra == 'agno'", specifier = ">=0.1.4" },
     { name = "openinference-instrumentation-anthropic", marker = "extra == 'anthropic'", specifier = ">=0.1.18" },
@@ -322,37 +332,17 @@ requires-dist = [
     { name = "opentelemetry-api", specifier = ">=1.32.1" },
     { name = "opentelemetry-exporter-otlp-proto-grpc", specifier = ">=1.32.1" },
     { name = "pydantic", specifier = ">=2.11.4" },
+    { name = "pytest", marker = "extra == 'ci'", specifier = ">=8.3.4" },
+    { name = "pytest-asyncio", marker = "extra == 'ci'", specifier = ">=0.26.0" },
+    { name = "pytest-httpserver", marker = "extra == 'ci'", specifier = ">=1.1.3" },
     { name = "ruff", marker = "extra == 'ci'", specifier = ">=0.11.7" },
+    { name = "smolagents", marker = "extra == 'smolagents'", specifier = ">=1.17.0" },
     { name = "wrapt", specifier = ">=1.17.2" },
 ]
 provides-extras = ["agno", "anthropic", "all", "ci", "crewai", "google-genai", "langchain", "litellm", "mcp", "openai", "openai-agents", "smolagents"]
 
 [package.metadata.requires-dev]
-dev = [
-    { name = "agno", specifier = ">=1.5.0" },
-    { name = "anthropic", specifier = ">=0.52.1" },
-    { name = "crewai", specifier = ">=0.130.0" },
-    { name = "google-genai", specifier = ">=1.19.0" },
-    { name = "langchain", specifier = ">=0.3.18" },
-    { name = "langchain-openai", specifier = ">=0.3.4" },
-    { name = "langgraph", specifier = ">=0.3.20" },
-    { name = "litellm", specifier = ">=1.72.0" },
-    { name = "mcp", specifier = ">=1.9.0" },
-    { name = "openai-agents", specifier = ">=0.0.7" },
-    { name = "openinference-instrumentation-agno", specifier = ">=0.1.4" },
-    { name = "openinference-instrumentation-anthropic", specifier = ">=0.1.18" },
-    { name = "openinference-instrumentation-crewai", specifier = ">=0.1.10" },
-    { name = "openinference-instrumentation-google-genai", specifier = ">=0.1.2" },
-    { name = "openinference-instrumentation-langchain", specifier = ">=0.1.43" },
-    { name = "openinference-instrumentation-mcp", specifier = ">=1.3.0" },
-    { name = "openinference-instrumentation-openai", specifier = ">=0.1.30" },
-    { name = "openinference-instrumentation-openai-agents", specifier = ">=0.1.12" },
-    { name = "openinference-instrumentation-smolagents", specifier = ">=0.1.12" },
-    { name = "pytest", specifier = ">=8.3.4" },
-    { name = "pytest-asyncio", specifier = ">=0.26.0" },
-    { name = "pytest-httpserver", specifier = ">=1.1.3" },
-    { name = "smolagents", specifier = ">=1.17.0" },
-]
+dev = [{ name = "atla-insights", extras = ["all", "ci"] }]
 
 [[package]]
 name = "attrs"
