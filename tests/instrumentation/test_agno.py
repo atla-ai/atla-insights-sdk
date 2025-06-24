@@ -5,6 +5,7 @@ from agno.models.anthropic import Claude
 from agno.models.google import Gemini
 from agno.models.litellm import LiteLLM
 from agno.models.openai import OpenAIChat
+from agno.tools.function import Function, FunctionCall
 from anthropic import Anthropic
 from google.genai import Client
 from openai import OpenAI
@@ -228,3 +229,38 @@ class TestAgnoInstrumentation(BaseLocalOtel):
             openai_request.attributes.get("llm.output_messages.0.message.content")
             == "hello world"
         )
+
+    def test_tool_invocation(self) -> None:
+        """Test the Agno instrumentation with tool invocation."""
+        from src.atla_insights import instrument_agno
+
+        with instrument_agno("openai"):
+            fn = Function(
+                name="test_function",
+                description="Test function",
+                parameters={
+                    "type": "object",
+                    "properties": {"some-arg": {"type": "string"}},
+                },
+            )
+            function_call = FunctionCall(
+                function=fn,
+                arguments={"some-arg": "some-value"},
+                result="some-result",
+                call_id="abc123",
+            )
+            function_call.execute()
+
+        finished_spans = self.get_finished_spans()
+        assert len(finished_spans) == 1
+
+        [span] = finished_spans
+
+        assert span.name == "test_function"
+
+        assert span.attributes is not None
+        assert span.attributes.get("openinference.span.kind") == "TOOL"
+        assert span.attributes.get("tool.name") == "test_function"
+        assert span.attributes.get("tool.description") == "Test function"
+        assert span.attributes.get("tool.parameters") == '{"some-arg": "some-value"}'
+        assert span.attributes.get("output.value") == "some-result"
