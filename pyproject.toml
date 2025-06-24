@@ -60,6 +60,9 @@ agno = [
 anthropic = [
     "openinference-instrumentation-anthropic>=0.1.18",
 ]
+all = [
+    "atla-insights[agno,anthropic,crewai,google-genai,langchain,litellm,mcp,openai,openai-agents,smolagents]",
+]
 ci = [
     "mypy>=1.15.0",
     "ruff>=0.11.7",
