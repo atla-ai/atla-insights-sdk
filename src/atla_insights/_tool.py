@@ -3,13 +3,14 @@
 from functools import wraps
 from typing import Any, Callable
 
-import logfire
 from openinference.instrumentation import safe_json_dumps
 from openinference.semconv.trace import (
     OpenInferenceMimeTypeValues,
     OpenInferenceSpanKindValues,
     SpanAttributes,
 )
+
+from ._main import _ATLA
 
 
 def _get_invocation_parameters(args: tuple[Any, ...], kwargs: dict[str, Any]) -> str:
@@ -36,28 +37,25 @@ def tool(func: Callable[..., Any]) -> Callable[..., Any]:
 
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
-        span_name = func.__name__
-        with logfire.span(span_name) as span:
-            span.set_attribute(
-                SpanAttributes.OPENINFERENCE_SPAN_KIND,
-                OpenInferenceSpanKindValues.TOOL.value,
-            )
-            span.set_attribute(SpanAttributes.TOOL_NAME, func.__name__)
-            span.set_attribute(SpanAttributes.TOOL_DESCRIPTION, func.__doc__)
+        with _ATLA.tracer.start_as_current_span(
+            name=func.__name__,
+            attributes={
+                SpanAttributes.OPENINFERENCE_SPAN_KIND: OpenInferenceSpanKindValues.TOOL.value,  # noqa: E501
+                SpanAttributes.TOOL_NAME: func.__name__,
+                SpanAttributes.INPUT_MIME_TYPE: OpenInferenceMimeTypeValues.JSON.value,
+                SpanAttributes.OUTPUT_MIME_TYPE: OpenInferenceMimeTypeValues.TEXT.value,
+            },
+        ) as span:
+            if func.__doc__:
+                span.set_attribute(SpanAttributes.TOOL_DESCRIPTION, func.__doc__)
 
             invocation_parameters = _get_invocation_parameters(args, kwargs)
             span.set_attribute(SpanAttributes.TOOL_PARAMETERS, invocation_parameters)
             span.set_attribute(SpanAttributes.INPUT_VALUE, invocation_parameters)
-            span.set_attribute(
-                SpanAttributes.INPUT_MIME_TYPE, OpenInferenceMimeTypeValues.JSON.value
-            )
 
             result = func(*args, **kwargs)
 
             span.set_attribute(SpanAttributes.OUTPUT_VALUE, str(result))
-            span.set_attribute(
-                SpanAttributes.OUTPUT_MIME_TYPE, OpenInferenceMimeTypeValues.TEXT.value
-            )
 
         return result
 

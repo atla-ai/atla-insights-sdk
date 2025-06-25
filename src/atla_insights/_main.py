@@ -83,13 +83,14 @@ class AtlaInsights:
             *additional_span_processors,
         ]
 
-        self.logfire_instance = logfire.configure(
+        logfire_instance = logfire.configure(
             additional_span_processors=span_processors,
             console=None if verbose else False,
             environment=os.getenv("_ATLA_ENV", "prod"),
             send_to_logfire=False,
             scrubbing=False,
         )
+        self.tracer = logfire_instance._get_tracer(is_span_tracer=True)
         self.configured = True
 
         logger.info("Atla insights configured correctly ✅")
@@ -310,12 +311,11 @@ class AtlaInsights:
         from .instrumentation._crewai import AtlaCrewAIInstrumentor
         from .instrumentation._litellm import AtlaLiteLLMIntrumentor
 
-        tracer = self.logfire_instance._get_tracer(is_span_tracer=True)
         return self._instrument_provider(
             provider="crewai",
             instrumentors=[
                 AtlaLiteLLMIntrumentor(),
-                AtlaCrewAIInstrumentor(tracer=tracer),
+                AtlaCrewAIInstrumentor(tracer=self.tracer),
             ],
         )
 
