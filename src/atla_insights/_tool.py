@@ -45,6 +45,8 @@ def tool(func: Callable[..., Any]) -> Callable[..., Any]:
                 SpanAttributes.INPUT_MIME_TYPE: OpenInferenceMimeTypeValues.JSON.value,
                 SpanAttributes.OUTPUT_MIME_TYPE: OpenInferenceMimeTypeValues.TEXT.value,
             },
+            record_exception=True,
+            set_status_on_exception=False,
         ) as span:
             if func.__doc__:
                 span.set_attribute(SpanAttributes.TOOL_DESCRIPTION, func.__doc__)
