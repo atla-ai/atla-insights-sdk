@@ -3,13 +3,13 @@
 from functools import wraps
 from typing import Any, Callable
 
-import opentelemetry.trace as trace_api
 from openinference.instrumentation import safe_json_dumps
 from openinference.semconv.trace import (
     OpenInferenceMimeTypeValues,
     OpenInferenceSpanKindValues,
     SpanAttributes,
 )
+from opentelemetry import trace as trace_api
 
 from ._main import _ATLA
 
