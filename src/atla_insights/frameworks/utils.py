@@ -4,7 +4,7 @@ from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-de
     BaseInstrumentor,
 )
 
-from atla_insights._constants import LLM_PROVIDER_TYPE
+from atla_insights.constants import LLM_PROVIDER_TYPE
 
 
 def get_instrumentors_for_provider(

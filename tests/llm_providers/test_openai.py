@@ -77,7 +77,7 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
     def test_nested_instrumentation_marked(self, mock_openai_client: OpenAI) -> None:
         """Test that the OpenAI instrumentation is traced."""
         from atla_insights import instrument, instrument_openai, mark_success
-        from atla_insights._constants import SUCCESS_MARK
+        from atla_insights.constants import SUCCESS_MARK
 
         @instrument("root_span")
         def test_function():
@@ -104,7 +104,7 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
     def test_failing_instrumentation(self, mock_failing_openai_client: OpenAI) -> None:
         """Test that the OpenAI instrumentation is traced."""
         from atla_insights import instrument_openai
-        from atla_insights._constants import SUCCESS_MARK
+        from atla_insights.constants import SUCCESS_MARK
 
         with instrument_openai():
             mock_failing_openai_client.chat.completions.create(
@@ -135,7 +135,7 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
     ) -> None:
         """Test that the OpenAI instrumentation is traced."""
         from atla_insights import instrument, instrument_openai, mark_success
-        from atla_insights._constants import SUCCESS_MARK
+        from atla_insights.constants import SUCCESS_MARK
 
         @instrument("root_span")
         def test_function():

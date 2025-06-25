@@ -1,16 +1,10 @@
 """Core functionality for the atla_insights package."""
 
 import importlib
-import json
 import logging
 import os
 from contextlib import contextmanager
-from typing import (
-    ContextManager,
-    Literal,
-    Optional,
-    Sequence,
-)
+from typing import ContextManager, Optional, Sequence
 
 import logfire
 import opentelemetry.trace
@@ -22,18 +16,13 @@ from opentelemetry.sdk.environment_variables import OTEL_ATTRIBUTE_COUNT_LIMIT
 from opentelemetry.sdk.trace import SpanProcessor
 from opentelemetry.trace import Tracer, TracerProvider
 
-from atla_insights._constants import (
-    DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT,
-    METADATA_MARK,
-    SUCCESS_MARK,
-)
-from atla_insights._span_processors import (
+from atla_insights.constants import DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT
+from atla_insights.metadata import validate_metadata
+from atla_insights.span_processors import (
     AtlaRootSpanProcessor,
     _metadata,
-    _root_span,
     get_atla_span_processor,
 )
-from atla_insights._utils import validate_metadata
 
 logger = logging.getLogger("atla_insights")
 
@@ -106,43 +95,6 @@ class AtlaInsights:
         if isinstance(trace.get_tracer_provider(), TracerProvider):
             importlib.reload(opentelemetry.trace)
 
-    def _mark_root_span(self, value: Literal[0, 1]) -> None:
-        """Mark the root span in the current trace with a value."""
-        if not self.configured:
-            raise ValueError(
-                "Cannot mark trace before running the atla `configure` method."
-            )
-        root_span = _root_span.get()
-        if root_span is None:
-            raise ValueError(
-                "Atla marking can only be done within an instrumented function."
-            )
-        root_span.set_attribute(SUCCESS_MARK, value)
-
-    def mark_success(self) -> None:
-        """Mark the root span in the current trace as successful."""
-        self._mark_root_span(1)
-        logger.info("Marked trace as success ✅")
-
-    def mark_failure(self) -> None:
-        """Mark the root span in the current trace as failed."""
-        self._mark_root_span(0)
-        logger.info("Marked trace as failure ❌")
-
-    def get_metadata(self) -> Optional[dict[str, str]]:
-        """Get the metadata for the current trace."""
-        return _metadata.get()
-
-    def set_metadata(self, metadata: dict[str, str]) -> None:
-        """Set the metadata for the current trace."""
-        validate_metadata(metadata)
-
-        _metadata.set(metadata)
-        if root_span := _root_span.get():
-            # If the root span already exists, we can assign the metadata to it.
-            # If not, it will be assigned the `_metadata` context var on creation.
-            root_span.set_attribute(METADATA_MARK, json.dumps(metadata))
-
     def instrument_service(
         self, service: str, instrumentors: Sequence[BaseInstrumentor]
     ) -> ContextManager[None]:
@@ -203,9 +155,3 @@ class AtlaInsights:
 ATLA_INSTANCE = AtlaInsights()
 
 configure = ATLA_INSTANCE.configure
-
-get_metadata = ATLA_INSTANCE.get_metadata
-set_metadata = ATLA_INSTANCE.set_metadata
-
-mark_success = ATLA_INSTANCE.mark_success
-mark_failure = ATLA_INSTANCE.mark_failure

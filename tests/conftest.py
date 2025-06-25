@@ -28,9 +28,7 @@ def mock_configure() -> None:
 
     span_processor = SimpleSpanProcessor(in_memory_span_exporter)
 
-    with patch(
-        "atla_insights._main.get_atla_span_processor", return_value=span_processor
-    ):
+    with patch("atla_insights.main.get_atla_span_processor", return_value=span_processor):
         configure(token="dummy", metadata={"environment": "unit-testing"})
 
 

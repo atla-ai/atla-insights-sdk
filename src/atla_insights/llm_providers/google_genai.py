@@ -2,7 +2,7 @@
 
 from typing import ContextManager
 
-from atla_insights._main import ATLA_INSTANCE
+from atla_insights.main import ATLA_INSTANCE
 
 
 def instrument_google_genai() -> ContextManager[None]:

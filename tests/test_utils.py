@@ -15,7 +15,7 @@ import pytest
 )
 def test_validate_metadata(metadata: dict[str, str], is_valid: bool) -> None:
     """Test validate_metadata function."""
-    from atla_insights._utils import validate_metadata
+    from atla_insights.metadata import validate_metadata
 
     if is_valid:
         validate_metadata(metadata)

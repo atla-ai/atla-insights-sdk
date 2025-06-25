@@ -55,7 +55,7 @@ class TestSpanProcessors(BaseLocalOtel):
     def test_metadata(self) -> None:
         """Test that run metadata is added to the root span correctly."""
         from atla_insights import instrument
-        from atla_insights._constants import METADATA_MARK
+        from atla_insights.constants import METADATA_MARK
 
         @instrument()
         def test_function():
@@ -76,7 +76,7 @@ class TestSpanProcessors(BaseLocalOtel):
     def test_get_set_metadata(self) -> None:
         """Test that the metadata is set and retrieved correctly."""
         from atla_insights import get_metadata, instrument, set_metadata
-        from atla_insights._constants import METADATA_MARK
+        from atla_insights.constants import METADATA_MARK
 
         @instrument()
         def test_function():
@@ -100,7 +100,7 @@ class TestSpanProcessors(BaseLocalOtel):
     def test_no_manual_marking(self) -> None:
         """Test that the instrumented function is traced."""
         from atla_insights import instrument
-        from atla_insights._constants import SUCCESS_MARK
+        from atla_insights.constants import SUCCESS_MARK
 
         @instrument()
         def test_function():
@@ -118,7 +118,7 @@ class TestSpanProcessors(BaseLocalOtel):
     def test_no_manual_marking_nested_1(self) -> None:
         """Test that the instrumented nested function is traced."""
         from atla_insights import instrument
-        from atla_insights._constants import SUCCESS_MARK
+        from atla_insights.constants import SUCCESS_MARK
 
         @instrument("root_span")
         def test_function():
@@ -145,7 +145,7 @@ class TestSpanProcessors(BaseLocalOtel):
     def test_no_manual_marking_nested_2(self) -> None:
         """Test that the instrumented nested function is traced."""
         from atla_insights import instrument
-        from atla_insights._constants import SUCCESS_MARK
+        from atla_insights.constants import SUCCESS_MARK
 
         @instrument("nested_span")
         def nested_function():
@@ -172,7 +172,7 @@ class TestSpanProcessors(BaseLocalOtel):
     def test_manual_marking(self) -> None:
         """Test that the instrumented function with a manual mark is traced."""
         from atla_insights import instrument, mark_success
-        from atla_insights._constants import SUCCESS_MARK
+        from atla_insights.constants import SUCCESS_MARK
 
         @instrument()
         def test_function():
@@ -192,7 +192,7 @@ class TestSpanProcessors(BaseLocalOtel):
     def test_manual_marking_nested(self) -> None:
         """Test that the nested instrumented function with a manual mark is traced."""
         from atla_insights import instrument, mark_success
-        from atla_insights._constants import SUCCESS_MARK
+        from atla_insights.constants import SUCCESS_MARK
 
         @instrument("root_span")
         def test_function():
@@ -221,7 +221,7 @@ class TestSpanProcessors(BaseLocalOtel):
     def test_multi_trace(self) -> None:
         """Test that multiple traces are traced."""
         from atla_insights import instrument
-        from atla_insights._constants import SUCCESS_MARK
+        from atla_insights.constants import SUCCESS_MARK
 
         @instrument()
         def test_function_1():
@@ -247,7 +247,7 @@ class TestSpanProcessors(BaseLocalOtel):
     def test_multi_trace_manual_mark(self) -> None:
         """Test that multiple traces with a manual mark are traced."""
         from atla_insights import instrument, mark_success
-        from atla_insights._constants import SUCCESS_MARK
+        from atla_insights.constants import SUCCESS_MARK
 
         @instrument()
         def test_function_1():

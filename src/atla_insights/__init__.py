@@ -2,14 +2,6 @@
 
 from logfire import instrument
 
-from atla_insights._main import (
-    configure,
-    get_metadata,
-    mark_failure,
-    mark_success,
-    set_metadata,
-)
-from atla_insights._tool import tool
 from atla_insights.frameworks import (
     instrument_agno,
     instrument_crewai,
@@ -34,6 +26,10 @@ from atla_insights.llm_providers import (
     uninstrument_litellm,
     uninstrument_openai,
 )
+from atla_insights.main import configure
+from atla_insights.marking import mark_failure, mark_success
+from atla_insights.metadata import get_metadata, set_metadata
+from atla_insights.tool import tool
 
 __all__ = [
     "configure",

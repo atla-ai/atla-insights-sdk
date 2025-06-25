@@ -2,8 +2,8 @@
 
 from typing import ContextManager
 
-from atla_insights._main import ATLA_INSTANCE
 from atla_insights.frameworks.utils import get_instrumentors_for_provider
+from atla_insights.main import ATLA_INSTANCE
 
 
 def instrument_crewai() -> ContextManager[None]:

@@ -128,7 +128,7 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
         with instrument_smolagents("openai"):
 
             @tool
-            def test_function(some_arg: str) -> str:
+            def some_function(some_arg: str) -> str:
                 """Test function.
 
                 Args:
@@ -139,20 +139,20 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
                 """
                 return "some-result"
 
-            test_function(some_arg="some-value")
+            some_function(some_arg="some-value")
 
         finished_spans = self.get_finished_spans()
         assert len(finished_spans) == 1
 
         [span] = finished_spans
 
-        assert span.name == "test_function"
+        assert span.name == "some_function"
 
         assert span.attributes is not None
 
         assert span.attributes.get("openinference.span.kind") == "TOOL"
 
-        assert span.attributes.get("tool.name") == "test_function"
+        assert span.attributes.get("tool.name") == "some_function"
         assert span.attributes.get("tool.description") == "Test function."
         assert span.attributes.get("tool.parameters") == '{"some_arg": "some-value"}'
 

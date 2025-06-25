@@ -17,7 +17,7 @@ class TestLitellmInstrumentation(BaseLocalOtel):
     def test_basic(self) -> None:
         """Test that the Litellm instrumentation is traced."""
         from atla_insights import instrument_litellm
-        from atla_insights._constants import SUCCESS_MARK
+        from atla_insights.constants import SUCCESS_MARK
 
         with instrument_litellm():
             completion(
@@ -39,7 +39,7 @@ class TestLitellmInstrumentation(BaseLocalOtel):
     async def test_basic_async(self) -> None:
         """Test that the Litellm instrumentation is traced."""
         from atla_insights import instrument_litellm
-        from atla_insights._constants import SUCCESS_MARK
+        from atla_insights.constants import SUCCESS_MARK
 
         with instrument_litellm():
             await acompletion(

@@ -1,3 +1,5 @@
+"""Span processors."""
+
 import json
 from contextvars import ContextVar
 from typing import Optional
@@ -7,7 +9,7 @@ from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExport
 from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 
-from atla_insights._constants import (
+from atla_insights.constants import (
     LOGFIRE_OTEL_TRACES_ENDPOINT,
     METADATA_MARK,
     SUCCESS_MARK,
@@ -21,6 +23,7 @@ class AtlaRootSpanProcessor(SpanProcessor):
     """An Atla root span processor."""
 
     def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
+        """On start span processing."""
         if span.parent is not None:
             return
 
@@ -31,6 +34,7 @@ class AtlaRootSpanProcessor(SpanProcessor):
             span.set_attribute(METADATA_MARK, json.dumps(metadata))
 
     def on_end(self, span: ReadableSpan) -> None:
+        """On end span processing."""
         pass
 
 

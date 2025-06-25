@@ -11,7 +11,7 @@ from openinference.semconv.trace import (
 )
 from opentelemetry import trace as trace_api
 
-from atla_insights._main import ATLA_INSTANCE
+from atla_insights.main import ATLA_INSTANCE
 
 
 def _get_invocation_parameters(args: tuple[Any, ...], kwargs: dict[str, Any]) -> str:
