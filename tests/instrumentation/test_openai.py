@@ -10,7 +10,7 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
 
     def test_basic(self, mock_openai_client: OpenAI) -> None:
         """Test that the OpenAI instrumentation is traced."""
-        from src.atla_insights import instrument_openai
+        from atla_insights import instrument_openai
 
         with instrument_openai():
             mock_openai_client.chat.completions.create(
@@ -18,10 +18,10 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
                 messages=[{"role": "user", "content": "hello world"}],
             )
 
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 1
-        span = spans[0]
+        [span] = spans
 
         assert span.attributes is not None
         assert span.attributes.get("llm.input_messages.0.message.role") == "user"
@@ -35,7 +35,7 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
 
     def test_nested_instrumentation(self, mock_openai_client: OpenAI) -> None:
         """Test that the OpenAI instrumentation is traced."""
-        from src.atla_insights import instrument, instrument_openai
+        from atla_insights import instrument, instrument_openai
 
         @instrument("root_span")
         def test_function():
@@ -49,10 +49,10 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
 
         test_function()
 
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 2
-        generation_span, root_span = spans
+        root_span, generation_span = spans
 
         assert root_span.name == "root_span"
         assert root_span.attributes is not None
@@ -76,8 +76,8 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
 
     def test_nested_instrumentation_marked(self, mock_openai_client: OpenAI) -> None:
         """Test that the OpenAI instrumentation is traced."""
-        from src.atla_insights import instrument, instrument_openai, mark_success
-        from src.atla_insights._constants import SUCCESS_MARK
+        from atla_insights import instrument, instrument_openai, mark_success
+        from atla_insights._constants import SUCCESS_MARK
 
         @instrument("root_span")
         def test_function():
@@ -93,18 +93,18 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
 
         test_function()
 
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 2
-        _, root_span = spans
+        root_span, _ = spans
 
         assert root_span.attributes is not None
         assert root_span.attributes.get(SUCCESS_MARK) == 1
 
     def test_failing_instrumentation(self, mock_failing_openai_client: OpenAI) -> None:
         """Test that the OpenAI instrumentation is traced."""
-        from src.atla_insights import instrument_openai
-        from src.atla_insights._constants import SUCCESS_MARK
+        from atla_insights import instrument_openai
+        from atla_insights._constants import SUCCESS_MARK
 
         with instrument_openai():
             mock_failing_openai_client.chat.completions.create(
@@ -112,10 +112,10 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
                 messages=[{"role": "user", "content": "hello world"}],
             )
 
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 1
-        span = spans[0]
+        [span] = spans
 
         assert span.attributes is not None
 
@@ -134,8 +134,8 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
         self, mock_failing_openai_client: OpenAI
     ) -> None:
         """Test that the OpenAI instrumentation is traced."""
-        from src.atla_insights import instrument, instrument_openai, mark_success
-        from src.atla_insights._constants import SUCCESS_MARK
+        from atla_insights import instrument, instrument_openai, mark_success
+        from atla_insights._constants import SUCCESS_MARK
 
         @instrument("root_span")
         def test_function():
@@ -151,17 +151,17 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
 
         test_function()
 
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 2
-        _, root_span = spans
+        root_span, _ = spans
 
         assert root_span.attributes is not None
         assert root_span.attributes.get(SUCCESS_MARK) == 1
 
     def test_responses_api(self, mock_openai_client: OpenAI) -> None:
         """Test responses API."""
-        from src.atla_insights import instrument_openai
+        from atla_insights import instrument_openai
 
         with instrument_openai():
             mock_openai_client.responses.create(
@@ -169,7 +169,7 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
                 input="hello world",
             )
 
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 1
         [span] = spans

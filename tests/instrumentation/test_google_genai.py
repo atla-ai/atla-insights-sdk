@@ -14,7 +14,7 @@ class TestGoogleGenAIInstrumentation(BaseLocalOtel):
 
     def test_basic(self, mock_google_genai_client: Client) -> None:
         """Test basic Google GenAI instrumentation."""
-        from src.atla_insights import instrument_google_genai
+        from atla_insights import instrument_google_genai
 
         with instrument_google_genai():
             mock_google_genai_client.models.generate_content(
@@ -44,7 +44,7 @@ class TestGoogleGenAIInstrumentation(BaseLocalOtel):
     @pytest.mark.asyncio
     async def test_async(self, mock_google_genai_client: Client) -> None:
         """Test async Google GenAI instrumentation."""
-        from src.atla_insights import instrument_google_genai
+        from atla_insights import instrument_google_genai
 
         with instrument_google_genai():
             await mock_google_genai_client.aio.models.generate_content(
@@ -73,7 +73,7 @@ class TestGoogleGenAIInstrumentation(BaseLocalOtel):
 
     def test_tool_calls(self, mock_google_genai_client: Client) -> None:
         """Test Google GenAI instrumentation with tool calls."""
-        from src.atla_insights import instrument_google_genai
+        from atla_insights import instrument_google_genai
 
         with instrument_google_genai():
             some_tool_function = types.FunctionDeclaration(
@@ -223,7 +223,7 @@ class TestGoogleGenAIInstrumentationHelpers:
         expected: Iterable[Tuple[str, AttributeValue]],
     ) -> None:
         """Test the get_tool_calls_from_content_parts function."""
-        from src.atla_insights.instrumentation._google_genai import (
+        from atla_insights.llm_providers.instrumentors.google_genai import (
             _get_tool_calls_from_content_parts,
         )
 
@@ -418,7 +418,9 @@ class TestGoogleGenAIInstrumentationHelpers:
         expected: Iterator[Tuple[str, AttributeValue]],
     ) -> None:
         """Test the get_tools_from_request function."""
-        from src.atla_insights.instrumentation._google_genai import get_tools_from_request
+        from atla_insights.llm_providers.instrumentors.google_genai import (
+            get_tools_from_request,
+        )
 
         tools = get_tools_from_request(request_parameters)
         assert sorted(tools) == sorted(expected)

@@ -35,6 +35,8 @@ def _tools(wrapped: Any, instance: Any, args: Any, kwargs: Any) -> Any:
 class AtlaLangChainInstrumentor(LangChainInstrumentor):
     """Atla instrumentor for LangChain."""
 
+    name = "langchain"
+
     def _instrument(self, **kwargs: Any) -> None:
         # Wrap original _tools functionality that includes tool parameters information.
         wrap_function_wrapper(

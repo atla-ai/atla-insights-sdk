@@ -114,8 +114,10 @@ class AtlaLiteLLMIntrumentor(BaseInstrumentor):
     """Atla instrumentor for LitelLLM."""
 
     atla_otel_logger: Optional[AtlaLiteLLMOpenTelemetry] = None
+    name = "litellm"
 
     def instrumentation_dependencies(self) -> Collection[str]:
+        """Get the dependencies for the Litellm instrumentor."""
         return ("litellm >= 1.72.0",)
 
     def _instrument(self) -> None:
@@ -134,7 +136,7 @@ class AtlaLiteLLMIntrumentor(BaseInstrumentor):
             logger.warning("Attempting to uninstrument not instrumented litellm")
             return
 
-        # Wait existing Atla callbacks to trigger before removing them.
+        # Wait for existing Atla callbacks to trigger before removing them.
         time.sleep(0.001)
 
         if self.atla_otel_logger in litellm.callbacks:

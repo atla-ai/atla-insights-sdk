@@ -1,36 +1,19 @@
 """OpenTelemetry assets to be used in instrumentation tests."""
 
 import time
-from unittest.mock import patch
 
 import litellm
 from opentelemetry.sdk.trace import ReadableSpan
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+
+from tests.conftest import in_memory_span_exporter
 
 
 class BaseLocalOtel:
     """Base class for local OpenTelemetry tests."""
 
-    in_memory_span_exporter: InMemorySpanExporter
-
-    @classmethod
-    def setup_class(cls) -> None:
-        """Set up an in-memory span exporter to collect traces to a local object."""
-        from src.atla_insights import configure
-
-        cls.in_memory_span_exporter = InMemorySpanExporter()
-        span_processor = SimpleSpanProcessor(cls.in_memory_span_exporter)
-
-        with patch(
-            "src.atla_insights._main.get_atla_span_processor",
-            return_value=span_processor,
-        ):
-            configure(token="dummy", metadata={"environment": "unit-testing"})
-
     def teardown_method(self) -> None:
         """Wipe any leftover instrumentation after each test run."""
-        self.in_memory_span_exporter.clear()
+        in_memory_span_exporter.clear()
 
         litellm.callbacks = []
 
@@ -41,6 +24,6 @@ class BaseLocalOtel:
         """
         time.sleep(0.001)  # wait for spans to get collected
         return sorted(
-            self.in_memory_span_exporter.get_finished_spans(),
+            in_memory_span_exporter.get_finished_spans(),
             key=lambda x: x.start_time if x.start_time is not None else 0,
         )

@@ -18,7 +18,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
 
     def test_basic_with_openai(self, mock_openai_client: OpenAI) -> None:
         """Test the Agno instrumentation with OpenAI."""
-        from src.atla_insights import instrument_agno
+        from atla_insights import instrument_agno
 
         with instrument_agno("openai"):
             agent = Agent(
@@ -53,7 +53,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
 
     def test_basic_with_litellm(self, mock_openai_client: OpenAI) -> None:
         """Test the Agno instrumentation with LiteLLM."""
-        from src.atla_insights import instrument_agno
+        from atla_insights import instrument_agno
 
         agent = Agent(
             model=LiteLLM(
@@ -83,7 +83,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
 
     def test_basic_with_anthropic(self, mock_anthropic_client: Anthropic) -> None:
         """Test the Agno instrumentation with Anthropic."""
-        from src.atla_insights import instrument_agno
+        from atla_insights import instrument_agno
 
         agent = Agent(
             model=Claude(
@@ -118,7 +118,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
 
     def test_basic_with_google_genai(self, mock_google_genai_client: Client) -> None:
         """Test the Agno instrumentation with Google GenAI."""
-        from src.atla_insights import instrument_agno
+        from atla_insights import instrument_agno
 
         agent = Agent(
             model=Gemini(
@@ -155,7 +155,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
         self, mock_openai_client: OpenAI, mock_anthropic_client: Anthropic
     ) -> None:
         """Test the Agno instrumentation with LiteLLM."""
-        from src.atla_insights import instrument_agno
+        from atla_insights import instrument_agno
 
         anthropic_agent = Agent(
             model=Claude(
@@ -232,7 +232,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
 
     def test_tool_invocation(self) -> None:
         """Test the Agno instrumentation with tool invocation."""
-        from src.atla_insights import instrument_agno
+        from atla_insights import instrument_agno
 
         with instrument_agno("openai"):
             fn = Function(

@@ -11,7 +11,7 @@ class TestAnthropicInstrumentation(BaseLocalOtel):
 
     def test_basic(self, mock_anthropic_client: Anthropic) -> None:
         """Test basic Anthropic instrumentation."""
-        from src.atla_insights import instrument_anthropic
+        from atla_insights import instrument_anthropic
 
         with instrument_anthropic():
             mock_anthropic_client.messages.create(
@@ -42,7 +42,7 @@ class TestAnthropicInstrumentation(BaseLocalOtel):
 
     def test_ctx(self, mock_anthropic_client: Anthropic) -> None:
         """Test basic Anthropic instrumentation."""
-        from src.atla_insights import instrument_anthropic
+        from atla_insights import instrument_anthropic
 
         with instrument_anthropic():
             mock_anthropic_client.messages.create(
@@ -64,7 +64,7 @@ class TestAnthropicInstrumentation(BaseLocalOtel):
     @pytest.mark.asyncio
     async def test_async(self, mock_async_anthropic_client: AsyncAnthropic) -> None:
         """Test basic Anthropic instrumentation."""
-        from src.atla_insights import instrument_anthropic
+        from atla_insights import instrument_anthropic
 
         with instrument_anthropic():
             await mock_async_anthropic_client.messages.create(

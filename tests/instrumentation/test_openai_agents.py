@@ -26,7 +26,7 @@ class TestOpenaiAgentsInstrumentation(BaseLocalOtel):
     @pytest.mark.asyncio
     async def test_basic(self, mock_async_openai_client: AsyncOpenAI) -> None:
         """Test the OpenAI Agents integration."""
-        from src.atla_insights import instrument_openai_agents
+        from atla_insights import instrument_openai_agents
 
         set_default_openai_client(mock_async_openai_client, use_for_tracing=False)
 
@@ -68,7 +68,7 @@ class TestOpenaiAgentsInstrumentation(BaseLocalOtel):
     @pytest.mark.asyncio
     async def test_chat_completion(self, mock_async_openai_client: AsyncOpenAI) -> None:
         """Test the OpenAI Agents integration with chat completions."""
-        from src.atla_insights import instrument_openai_agents
+        from atla_insights import instrument_openai_agents
 
         with instrument_openai_agents():
             agent = Agent(
@@ -107,7 +107,7 @@ class TestOpenaiAgentsInstrumentation(BaseLocalOtel):
     @pytest.mark.asyncio
     async def test_tool_invocation(self, mock_async_openai_client: AsyncOpenAI) -> None:
         """Test the OpenAI Agents SDK instrumentation with tool invocation."""
-        from src.atla_insights import instrument_openai_agents
+        from atla_insights import instrument_openai_agents
 
         with instrument_openai_agents():
             with TraceCtxManager(

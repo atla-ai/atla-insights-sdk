@@ -14,23 +14,23 @@ class TestInstrumentation(BaseLocalOtel):
 
     def test_basic_instrumentation(self) -> None:
         """Test that the instrumented function is traced."""
-        from src.atla_insights import instrument
+        from atla_insights import instrument
 
         @instrument("some_func")
         def test_function():
             return "test result"
 
         test_function()
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 1
-        span = spans[0]
+        [span] = spans
 
         assert span.name == "some_func"
 
     def test_basic_instrumentation_fail(self) -> None:
         """Test that a failing instrumented function is traced."""
-        from src.atla_insights import instrument
+        from atla_insights import instrument
 
         @instrument("some_failing_func")
         def test_function():
@@ -41,10 +41,10 @@ class TestInstrumentation(BaseLocalOtel):
         except ValueError:
             pass
 
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 1
-        span = spans[0]
+        [span] = spans
 
         assert span.name == "some_failing_func"
 
@@ -54,18 +54,18 @@ class TestSpanProcessors(BaseLocalOtel):
 
     def test_metadata(self) -> None:
         """Test that run metadata is added to the root span correctly."""
-        from src.atla_insights import instrument
-        from src.atla_insights._constants import METADATA_MARK
+        from atla_insights import instrument
+        from atla_insights._constants import METADATA_MARK
 
         @instrument()
         def test_function():
             return "test result"
 
         test_function()
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 1
-        span = spans[0]
+        [span] = spans
 
         assert span.attributes is not None
         assert span.attributes.get(METADATA_MARK) is not None
@@ -75,8 +75,8 @@ class TestSpanProcessors(BaseLocalOtel):
 
     def test_get_set_metadata(self) -> None:
         """Test that the metadata is set and retrieved correctly."""
-        from src.atla_insights import get_metadata, instrument, set_metadata
-        from src.atla_insights._constants import METADATA_MARK
+        from atla_insights import get_metadata, instrument, set_metadata
+        from atla_insights._constants import METADATA_MARK
 
         @instrument()
         def test_function():
@@ -89,36 +89,36 @@ class TestSpanProcessors(BaseLocalOtel):
             return "test result"
 
         test_function()
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 1
-        span = spans[0]
+        [span] = spans
 
         assert span.attributes is not None
         assert span.attributes.get(METADATA_MARK) is not None
 
     def test_no_manual_marking(self) -> None:
         """Test that the instrumented function is traced."""
-        from src.atla_insights import instrument
-        from src.atla_insights._constants import SUCCESS_MARK
+        from atla_insights import instrument
+        from atla_insights._constants import SUCCESS_MARK
 
         @instrument()
         def test_function():
             return "test result"
 
         test_function()
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 1
-        span = spans[0]
+        [span] = spans
 
         assert span.attributes is not None
         assert span.attributes.get(SUCCESS_MARK) == -1
 
     def test_no_manual_marking_nested_1(self) -> None:
         """Test that the instrumented nested function is traced."""
-        from src.atla_insights import instrument
-        from src.atla_insights._constants import SUCCESS_MARK
+        from atla_insights import instrument
+        from atla_insights._constants import SUCCESS_MARK
 
         @instrument("root_span")
         def test_function():
@@ -130,10 +130,10 @@ class TestSpanProcessors(BaseLocalOtel):
             return "test result"
 
         test_function()
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 2
-        nested_span, root_span = spans
+        root_span, nested_span = spans
 
         assert root_span.name == "root_span"
         assert root_span.attributes is not None
@@ -144,8 +144,8 @@ class TestSpanProcessors(BaseLocalOtel):
 
     def test_no_manual_marking_nested_2(self) -> None:
         """Test that the instrumented nested function is traced."""
-        from src.atla_insights import instrument
-        from src.atla_insights._constants import SUCCESS_MARK
+        from atla_insights import instrument
+        from atla_insights._constants import SUCCESS_MARK
 
         @instrument("nested_span")
         def nested_function():
@@ -157,10 +157,10 @@ class TestSpanProcessors(BaseLocalOtel):
             return "test result"
 
         test_function()
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 2
-        nested_span, root_span = spans
+        root_span, nested_span = spans
 
         assert root_span.name == "root_span"
         assert root_span.attributes is not None
@@ -171,8 +171,8 @@ class TestSpanProcessors(BaseLocalOtel):
 
     def test_manual_marking(self) -> None:
         """Test that the instrumented function with a manual mark is traced."""
-        from src.atla_insights import instrument, mark_success
-        from src.atla_insights._constants import SUCCESS_MARK
+        from atla_insights import instrument, mark_success
+        from atla_insights._constants import SUCCESS_MARK
 
         @instrument()
         def test_function():
@@ -181,18 +181,18 @@ class TestSpanProcessors(BaseLocalOtel):
 
         test_function()
 
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 1
-        span = spans[0]
+        [span] = spans
 
         assert span.attributes is not None
         assert span.attributes.get(SUCCESS_MARK) == 1
 
     def test_manual_marking_nested(self) -> None:
         """Test that the nested instrumented function with a manual mark is traced."""
-        from src.atla_insights import instrument, mark_success
-        from src.atla_insights._constants import SUCCESS_MARK
+        from atla_insights import instrument, mark_success
+        from atla_insights._constants import SUCCESS_MARK
 
         @instrument("root_span")
         def test_function():
@@ -206,10 +206,10 @@ class TestSpanProcessors(BaseLocalOtel):
 
         test_function()
 
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 2
-        nested_span, root_span = spans
+        root_span, nested_span = spans
 
         assert root_span.name == "root_span"
         assert root_span.attributes is not None
@@ -220,8 +220,8 @@ class TestSpanProcessors(BaseLocalOtel):
 
     def test_multi_trace(self) -> None:
         """Test that multiple traces are traced."""
-        from src.atla_insights import instrument
-        from src.atla_insights._constants import SUCCESS_MARK
+        from atla_insights import instrument
+        from atla_insights._constants import SUCCESS_MARK
 
         @instrument()
         def test_function_1():
@@ -234,7 +234,7 @@ class TestSpanProcessors(BaseLocalOtel):
         test_function_1()
         test_function_2()
 
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 2
         span_1, span_2 = spans
@@ -246,8 +246,8 @@ class TestSpanProcessors(BaseLocalOtel):
 
     def test_multi_trace_manual_mark(self) -> None:
         """Test that multiple traces with a manual mark are traced."""
-        from src.atla_insights import instrument, mark_success
-        from src.atla_insights._constants import SUCCESS_MARK
+        from atla_insights import instrument, mark_success
+        from atla_insights._constants import SUCCESS_MARK
 
         @instrument()
         def test_function_1():
@@ -262,7 +262,7 @@ class TestSpanProcessors(BaseLocalOtel):
 
         test_function_2()
 
-        spans = self.in_memory_span_exporter.get_finished_spans()
+        spans = self.get_finished_spans()
 
         assert len(spans) == 2
         span_1, span_2 = spans
@@ -274,7 +274,7 @@ class TestSpanProcessors(BaseLocalOtel):
 
     def test_metadata_fastapi_context_simulation(self) -> None:
         """Test metadata functionality in a server context."""
-        from src.atla_insights import get_metadata, instrument, set_metadata
+        from atla_insights import get_metadata, instrument, set_metadata
 
         @instrument("mock_api_request")
         def simulate_fastapi_request(user_id: str, session_id: str) -> bool:
@@ -307,7 +307,7 @@ class TestSpanProcessors(BaseLocalOtel):
     @pytest.mark.asyncio
     async def test_metadata_fastapi_context_simulation_async(self) -> None:
         """Test metadata functionality in async server context."""
-        from src.atla_insights import get_metadata, instrument, set_metadata
+        from atla_insights import get_metadata, instrument, set_metadata
 
         @instrument("mock_async_api_request")
         async def simulate_async_fastapi_request(user_id: str, session_id: str) -> bool:

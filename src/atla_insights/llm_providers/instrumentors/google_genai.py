@@ -227,6 +227,8 @@ def get_tools_from_request(  # noqa: C901
 class AtlaGoogleGenAIInstrumentor(GoogleGenAIInstrumentor):
     """Atla Google GenAI instrumentor class."""
 
+    name = "google-genai"
+
     def _instrument(self, **kwargs) -> None:
         original_get_extra_attributes_from_request = (
             _RequestAttributesExtractor.get_extra_attributes_from_request

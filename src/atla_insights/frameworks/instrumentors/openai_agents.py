@@ -31,6 +31,8 @@ def _get_attributes_from_function_span_data(
 class AtlaOpenAIAgentsInstrumentor(OpenAIAgentsInstrumentor):
     """Atla OpenAI Agents SDK instrumentor class."""
 
+    name = "openai-agents"
+
     def _instrument(self, **kwargs: Any) -> None:
         wrap_function_wrapper(
             "openinference.instrumentation.openai_agents._processor",

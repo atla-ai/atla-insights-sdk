@@ -16,7 +16,7 @@ class TestLangChainInstrumentation(BaseLocalOtel):
 
     def test_basic_langchain(self, mock_openai_client: OpenAI) -> None:
         """Test basic Langchain instrumentation."""
-        from src.atla_insights import instrument_langchain
+        from atla_insights import instrument_langchain
 
         with instrument_langchain():
             chat = ChatOpenAI(  # type: ignore[call-arg]
@@ -49,7 +49,7 @@ class TestLangChainInstrumentation(BaseLocalOtel):
 
     def test_basic_langgraph(self, mock_openai_client: OpenAI) -> None:
         """Test basic Langgraph instrumentation."""
-        from src.atla_insights import instrument_langchain
+        from atla_insights import instrument_langchain
 
         with instrument_langchain():
             chat = ChatOpenAI(  # type: ignore[call-arg]
@@ -100,7 +100,7 @@ class TestLangChainInstrumentation(BaseLocalOtel):
 
     def test_tool_invocation(self) -> None:
         """Test the LangChain instrumentation with tool invocation."""
-        from src.atla_insights import instrument_langchain
+        from atla_insights import instrument_langchain
 
         with instrument_langchain():
 

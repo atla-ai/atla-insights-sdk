@@ -8,7 +8,7 @@ class TestTool(BaseLocalOtel):
 
     def test_tool(self) -> None:
         """Test the tool decorator."""
-        from src.atla_insights import tool
+        from atla_insights import tool
 
         @tool
         def test_function(some_arg: str) -> str:

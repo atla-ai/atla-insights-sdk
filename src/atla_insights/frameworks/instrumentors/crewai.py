@@ -118,7 +118,13 @@ class _ToolUseWrapper:
 class AtlaCrewAIInstrumentor(CrewAIInstrumentor):
     """Atla CrewAI instrumentator class."""
 
+    name = "crewai"
+
     def __init__(self, tracer: Tracer) -> None:
+        """Initialize the Atla CrewAI instrumentator.
+
+        :param tracer (Tracer): The OpenTelemetry tracer to use for tracing.
+        """
         super().__init__()
         self.tracer = tracer
 

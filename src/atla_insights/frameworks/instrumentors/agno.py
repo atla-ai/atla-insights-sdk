@@ -14,6 +14,8 @@ except ImportError as e:
 class AtlaAgnoInstrumentor(AgnoInstrumentor):
     """Atla Agno instrumentor class."""
 
+    name = "agno"
+
     def _uninstrument(self, **kwargs: Any) -> None:
         # Custom uninstrumentation to ensure Agno framework remains fully functional
         # afterwards.

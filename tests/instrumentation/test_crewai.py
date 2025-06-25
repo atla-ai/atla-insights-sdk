@@ -13,7 +13,7 @@ class TestCrewAIInstrumentation(BaseLocalOtel):
 
     def test_basic(self, mock_openai_client: OpenAI) -> None:
         """Test basic CrewAI instrumentation."""
-        from src.atla_insights import instrument_crewai
+        from atla_insights import instrument_crewai
 
         with instrument_crewai():
             test_agent = Agent(
@@ -51,7 +51,7 @@ class TestCrewAIInstrumentation(BaseLocalOtel):
     @pytest.mark.asyncio
     async def test_async(self, mock_openai_client: OpenAI) -> None:
         """Test basic async CrewAI instrumentation."""
-        from src.atla_insights import instrument_crewai
+        from atla_insights import instrument_crewai
 
         with instrument_crewai():
             test_agent = Agent(
@@ -88,7 +88,7 @@ class TestCrewAIInstrumentation(BaseLocalOtel):
 
     def test_ctx(self, mock_openai_client: OpenAI) -> None:
         """Test that the CrewAI instrumentation is traced."""
-        from src.atla_insights import instrument_crewai
+        from atla_insights import instrument_crewai
 
         with instrument_crewai():
             test_agent = Agent(
@@ -120,7 +120,7 @@ class TestCrewAIInstrumentation(BaseLocalOtel):
 
     def test_tool_invocation(self) -> None:
         """Test the CrewAI instrumentation with tool invocation."""
-        from src.atla_insights import instrument_crewai
+        from atla_insights import instrument_crewai
 
         with instrument_crewai():
 

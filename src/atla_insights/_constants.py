@@ -1,6 +1,6 @@
 """Constants for the atla_insights package."""
 
-from typing import Literal
+from typing import Literal, Sequence, Union
 
 DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT = 4096
 
@@ -14,3 +14,4 @@ SUCCESS_MARK = "atla.mark.success"
 LOGFIRE_OTEL_TRACES_ENDPOINT = "https://logfire-eu.pydantic.dev/v1/traces"
 
 SUPPORTED_LLM_PROVIDER = Literal["anthropic", "google-genai", "litellm", "openai"]
+LLM_PROVIDER_TYPE = Union[Sequence[SUPPORTED_LLM_PROVIDER], SUPPORTED_LLM_PROVIDER]

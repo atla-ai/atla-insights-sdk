@@ -16,8 +16,8 @@ class TestLitellmInstrumentation(BaseLocalOtel):
 
     def test_basic(self) -> None:
         """Test that the Litellm instrumentation is traced."""
-        from src.atla_insights import instrument_litellm
-        from src.atla_insights._constants import SUCCESS_MARK
+        from atla_insights import instrument_litellm
+        from atla_insights._constants import SUCCESS_MARK
 
         with instrument_litellm():
             completion(
@@ -38,8 +38,8 @@ class TestLitellmInstrumentation(BaseLocalOtel):
     @pytest.mark.asyncio
     async def test_basic_async(self) -> None:
         """Test that the Litellm instrumentation is traced."""
-        from src.atla_insights import instrument_litellm
-        from src.atla_insights._constants import SUCCESS_MARK
+        from atla_insights import instrument_litellm
+        from atla_insights._constants import SUCCESS_MARK
 
         with instrument_litellm():
             await acompletion(
@@ -76,7 +76,7 @@ class TestLitellmInstrumentation(BaseLocalOtel):
         mock_openai_client: OpenAI,
     ) -> None:
         """Test the Litellm integration."""
-        from src.atla_insights import instrument_litellm
+        from atla_insights import instrument_litellm
 
         with instrument_litellm():
             completion(
@@ -119,7 +119,7 @@ class TestLitellmInstrumentation(BaseLocalOtel):
         mock_openai_client: OpenAI,
     ) -> None:
         """Test the Litellm integration."""
-        from src.atla_insights import instrument_litellm
+        from atla_insights import instrument_litellm
 
         with instrument_litellm():
             await acompletion(
@@ -146,7 +146,7 @@ class TestLitellmInstrumentation(BaseLocalOtel):
 
     def test_ctx(self) -> None:
         """Test that the Litellm instrumentation is traced."""
-        from src.atla_insights import instrument_litellm
+        from atla_insights import instrument_litellm
 
         with instrument_litellm():
             completion(

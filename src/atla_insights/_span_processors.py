@@ -7,7 +7,11 @@ from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExport
 from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 
-from ._constants import LOGFIRE_OTEL_TRACES_ENDPOINT, METADATA_MARK, SUCCESS_MARK
+from atla_insights._constants import (
+    LOGFIRE_OTEL_TRACES_ENDPOINT,
+    METADATA_MARK,
+    SUCCESS_MARK,
+)
 
 _metadata: ContextVar[Optional[dict[str, str]]] = ContextVar("_metadata", default=None)
 _root_span: ContextVar[Optional[Span]] = ContextVar("_root_span", default=None)

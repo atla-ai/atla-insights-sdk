@@ -11,7 +11,7 @@ from openinference.semconv.trace import (
 )
 from opentelemetry import trace as trace_api
 
-from ._main import _ATLA
+from atla_insights._main import ATLA_INSTANCE
 
 
 def _get_invocation_parameters(args: tuple[Any, ...], kwargs: dict[str, Any]) -> str:
@@ -35,10 +35,14 @@ def tool(func: Callable[..., Any]) -> Callable[..., Any]:
     Returns:
         Callable[..., Any]: The wrapped function.
     """
+    tracer = ATLA_INSTANCE.tracer
+
+    if tracer is None:
+        raise ValueError("Atla insights must be configured before instrumenting tools.")
 
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
-        with _ATLA.tracer.start_as_current_span(
+        with tracer.start_as_current_span(
             func.__name__,
             attributes={
                 SpanAttributes.OPENINFERENCE_SPAN_KIND: OpenInferenceSpanKindValues.TOOL.value,  # noqa: E501

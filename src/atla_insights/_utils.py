@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from ._constants import (
+from atla_insights._constants import (
     MAX_METADATA_FIELDS,
     MAX_METADATA_KEY_CHARS,
     MAX_METADATA_VALUE_CHARS,

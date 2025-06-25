@@ -106,6 +106,8 @@ class _ToolCallWrapper:
 class AtlaSmolAgentsInstrumentor(SmolagentsInstrumentor):
     """Atla SmolAgents SDK instrumentor class."""
 
+    name = "smolagents"
+
     def _instrument(self, **kwargs: Any) -> None:
         super()._instrument(**kwargs)
 

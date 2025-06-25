@@ -11,7 +11,7 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
 
     def test_basic_with_openai(self, mock_openai_client: OpenAI) -> None:
         """Test the SmolAgents instrumentation with OpenAI."""
-        from src.atla_insights import instrument_smolagents
+        from atla_insights import instrument_smolagents
 
         agent = CodeAgent(
             model=OpenAIServerModel(
@@ -84,7 +84,7 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
 
     def test_basic_with_litellm(self, mock_openai_client: OpenAI) -> None:
         """Test the SmolAgents instrumentation with LiteLLM."""
-        from src.atla_insights import instrument_smolagents
+        from atla_insights import instrument_smolagents
 
         agent = CodeAgent(
             model=LiteLLMModel(
@@ -123,7 +123,7 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
 
     def test_tool_invocation(self) -> None:
         """Test the SmolAgents instrumentation with tool invocation."""
-        from src.atla_insights import instrument_smolagents
+        from atla_insights import instrument_smolagents
 
         with instrument_smolagents("openai"):
 
