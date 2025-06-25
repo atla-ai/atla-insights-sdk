@@ -1,7 +1,7 @@
 """Utility functions for framework instrumentation."""
 
-from opentelemetry.instrumentation.instrumentor import (
-    BaseInstrumentor,  # type: ignore[attr-defined]
+from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
+    BaseInstrumentor,
 )
 
 from atla_insights._constants import LLM_PROVIDER_TYPE
