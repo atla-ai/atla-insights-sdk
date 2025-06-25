@@ -1,0 +1,64 @@
+"""Tool instrumentation."""
+
+from functools import wraps
+from typing import Any, Callable
+
+from openinference.instrumentation import safe_json_dumps
+from openinference.semconv.trace import (
+    OpenInferenceMimeTypeValues,
+    OpenInferenceSpanKindValues,
+    SpanAttributes,
+)
+
+from ._main import _ATLA
+
+
+def _get_invocation_parameters(args: tuple[Any, ...], kwargs: dict[str, Any]) -> str:
+    """Get the invocation parameters from the arguments and keyword arguments."""
+    invocation_parameters: dict = {**kwargs, **dict(enumerate(args))}
+    invocation_parameters = {
+        k: v for k, v in invocation_parameters.items() if k not in {"self", "cls"}
+    }
+    return safe_json_dumps(invocation_parameters)
+
+
+def tool(func: Callable[..., Any]) -> Callable[..., Any]:
+    """Instrument a function-based LLM tool.
+
+    This decorator instruments a function-based LLM tool to automatically
+    capture the tool invocation parameters and output value.
+
+    Args:
+        func (Callable[..., Any]): The function to instrument.
+
+    Returns:
+        Callable[..., Any]: The wrapped function.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs) -> Any:
+        with _ATLA.tracer.start_as_current_span(
+            name=func.__name__,
+            attributes={
+                SpanAttributes.OPENINFERENCE_SPAN_KIND: OpenInferenceSpanKindValues.TOOL.value,  # noqa: E501
+                SpanAttributes.TOOL_NAME: func.__name__,
+                SpanAttributes.INPUT_MIME_TYPE: OpenInferenceMimeTypeValues.JSON.value,
+                SpanAttributes.OUTPUT_MIME_TYPE: OpenInferenceMimeTypeValues.TEXT.value,
+            },
+            record_exception=True,
+            set_status_on_exception=False,
+        ) as span:
+            if func.__doc__:
+                span.set_attribute(SpanAttributes.TOOL_DESCRIPTION, func.__doc__)
+
+            invocation_parameters = _get_invocation_parameters(args, kwargs)
+            span.set_attribute(SpanAttributes.TOOL_PARAMETERS, invocation_parameters)
+            span.set_attribute(SpanAttributes.INPUT_VALUE, invocation_parameters)
+
+            result = func(*args, **kwargs)
+
+            span.set_attribute(SpanAttributes.OUTPUT_VALUE, str(result))
+
+        return result
+
+    return wrapper

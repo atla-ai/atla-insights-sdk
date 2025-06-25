@@ -83,13 +83,14 @@ class AtlaInsights:
             *additional_span_processors,
         ]
 
-        self.logfire_instance = logfire.configure(
+        logfire_instance = logfire.configure(
             additional_span_processors=span_processors,
             console=None if verbose else False,
             environment=os.getenv("_ATLA_ENV", "prod"),
             send_to_logfire=False,
             scrubbing=False,
         )
+        self.tracer = logfire_instance._get_tracer(is_span_tracer=True)
         self.configured = True
 
         logger.info("Atla insights configured correctly ✅")
@@ -194,7 +195,7 @@ class AtlaInsights:
 
     def instrument_google_genai(self) -> ContextManager[None]:
         """Instrument Google GenAI."""
-        from ._google_genai import AtlaGoogleGenAIInstrumentor
+        from .instrumentation._google_genai import AtlaGoogleGenAIInstrumentor
 
         return self._instrument_provider(
             provider="google-genai",
@@ -226,7 +227,7 @@ class AtlaInsights:
 
     def instrument_langchain(self) -> ContextManager[None]:
         """Instrument the Langchain framework."""
-        from ._langchain import AtlaLangChainInstrumentor
+        from .instrumentation._langchain import AtlaLangChainInstrumentor
 
         return self._instrument_provider(
             provider="langchain",
@@ -239,7 +240,7 @@ class AtlaInsights:
 
     def instrument_litellm(self) -> ContextManager[None]:
         """Instrument litellm."""
-        from ._litellm import AtlaLiteLLMIntrumentor
+        from .instrumentation._litellm import AtlaLiteLLMIntrumentor
 
         return self._instrument_provider(
             provider="litellm",
@@ -267,11 +268,11 @@ class AtlaInsights:
 
                     instrumentors.append(AnthropicInstrumentor())
                 case "google-genai":
-                    from ._google_genai import AtlaGoogleGenAIInstrumentor
+                    from .instrumentation._google_genai import AtlaGoogleGenAIInstrumentor
 
                     instrumentors.append(AtlaGoogleGenAIInstrumentor())
                 case "litellm":
-                    from ._litellm import AtlaLiteLLMIntrumentor
+                    from .instrumentation._litellm import AtlaLiteLLMIntrumentor
 
                     instrumentors.append(AtlaLiteLLMIntrumentor())
                 case "openai":
@@ -291,7 +292,7 @@ class AtlaInsights:
         :param llm_provider (Union[Sequence[SUPPORTED_LLM_PROVIDER],
             SUPPORTED_LLM_PROVIDER]): The LLM provider(s) to instrument.
         """
-        from ._agno import AtlaAgnoInstrumentor
+        from .instrumentation._agno import AtlaAgnoInstrumentor
 
         return self._instrument_provider(
             provider="agno",
@@ -307,15 +308,14 @@ class AtlaInsights:
 
     def instrument_crewai(self) -> ContextManager[None]:
         """Instrument CrewAI."""
-        from ._crewai import AtlaCrewAIInstrumentor
-        from ._litellm import AtlaLiteLLMIntrumentor
+        from .instrumentation._crewai import AtlaCrewAIInstrumentor
+        from .instrumentation._litellm import AtlaLiteLLMIntrumentor
 
-        tracer = self.logfire_instance._get_tracer(is_span_tracer=True)
         return self._instrument_provider(
             provider="crewai",
             instrumentors=[
                 AtlaLiteLLMIntrumentor(),
-                AtlaCrewAIInstrumentor(tracer=tracer),
+                AtlaCrewAIInstrumentor(tracer=self.tracer),
             ],
         )
 
@@ -335,7 +335,7 @@ class AtlaInsights:
             SUPPORTED_LLM_PROVIDER]): The LLM provider(s) to instrument.
             Defaults to "openai".
         """
-        from ._openai_agents import AtlaOpenAIAgentsInstrumentor
+        from .instrumentation._openai_agents import AtlaOpenAIAgentsInstrumentor
 
         return self._instrument_provider(
             provider="openai-agents",
@@ -377,7 +377,7 @@ class AtlaInsights:
         :param llm_provider (Union[Sequence[SUPPORTED_LLM_PROVIDER],
             SUPPORTED_LLM_PROVIDER]): The LLM provider(s) to instrument.
         """
-        from ._smolagents import AtlaSmolAgentsInstrumentor
+        from .instrumentation._smolagents import AtlaSmolAgentsInstrumentor
 
         return self._instrument_provider(
             provider="smolagents",
