@@ -23,7 +23,7 @@ with open(Path(__file__).parent / "test_data" / "mock_responses.json", "r") as f
 
 @pytest.fixture(scope="session", autouse=True)
 def mock_configure() -> None:
-    """Create an in-memory span exporter."""
+    """Mock Atla configuration to send traces to a local object instead."""
     from atla_insights import configure
 
     span_processor = SimpleSpanProcessor(in_memory_span_exporter)

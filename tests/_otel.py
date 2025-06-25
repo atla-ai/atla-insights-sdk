@@ -14,7 +14,6 @@ class BaseLocalOtel:
     def teardown_method(self) -> None:
         """Wipe any leftover instrumentation after each test run."""
         in_memory_span_exporter.clear()
-
         litellm.callbacks = []
 
     def get_finished_spans(self) -> list[ReadableSpan]:
