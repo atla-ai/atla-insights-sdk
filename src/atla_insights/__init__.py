@@ -29,6 +29,7 @@ from ._main import (
     uninstrument_openai_agents,
     uninstrument_smolagents,
 )
+from ._tool import tool
 
 __all__ = [
     "configure",
@@ -47,6 +48,7 @@ __all__ = [
     "mark_failure",
     "mark_success",
     "set_metadata",
+    "tool",
     "uninstrument_agno",
     "uninstrument_anthropic",
     "uninstrument_crewai",

@@ -223,7 +223,9 @@ class TestGoogleGenAIInstrumentationHelpers:
         expected: Iterable[Tuple[str, AttributeValue]],
     ) -> None:
         """Test the get_tool_calls_from_content_parts function."""
-        from src.atla_insights._google_genai import _get_tool_calls_from_content_parts
+        from src.atla_insights.instrumentation._google_genai import (
+            _get_tool_calls_from_content_parts,
+        )
 
         tool_calls = _get_tool_calls_from_content_parts(content_parts)
         assert sorted(tool_calls) == sorted(expected)
@@ -416,7 +418,7 @@ class TestGoogleGenAIInstrumentationHelpers:
         expected: Iterator[Tuple[str, AttributeValue]],
     ) -> None:
         """Test the get_tools_from_request function."""
-        from src.atla_insights._google_genai import get_tools_from_request
+        from src.atla_insights.instrumentation._google_genai import get_tools_from_request
 
         tools = get_tools_from_request(request_parameters)
         assert sorted(tools) == sorted(expected)

@@ -2,6 +2,7 @@
 
 import pytest
 from crewai import LLM, Agent, Crew, Task
+from crewai.tools.tool_usage import CrewStructuredTool, ToolCalling, ToolUsage
 from openai import OpenAI
 
 from tests._otel import BaseLocalOtel
@@ -116,3 +117,43 @@ class TestCrewAIInstrumentation(BaseLocalOtel):
         assert kickoff.name == "Crew.kickoff"
         assert execute.name == "Task._execute_core"
         assert request.name == "litellm_request"
+
+    def test_tool_invocation(self) -> None:
+        """Test the CrewAI instrumentation with tool invocation."""
+        from src.atla_insights import instrument_crewai
+
+        with instrument_crewai():
+
+            def test_function(some_arg: str) -> str:
+                """Test function."""
+                return "some-result"
+
+            tool = CrewStructuredTool.from_function(func=test_function)
+            tool_usage = ToolUsage(
+                tools_handler=None,
+                tools=[tool],
+                task=None,
+                function_calling_llm=None,
+            )
+            tool_calling = ToolCalling(
+                tool_name="test_function",
+                arguments={"some_arg": "some-value"},
+            )
+            tool_usage._use("test_function", tool, tool_calling)
+
+        finished_spans = self.get_finished_spans()
+        assert len(finished_spans) == 1
+
+        [span] = finished_spans
+
+        assert span.name == "test_function"
+
+        assert span.attributes is not None
+        assert span.attributes.get("openinference.span.kind") == "TOOL"
+
+        assert span.attributes.get("tool.name") == "test_function"
+        assert span.attributes.get("tool.description") == "Test function."
+        assert span.attributes.get("tool.parameters") == '{"some_arg": "some-value"}'
+
+        assert span.attributes.get("input.value") is not None
+        assert span.attributes.get("output.value") == "some-result"

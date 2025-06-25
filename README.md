@@ -143,6 +143,22 @@ configure(
 )
 ```
 
+### Tool invocations
+
+If you want to ensure your function-based tool calls are logged correctly, you can wrap
+them using the `@tool` decorator as follows:
+
+```python
+from atla_insights import tool
+
+@tool
+def my_tool(my_arg: str) -> str:
+    return "some-output"
+```
+
+⚠️ Note that if you are using an instrumented framework, you do **not** need to manually
+decorate your tools in this way.
+
 
 ### Marking trace success / failure
 
