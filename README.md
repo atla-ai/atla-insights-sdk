@@ -81,20 +81,16 @@ with instrument_my_framework():
 
 ### Instrumentation Support
 
-We currently support the following frameworks / providers:
+#### Providers
+
+We currently support the following LLM providers:
 
 | Framework / Provider          | Instrumentation Function   | Notes |
 |-------------------------------|----------------------------|-------|
-| **Agno**                      | `instrument_agno`          | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models |
 | **Anthropic**                 | `instrument_anthropic`     | |
-| **CrewAI**                    | `instrument_crewai`        | |
-| **Google GenAI**              | `instrument_google_genai`  | |
-| **LangChain**                 | `instrument_langchain`     | This includes e.g. LangGraph as well |
+| **Google GenAI**              | `instrument_google_genai`  | E.g. Gemini |
 | **LiteLLM**                   | `instrument_litellm`       | Supports all available models in the LiteLLM framework |
-| **MCP**                       | `instrument_mcp`           | Only includes context propagation. You will need to instrument the model calling MCP function separately. |
 | **OpenAI**                    | `instrument_openai`        | |
-| **OpenAI Agents**             | `instrument_openai_agents` | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models |
-| **Smolagents**                | `instrument_smolagents`    | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models |
 
 ⚠️ Note that, by default, instrumented LLM calls will be treated independently from one
 another. In order to logically group LLM calls into a trace, you will need to group them
@@ -119,6 +115,33 @@ def run_my_agent() -> None:
     ...
 ```
 
+#### Frameworks
+
+We currently support the following frameworks:
+
+| Framework / Provider          | Instrumentation Function   | Notes |
+|-------------------------------|----------------------------|-------|
+| **Agno**                      | `instrument_agno`          | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
+| **CrewAI**                    | `instrument_crewai`        | |
+| **LangChain**                 | `instrument_langchain`     | This includes e.g. LangGraph as well |
+| **MCP**                       | `instrument_mcp`           | Only includes context propagation. You will need to instrument the model calling the MCP server separately. |
+| **OpenAI Agents**             | `instrument_openai_agents` | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
+| **Smolagents**                | `instrument_smolagents`    | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
+
+⚠️ *Note that some frameworks do not provide their own LLM interface. In these cases, you will
+need to instrument both the framework _and_ the underlying LLM provider(s) as follows:
+
+```python
+from atla_insights import configure, instrument, instrument_agno
+
+configure(...)
+
+# If you are using a single LLM provider (e.g. via `OpenAIChat`).
+instrument_agno("openai")
+
+# If you are using multiple LLM providers (e.g. `OpenAIChat` and `Claude`).
+instrument_agno(["anthropic", "openai"])
+```
 
 ### Adding metadata
 
