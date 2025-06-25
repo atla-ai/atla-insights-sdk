@@ -18,8 +18,10 @@ except ImportError as e:
 
 def _tools(wrapped: Any, instance: Any, args: Any, kwargs: Any) -> Any:
     """Wrap the tools function to include tool parameters information."""
+    # Yield from the original tools instrumentation funtcion.
     yield from wrapped(*args, **kwargs)
 
+    # Get the tool parameters from the run.inputs.input field.
     run = args[0]
     if parameters := run.inputs.get("input"):
         try:

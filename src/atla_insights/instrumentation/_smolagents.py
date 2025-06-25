@@ -43,11 +43,11 @@ def _tool_parameters(
     arguments = _bind_arguments(wrapped, *args, **kwargs)
     arguments = _strip_method_args(arguments)
 
-    tool_parameters = {**arguments.get("kwargs", {})}
-    if tool_args := arguments.get("args"):
-        for tool_arg_idx, tool_arg in enumerate(tool_args):
-            tool_parameters[tool_arg_idx] = tool_arg
-
+    # Positional arguments are converted to indexed keyword arguments (convention).
+    tool_parameters = {
+        **arguments.get("kwargs", {}),
+        **dict(enumerate(arguments.get("args", []))),
+    }
     yield SpanAttributes.TOOL_PARAMETERS, safe_json_dumps(tool_parameters)
 
 
@@ -79,8 +79,18 @@ class _ToolCallWrapper:
                 **dict(_tool_parameters(wrapped, *args, **kwargs)),
                 **dict(get_attributes_from_context()),
             },
+            record_exception=False,
+            set_status_on_exception=False,
         ) as span:
-            response = wrapped(*args, **kwargs)
+            try:
+                response = wrapped(*args, **kwargs)
+            except Exception as exception:
+                span.set_status(
+                    trace_api.Status(trace_api.StatusCode.ERROR, str(exception))
+                )
+                span.record_exception(exception)
+                raise
+
             span.set_status(trace_api.StatusCode.OK)
             span.set_attributes(
                 dict(

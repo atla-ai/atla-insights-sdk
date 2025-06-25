@@ -39,6 +39,7 @@ def _set_callbacks(
     args: tuple[Any, ...],
     kwargs: Mapping[str, Any],
 ) -> None:
+    """Ensures Atla Insights litellm callbacks are never unintentionally overwritten."""
     if callbacks := kwargs.get("callbacks"):
         for callback in callbacks:
             if callback not in litellm.callbacks:
@@ -46,6 +47,8 @@ def _set_callbacks(
 
 
 class _ToolUseWrapper:
+    """Ensures Atla Insights tool invocation spans are correctly instrumented."""
+
     def __init__(self, tracer: trace_api.Tracer) -> None:
         self._tracer = tracer
 
@@ -58,6 +61,7 @@ class _ToolUseWrapper:
     ) -> Any:
         if context_api.get_value(context_api._SUPPRESS_INSTRUMENTATION_KEY):
             return wrapped(*args, **kwargs)
+
         if kwargs.get("tool") or len(args) > 1:
             tool = kwargs.get("tool") or args[1]
             span_name = tool.name
@@ -65,6 +69,7 @@ class _ToolUseWrapper:
             span_name = f"{instance.__class__.__name__}.{wrapped.__name__}"
         else:
             span_name = wrapped.__name__
+
         with self._tracer.start_as_current_span(
             span_name,
             attributes=dict(

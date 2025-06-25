@@ -19,16 +19,13 @@ def _get_attributes_from_function_span_data(
     wrapped: Any, instance: Any, args: Any, kwargs: Any
 ) -> Any:
     """Wrap the _get_attributes_from_function_span_data function to add tool params."""
+    # Yield from the original instrumentation function.
     yield from wrapped(*args, **kwargs)
 
+    # Get the tool parameters from the obj.input field.
     obj = args[0]
     if obj.input:
         yield SpanAttributes.TOOL_PARAMETERS, obj.input
-    else:
-        yield SpanAttributes.TOOL_PARAMETERS, "{}"
-
-    if obj.output is None:
-        yield SpanAttributes.OUTPUT_VALUE, "{}"
 
 
 class AtlaOpenAIAgentsInstrumentor(OpenAIAgentsInstrumentor):

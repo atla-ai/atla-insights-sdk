@@ -3,6 +3,7 @@
 from functools import wraps
 from typing import Any, Callable
 
+import opentelemetry.trace as trace_api
 from openinference.instrumentation import safe_json_dumps
 from openinference.semconv.trace import (
     OpenInferenceMimeTypeValues,
@@ -38,14 +39,14 @@ def tool(func: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
         with _ATLA.tracer.start_as_current_span(
-            name=func.__name__,
+            func.__name__,
             attributes={
                 SpanAttributes.OPENINFERENCE_SPAN_KIND: OpenInferenceSpanKindValues.TOOL.value,  # noqa: E501
                 SpanAttributes.TOOL_NAME: func.__name__,
                 SpanAttributes.INPUT_MIME_TYPE: OpenInferenceMimeTypeValues.JSON.value,
                 SpanAttributes.OUTPUT_MIME_TYPE: OpenInferenceMimeTypeValues.TEXT.value,
             },
-            record_exception=True,
+            record_exception=False,
             set_status_on_exception=False,
         ) as span:
             if func.__doc__:
@@ -55,9 +56,19 @@ def tool(func: Callable[..., Any]) -> Callable[..., Any]:
             span.set_attribute(SpanAttributes.TOOL_PARAMETERS, invocation_parameters)
             span.set_attribute(SpanAttributes.INPUT_VALUE, invocation_parameters)
 
-            result = func(*args, **kwargs)
+            try:
+                result = func(*args, **kwargs)
+            except Exception as exception:
+                span.set_status(
+                    trace_api.Status(trace_api.StatusCode.ERROR, str(exception))
+                )
+                span.record_exception(exception)
+                raise
 
-            span.set_attribute(SpanAttributes.OUTPUT_VALUE, str(result))
+            span.set_status(trace_api.StatusCode.OK)
+
+            if result is not None:
+                span.set_attribute(SpanAttributes.OUTPUT_VALUE, str(result))
 
         return result
 
