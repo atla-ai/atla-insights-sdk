@@ -15,6 +15,21 @@ from opentelemetry import trace as trace_api
 from atla_insights.main import ATLA_INSTANCE
 
 
+def _get_invocation_params(func: Callable[..., Any], *args, **kwargs) -> dict[str, Any]:
+    """Get the invocation parameters for a function.
+
+    :param func (Callable[..., Any]): The function to get the invocation parameters for.
+    :param args (Any): The positional arguments to bind to the function.
+    :param kwargs (Any): The keyword arguments to bind to the function.
+    :return (dict[str, Any]): The invocation parameters.
+    """
+    func_parameters = inspect.signature(func).bind(*args, **kwargs)
+    func_parameters.apply_defaults()
+    return {
+        k: v for k, v in func_parameters.arguments.items() if k not in {"self", "cls"}
+    }
+
+
 def tool(func: Callable[..., Any]) -> Callable[..., Any]:
     """Instrument a function-based LLM tool.
 
@@ -48,21 +63,12 @@ def tool(func: Callable[..., Any]) -> Callable[..., Any]:
             if func.__doc__:
                 span.set_attribute(SpanAttributes.TOOL_DESCRIPTION, func.__doc__)
 
-            func_parameters = inspect.signature(func).bind(*args, **kwargs)
-            func_parameters.apply_defaults()
-            invocation_parameters = {
-                k: v
-                for k, v in func_parameters.arguments.items()
-                if k not in {"self", "cls"}
-            }
+            invocation_params = _get_invocation_params(func, *args, **kwargs)
+            invocation_params_json = safe_json_dumps(invocation_params)
 
-            span.set_attribute(
-                SpanAttributes.INPUT_VALUE, safe_json_dumps(invocation_parameters)
-            )
-            if invocation_parameters:
-                span.set_attribute(
-                    SpanAttributes.TOOL_PARAMETERS, safe_json_dumps(invocation_parameters)
-                )
+            span.set_attribute(SpanAttributes.INPUT_VALUE, invocation_params_json)
+            if invocation_params:
+                span.set_attribute(SpanAttributes.TOOL_PARAMETERS, invocation_params_json)
 
             try:
                 result = func(*args, **kwargs)
