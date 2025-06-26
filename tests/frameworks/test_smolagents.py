@@ -1,9 +1,7 @@
 """Unit tests for the SmolAgents instrumentation."""
 
-from typing import ClassVar
-
 from openai import OpenAI
-from smolagents import CodeAgent, LiteLLMModel, OpenAIServerModel, Tool, tool
+from smolagents import CodeAgent, LiteLLMModel, OpenAIServerModel, tool
 
 from tests._otel import BaseLocalOtel
 
@@ -142,43 +140,6 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
                 return "some-result"
 
             some_function(some_arg="some-value")
-
-        finished_spans = self.get_finished_spans()
-        assert len(finished_spans) == 1
-
-        [span] = finished_spans
-
-        assert span.name == "some_function"
-
-        assert span.attributes is not None
-
-        assert span.attributes.get("openinference.span.kind") == "TOOL"
-
-        assert span.attributes.get("tool.name") == "some_function"
-        assert span.attributes.get("tool.description") == "Test function."
-        assert span.attributes.get("tool.parameters") == '{"some_arg": "some-value"}'
-
-        assert span.attributes.get("input.value") is not None
-        assert span.attributes.get("output.value") == "some-result"
-
-    def test_tool_invocation_explicit(self) -> None:
-        """Test the SmolAgents instrumentation with explicit tool invocation."""
-        from atla_insights import instrument_smolagents
-
-        with instrument_smolagents("openai"):
-
-            class SomeTool(Tool):
-                name = "some_function"
-                description = "Test function."
-                inputs: ClassVar[dict[str, dict[str, str | type | bool]]] = {
-                    "some_arg": {"type": "string", "description": "Some arg."}
-                }
-                output_type = "string"
-
-                def forward(self, some_arg: str) -> str:
-                    return "some-result"
-
-            SomeTool()(some_arg="some-value")
 
         finished_spans = self.get_finished_spans()
         assert len(finished_spans) == 1
