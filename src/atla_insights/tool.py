@@ -48,9 +48,12 @@ def tool(func: Callable[..., Any]) -> Callable[..., Any]:
             if func.__doc__:
                 span.set_attribute(SpanAttributes.TOOL_DESCRIPTION, func.__doc__)
 
-            func_parameters = inspect.signature(func).bind(*args, **kwargs).arguments
+            func_parameters = inspect.signature(func).bind(*args, **kwargs)
+            func_parameters.apply_defaults()
             invocation_parameters = {
-                k: v for k, v in func_parameters.items() if k not in {"self", "cls"}
+                k: v
+                for k, v in func_parameters.arguments.items()
+                if k not in {"self", "cls"}
             }
 
             span.set_attribute(

@@ -155,6 +155,30 @@ class TestTool(BaseLocalOtel):
             == '{"args": ["some-arg", "other-arg", "third-arg"], "kwargs": {"some_kwarg": 1, "other_kwarg": 2}}'  # noqa: E501
         )
 
+    def test_default_args(self) -> None:
+        """Test the tool decorator with default arguments."""
+        from atla_insights import tool
+
+        @tool
+        def test_function(some_arg: str, other_arg: str = "other-value") -> str:
+            """Test function."""
+            return "some-result"
+
+        test_function("some-value")
+
+        finished_spans = self.get_finished_spans()
+        assert len(finished_spans) == 1
+
+        [span] = finished_spans
+
+        assert span.name == "test_function"
+
+        assert span.attributes is not None
+        assert (
+            span.attributes.get("tool.parameters")
+            == '{"some_arg": "some-value", "other_arg": "other-value"}'
+        )
+
     def test_exception(self) -> None:
         """Test the tool decorator with a failing tool."""
         from atla_insights import tool

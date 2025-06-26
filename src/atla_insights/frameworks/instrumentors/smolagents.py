@@ -43,12 +43,25 @@ def _tool_parameters(
     arguments = _bind_arguments(wrapped, *args, **kwargs)
     arguments = _strip_method_args(arguments)
 
-    # Positional arguments are converted to indexed keyword arguments (convention).
-    tool_parameters = {
-        **arguments.get("kwargs", {}),
-        **dict(enumerate(arguments.get("args", []))),
-    }
-    yield SpanAttributes.TOOL_PARAMETERS, safe_json_dumps(tool_parameters)
+    # Remove SmolAgents-specific arguments.
+    if "sanitize_inputs_outputs" in arguments:
+        del arguments["sanitize_inputs_outputs"]
+
+    # Remove positional arguments if there are none.
+    if not arguments.get("args"):
+        del arguments["args"]
+
+    # Remove keyword arguments if there are none.
+    if not arguments.get("kwargs"):
+        del arguments["kwargs"]
+    else:
+        # Unpack kwargs. The user will have passed them directly but the Tool.__call__
+        # will nest them in a "kwargs" key because of its *args, **kwargs signature.
+        arguments = {**arguments, **arguments.get("kwargs", {})}
+        del arguments["kwargs"]
+
+    if arguments:
+        yield SpanAttributes.TOOL_PARAMETERS, safe_json_dumps(arguments)
 
 
 class _ToolCallWrapper:
