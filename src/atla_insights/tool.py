@@ -63,6 +63,7 @@ def tool(func: Callable[..., Any]) -> Callable[..., Any]:
             if func.__doc__:
                 span.set_attribute(SpanAttributes.TOOL_DESCRIPTION, func.__doc__)
 
+            # Get & log the invocation parameters of the tool function.
             invocation_params = _get_invocation_params(func, *args, **kwargs)
             invocation_params_json = safe_json_dumps(invocation_params)
 
@@ -70,6 +71,7 @@ def tool(func: Callable[..., Any]) -> Callable[..., Any]:
             if invocation_params:
                 span.set_attribute(SpanAttributes.TOOL_PARAMETERS, invocation_params_json)
 
+            # Execute the tool function.
             try:
                 result = func(*args, **kwargs)
             except Exception as exception:
@@ -79,8 +81,8 @@ def tool(func: Callable[..., Any]) -> Callable[..., Any]:
                 span.record_exception(exception)
                 raise
 
+            # Log the result of the tool function.
             span.set_status(trace_api.StatusCode.OK)
-
             if result is not None:
                 span.set_attribute(SpanAttributes.OUTPUT_VALUE, str(result))
 
