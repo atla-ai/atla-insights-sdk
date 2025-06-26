@@ -1,5 +1,6 @@
 """Tool instrumentation."""
 
+import inspect
 from functools import wraps
 from typing import Any, Callable
 
@@ -12,15 +13,6 @@ from openinference.semconv.trace import (
 from opentelemetry import trace as trace_api
 
 from atla_insights.main import ATLA_INSTANCE
-
-
-def _get_invocation_parameters(args: tuple[Any, ...], kwargs: dict[str, Any]) -> str:
-    """Get the invocation parameters from the arguments and keyword arguments."""
-    invocation_parameters: dict = {**kwargs, **dict(enumerate(args))}
-    invocation_parameters = {
-        k: v for k, v in invocation_parameters.items() if k not in {"self", "cls"}
-    }
-    return safe_json_dumps(invocation_parameters)
 
 
 def tool(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -56,9 +48,18 @@ def tool(func: Callable[..., Any]) -> Callable[..., Any]:
             if func.__doc__:
                 span.set_attribute(SpanAttributes.TOOL_DESCRIPTION, func.__doc__)
 
-            invocation_parameters = _get_invocation_parameters(args, kwargs)
-            span.set_attribute(SpanAttributes.TOOL_PARAMETERS, invocation_parameters)
-            span.set_attribute(SpanAttributes.INPUT_VALUE, invocation_parameters)
+            func_parameters = inspect.signature(func).bind(*args, **kwargs).arguments
+            invocation_parameters = {
+                k: v for k, v in func_parameters.items() if k not in {"self", "cls"}
+            }
+
+            span.set_attribute(
+                SpanAttributes.INPUT_VALUE, safe_json_dumps(invocation_parameters)
+            )
+            if invocation_parameters:
+                span.set_attribute(
+                    SpanAttributes.TOOL_PARAMETERS, safe_json_dumps(invocation_parameters)
+                )
 
             try:
                 result = func(*args, **kwargs)
