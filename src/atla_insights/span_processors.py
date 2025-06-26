@@ -1,7 +1,6 @@
 """Span processors."""
 
 import json
-from contextvars import ContextVar
 from typing import Optional
 
 from opentelemetry.context import Context
@@ -14,9 +13,7 @@ from atla_insights.constants import (
     METADATA_MARK,
     SUCCESS_MARK,
 )
-
-_metadata: ContextVar[Optional[dict[str, str]]] = ContextVar("_metadata", default=None)
-_root_span: ContextVar[Optional[Span]] = ContextVar("_root_span", default=None)
+from atla_insights.context import metadata_var, root_span_var
 
 
 class AtlaRootSpanProcessor(SpanProcessor):
@@ -27,10 +24,10 @@ class AtlaRootSpanProcessor(SpanProcessor):
         if span.parent is not None:
             return
 
-        _root_span.set(span)
+        root_span_var.set(span)
         span.set_attribute(SUCCESS_MARK, -1)
 
-        if metadata := _metadata.get():
+        if metadata := metadata_var.get():
             span.set_attribute(METADATA_MARK, json.dumps(metadata))
 
     def on_end(self, span: ReadableSpan) -> None:

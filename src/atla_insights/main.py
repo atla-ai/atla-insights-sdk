@@ -17,12 +17,8 @@ from opentelemetry.sdk.trace import SpanProcessor
 from opentelemetry.trace import Tracer, TracerProvider
 
 from atla_insights.constants import DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT
-from atla_insights.metadata import validate_metadata
-from atla_insights.span_processors import (
-    AtlaRootSpanProcessor,
-    _metadata,
-    get_atla_span_processor,
-)
+from atla_insights.metadata import set_metadata
+from atla_insights.span_processors import AtlaRootSpanProcessor, get_atla_span_processor
 
 logger = logging.getLogger("atla_insights")
 
@@ -63,8 +59,8 @@ class AtlaInsights:
         """
         self._maybe_reset_tracer_provider()
 
-        validate_metadata(metadata)
-        _metadata.set(metadata)
+        if metadata is not None:
+            set_metadata(metadata)
 
         additional_span_processors = additional_span_processors or []
         span_processors = [

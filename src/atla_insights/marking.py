@@ -3,16 +3,16 @@
 from typing import Literal
 
 from atla_insights.constants import SUCCESS_MARK
+from atla_insights.context import root_span_var
 from atla_insights.main import logger
-from atla_insights.span_processors import _root_span
 
 
 def _mark_root_span(value: Literal[0, 1]) -> None:
     """Mark the root span in the current trace with a value."""
-    root_span = _root_span.get()
-    if root_span is None:
+    if root_span := root_span_var.get():
+        root_span.set_attribute(SUCCESS_MARK, value)
+    else:
         raise ValueError("Atla marking can only be done within an instrumented function.")
-    root_span.set_attribute(SUCCESS_MARK, value)
 
 
 def mark_success() -> None:

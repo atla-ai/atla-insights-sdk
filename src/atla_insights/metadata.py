@@ -9,7 +9,7 @@ from atla_insights.constants import (
     MAX_METADATA_VALUE_CHARS,
     METADATA_MARK,
 )
-from atla_insights.span_processors import _metadata, _root_span
+from atla_insights.context import metadata_var, root_span_var
 
 
 def validate_metadata(metadata: Optional[dict[str, str]]) -> None:
@@ -50,7 +50,7 @@ def get_metadata() -> Optional[dict[str, str]]:
 
     :return (Optional[dict[str, str]]): The metadata for the current trace.
     """
-    return _metadata.get()
+    return metadata_var.get()
 
 
 def set_metadata(metadata: dict[str, str]) -> None:
@@ -69,8 +69,8 @@ def set_metadata(metadata: dict[str, str]) -> None:
     """
     validate_metadata(metadata)
 
-    _metadata.set(metadata)
-    if root_span := _root_span.get():
+    metadata_var.set(metadata)
+    if root_span := root_span_var.get():
         # If the root span already exists, we can assign the metadata to it.
-        # If not, it will be assigned the `_metadata` context var on creation.
+        # If not, it will be assigned the `metadata_var` context var on creation.
         root_span.set_attribute(METADATA_MARK, json.dumps(metadata))
