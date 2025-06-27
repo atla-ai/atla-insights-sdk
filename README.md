@@ -85,7 +85,7 @@ with instrument_my_framework():
 
 We currently support the following LLM providers:
 
-| Framework / Provider          | Instrumentation Function   | Notes |
+| Provider                      | Instrumentation Function   | Notes |
 |-------------------------------|----------------------------|-------|
 | **Anthropic**                 | `instrument_anthropic`     | |
 | **Google GenAI**              | `instrument_google_genai`  | E.g. Gemini |
@@ -119,7 +119,7 @@ def run_my_agent() -> None:
 
 We currently support the following frameworks:
 
-| Framework / Provider          | Instrumentation Function   | Notes |
+| Framework                     | Instrumentation Function   | Notes |
 |-------------------------------|----------------------------|-------|
 | **Agno**                      | `instrument_agno`          | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
 | **CrewAI**                    | `instrument_crewai`        | |
