@@ -1,7 +1,5 @@
 """Atla package for PyPI distribution."""
 
-from logfire import instrument
-
 from atla_insights.frameworks import (
     instrument_agno,
     instrument_crewai,
@@ -16,6 +14,7 @@ from atla_insights.frameworks import (
     uninstrument_openai_agents,
     uninstrument_smolagents,
 )
+from atla_insights.instrument import instrument
 from atla_insights.llm_providers import (
     instrument_anthropic,
     instrument_google_genai,

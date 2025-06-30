@@ -32,7 +32,7 @@ class TestLitellmInstrumentation(BaseLocalOtel):
         [litellm_request] = spans
 
         assert litellm_request.attributes is not None
-        assert litellm_request.attributes.get("logfire.msg") == "litellm_request"
+        assert litellm_request.attributes.get("atla.instrumentation.name") == "litellm"
         assert litellm_request.attributes.get(SUCCESS_MARK) == -1
 
     @pytest.mark.asyncio
@@ -55,7 +55,7 @@ class TestLitellmInstrumentation(BaseLocalOtel):
         [litellm_request] = spans
 
         assert litellm_request.attributes is not None
-        assert litellm_request.attributes.get("logfire.msg") == "litellm_request"
+        assert litellm_request.attributes.get("atla.instrumentation.name") == "litellm"
         assert litellm_request.attributes.get(SUCCESS_MARK) == -1
 
     @pytest.mark.parametrize(
