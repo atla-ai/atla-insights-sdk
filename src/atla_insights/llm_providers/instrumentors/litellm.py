@@ -17,11 +17,10 @@ except ImportError as e:
         'Please install it via `pip install "atla-insights[litellm]"`.'
     ) from e
 
-from opentelemetry import trace
 from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
     BaseInstrumentor,
 )
-from opentelemetry.trace import SpanKind, Status, StatusCode
+from opentelemetry.trace import SpanKind, Status, StatusCode, Tracer
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +29,10 @@ logger = logging.getLogger(__name__)
 class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
     """An Atla LiteLLM OpenTelemetry integration."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, tracer: Tracer, **kwargs) -> None:
         """Initialize the Atla LiteLLM OpenTelemetry integration."""
         self.config = {}
-        self.tracer = trace.get_tracer("logfire")
+        self.tracer = tracer
         self.callback_name = None
         self.span_kind = SpanKind
 
@@ -116,6 +115,10 @@ class AtlaLiteLLMIntrumentor(BaseInstrumentor):
     atla_otel_logger: Optional[AtlaLiteLLMOpenTelemetry] = None
     name = "litellm"
 
+    def __init__(self, tracer: Tracer) -> None:
+        """Initialize the Atla LiteLLM instrumentor."""
+        self.tracer = tracer
+
     def instrumentation_dependencies(self) -> Collection[str]:
         """Get the dependencies for the Litellm instrumentor."""
         return ("litellm >= 1.72.0",)
@@ -128,7 +131,7 @@ class AtlaLiteLLMIntrumentor(BaseInstrumentor):
             logger.warning("Attempting to instrument already instrumented litellm")
             return
 
-        self.atla_otel_logger = AtlaLiteLLMOpenTelemetry()
+        self.atla_otel_logger = AtlaLiteLLMOpenTelemetry(tracer=self.tracer)
         litellm.callbacks.append(self.atla_otel_logger)
 
     def _uninstrument(self) -> None:
