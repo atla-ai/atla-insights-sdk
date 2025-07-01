@@ -32,12 +32,14 @@ class TestCrewAIInstrumentation(BaseLocalOtel):
 
         finished_spans = self.get_finished_spans()
 
-        assert len(finished_spans) == 3
+        assert len(finished_spans) == 5
 
-        kickoff, execute, request = finished_spans
+        kickoff, crew_create, execute, task_create, request = finished_spans
 
         assert kickoff.name == "Crew.kickoff"
+        assert crew_create.name == "Crew Created"
         assert execute.name == "Task._execute_core"
+        assert task_create.name == "Task Created"
         assert request.name == "litellm_request"
 
         assert request.attributes is not None
@@ -70,12 +72,14 @@ class TestCrewAIInstrumentation(BaseLocalOtel):
 
         finished_spans = self.get_finished_spans()
 
-        assert len(finished_spans) == 3
+        assert len(finished_spans) == 5
 
-        kickoff, execute, request = finished_spans
+        kickoff, crew_create, execute, task_create, request = finished_spans
 
         assert kickoff.name == "Crew.kickoff"
+        assert crew_create.name == "Crew Created"
         assert execute.name == "Task._execute_core"
+        assert task_create.name == "Task Created"
         assert request.name == "litellm_request"
 
         assert request.attributes is not None
@@ -110,12 +114,14 @@ class TestCrewAIInstrumentation(BaseLocalOtel):
 
         finished_spans = self.get_finished_spans()
 
-        assert len(finished_spans) == 3
+        assert len(finished_spans) == 7
 
-        kickoff, execute, request = finished_spans
+        kickoff, crew_create, execute, task_create, request, _, _ = finished_spans
 
         assert kickoff.name == "Crew.kickoff"
+        assert crew_create.name == "Crew Created"
         assert execute.name == "Task._execute_core"
+        assert task_create.name == "Task Created"
         assert request.name == "litellm_request"
 
     def test_tool_invocation(self) -> None:
@@ -142,11 +148,13 @@ class TestCrewAIInstrumentation(BaseLocalOtel):
             tool_usage._use("test_function", tool, tool_calling)
 
         finished_spans = self.get_finished_spans()
-        assert len(finished_spans) == 1
 
-        [span] = finished_spans
+        assert len(finished_spans) == 2
+
+        span, tool_usage_span = finished_spans
 
         assert span.name == "test_function"
+        assert tool_usage_span.name == "Tool Usage"
 
         assert span.attributes is not None
         assert span.attributes.get("openinference.span.kind") == "TOOL"

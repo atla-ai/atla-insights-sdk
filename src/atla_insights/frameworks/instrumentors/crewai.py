@@ -1,6 +1,5 @@
 """CrewAI instrumentation."""
 
-import os
 from importlib import import_module
 from typing import Any, Callable, Mapping
 
@@ -11,8 +10,6 @@ from wrapt import wrap_function_wrapper
 
 try:
     import litellm
-    from crewai.telemetry.telemetry import Telemetry
-    from crewai.utilities.events.event_listener import event_listener
     from openinference.instrumentation import (
         get_attributes_from_context,
         get_output_attributes,
@@ -128,14 +125,7 @@ class AtlaCrewAIInstrumentor(CrewAIInstrumentor):
         super().__init__()
         self.tracer = tracer
 
-        # Disable the built-in CrewAI telemetry to avoid interfering with instrumentation.
-        os.environ["CREWAI_DISABLE_TELEMETRY"] = "true"
-        # Re-initialize telemetry to ensure the new settings are propagated.
-        event_listener._telemetry = Telemetry()
-
     def _instrument(self, **kwargs: Any) -> None:
-        from crewai.llm import LLM
-
         execute_core_wrapper = _ExecuteCoreWrapper(tracer=self.tracer)
         self._original_execute_core = getattr(
             import_module("crewai").Task, "_execute_core", None
@@ -164,7 +154,9 @@ class AtlaCrewAIInstrumentor(CrewAIInstrumentor):
             wrapper=use_wrapper,
         )
 
-        self._original_set_callbacks = getattr(LLM, "set_callbacks", None)
+        self._original_set_callbacks = getattr(
+            import_module("crewai.llm").LLM, "set_callbacks", None
+        )
         wrap_function_wrapper(
             module="crewai.llm",
             name="LLM.set_callbacks",
@@ -172,8 +164,6 @@ class AtlaCrewAIInstrumentor(CrewAIInstrumentor):
         )
 
     def _uninstrument(self, **kwargs: Any) -> None:
-        from crewai.llm import LLM
-
         if self._original_execute_core is not None:
             task_module = import_module("crewai")
             task_module.Task._execute_core = self._original_execute_core
@@ -190,7 +180,6 @@ class AtlaCrewAIInstrumentor(CrewAIInstrumentor):
             self._original_tool_use = None
 
         if self._original_set_callbacks is not None:
-            LLM.set_callbacks = self._original_set_callbacks  # type: ignore[method-assign]
+            llm_module = import_module("crewai.llm")
+            llm_module.LLM.set_callbacks = self._original_set_callbacks
             self._original_set_callbacks = None
-
-        # TODO(mathias): Reset CrewAI telemetry to original settings.
