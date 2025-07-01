@@ -24,7 +24,7 @@ try:
 except ImportError as e:
     raise ImportError(
         "Google GenAI instrumentation needs to be installed. "
-        "Please install it via `pip install atla-insights[google-genai]`."
+        'Please install it via `pip install "atla-insights[google-genai]"`.'
     ) from e
 
 

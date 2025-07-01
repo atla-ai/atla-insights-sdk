@@ -11,7 +11,7 @@ try:
 except ImportError as e:
     raise ImportError(
         "OpenAI agents instrumentation needs to be installed. "
-        "Please install it via `pip install atla-insights[openai-agents]`."
+        'Please install it via `pip install "atla-insights[openai-agents]"`.'
     ) from e
 
 

@@ -14,7 +14,7 @@ try:
 except ImportError as e:
     raise ImportError(
         "Litellm needs to be installed. "
-        "Please install it via `pip install atla-insights[litellm]`."
+        'Please install it via `pip install "atla-insights[litellm]"`.'
     ) from e
 
 from opentelemetry import trace

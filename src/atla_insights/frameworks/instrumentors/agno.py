@@ -7,7 +7,7 @@ try:
 except ImportError as e:
     raise ImportError(
         "Agno instrumentation needs to be installed. "
-        "Please install it via `pip install atla-insights[agno]`."
+        'Please install it via `pip install "atla-insights[agno]"`.'
     ) from e
 
 
