@@ -69,7 +69,7 @@ class AtlaInsights:
         ]
 
         if verbose:
-            span_processors.append(get_atla_console_span_processor(logger))
+            span_processors.append(get_atla_console_span_processor())
 
         self.tracer_provider = self._setup_tracer_provider()
         self.tracer = self.tracer_provider.get_tracer(OTEL_MODULE_NAME)

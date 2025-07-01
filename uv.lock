@@ -212,7 +212,6 @@ name = "atla-insights"
 version = "0.0.1"
 source = { editable = "." }
 dependencies = [
-    { name = "logfire" },
     { name = "openai" },
     { name = "openinference-instrumentation" },
     { name = "openinference-semantic-conventions" },
@@ -312,7 +311,6 @@ requires-dist = [
     { name = "langgraph", marker = "extra == 'langchain'", specifier = ">=0.3.20" },
     { name = "litellm", marker = "extra == 'crewai'", specifier = ">=1.72.0" },
     { name = "litellm", marker = "extra == 'litellm'", specifier = ">=1.72.0" },
-    { name = "logfire", specifier = ">=3.14.1" },
     { name = "mcp", marker = "extra == 'mcp'", specifier = ">=1.9.0" },
     { name = "mypy", marker = "extra == 'ci'", specifier = ">=1.15.0" },
     { name = "openai", specifier = ">=1.77.0" },
@@ -1800,25 +1798,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/55/d3/f1a8c9c9ffdd3bab1bc410254c8140b1346f05a01b8c6b37c48b56abb4b0/litellm-1.72.0.tar.gz", hash = "sha256:135022b9b8798f712ffa84e71ac419aa4310f1d0a70f79dd2007f7ef3a381e43", size = 8082337, upload-time = "2025-06-01T02:12:54.203Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c2/98/bec08f5a3e504013db6f52b5fd68375bd92b463c91eb454d5a6460e957af/litellm-1.72.0-py3-none-any.whl", hash = "sha256:88360a7ae9aa9c96278ae1bb0a459226f909e711c5d350781296d0640386a824", size = 7979630, upload-time = "2025-06-01T02:12:50.458Z" },
-]
-
-[[package]]
-name = "logfire"
-version = "3.21.2"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "executing" },
-    { name = "opentelemetry-exporter-otlp-proto-http" },
-    { name = "opentelemetry-instrumentation" },
-    { name = "opentelemetry-sdk" },
-    { name = "protobuf" },
-    { name = "rich" },
-    { name = "tomli", marker = "python_full_version < '3.11'" },
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/4f/2c/1fcb1440accbace48df3151a559f1d082e905d2ca4da6848c1d74cbc11e9/logfire-3.21.2.tar.gz", hash = "sha256:81ade93399b156bee0bd0d89ef921b2fb90034217960725598745941d6c36da4", size = 490071, upload-time = "2025-06-30T13:49:52.613Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ea/b4/185e335ce772ed1b0004993ef456742119e88fe0a0ee196d8b4452fdc222/logfire-3.21.2-py3-none-any.whl", hash = "sha256:a08bc6a3b3dcbf98dd27067325ea3d178e6e046fe0d7f8e63e971db52d317e70", size = 201619, upload-time = "2025-06-30T13:49:49.446Z" },
 ]
 
 [[package]]
