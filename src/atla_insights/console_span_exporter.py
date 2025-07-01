@@ -109,7 +109,7 @@ class ConsoleSpanExporter(SpanExporter):
         """Build up a summary of the span, including formatting for rich, then print it.
 
         :param span (ReadableSpan): The span to print.
-        :param indent (int): The indent level. Defaults to `0`.
+        :param indent (int): The indent level. Defaults to 0.
         """
         _msg, parts = self._span_text_parts(span, indent)
 
@@ -117,7 +117,7 @@ class ConsoleSpanExporter(SpanExporter):
 
         if self._console:
             self._console.print(Text.assemble(*parts))
-        else:
+        elif self._output and not self._output.closed:
             print("".join(text for text, _style in parts), file=self._output)
 
         exc_event = next(
@@ -175,11 +175,11 @@ class ConsoleSpanExporter(SpanExporter):
             indented_code = indent_text(exc_tb, indent_str + "│ ")
             exc_tb_rich = Syntax(indented_code, "python", background_color="default")
             self._console.print(Group(barrier, exc_type_rich, exc_msg_rich), exc_tb_rich)
-        else:
+        elif self._output and not self._output.closed:
             out = [f"{indent_str}│ {exc_type}: {exc_msg}"]
             out += [indent_text(exc_tb, indent_str + "│ ")]
             print("\n".join(out), file=self._output)
 
-    def force_flush(self, timeout_millis: int = 0) -> bool:  # pragma: no cover
+    def force_flush(self, timeout_millis: int = 0) -> bool:
         """Force flush all spans, does nothing for this exporter."""
         return True
