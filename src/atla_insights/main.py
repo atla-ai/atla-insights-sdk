@@ -5,13 +5,12 @@ import os
 from contextlib import contextmanager
 from typing import ContextManager, Optional, Sequence
 
-from opentelemetry import trace
 from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
     BaseInstrumentor,
 )
 from opentelemetry.sdk.environment_variables import OTEL_ATTRIBUTE_COUNT_LIMIT
 from opentelemetry.sdk.trace import SpanProcessor, TracerProvider
-from opentelemetry.trace import ProxyTracerProvider, Tracer
+from opentelemetry.trace import Tracer, set_tracer_provider
 
 from atla_insights.constants import DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT, OTEL_MODULE_NAME
 from atla_insights.metadata import set_metadata
@@ -20,6 +19,7 @@ from atla_insights.span_processors import (
     get_atla_console_span_processor,
     get_atla_span_processor,
 )
+from atla_insights.utils import maybe_get_existing_tracer_provider
 
 logger = logging.getLogger(OTEL_MODULE_NAME)
 
@@ -92,14 +92,14 @@ class AtlaInsights:
 
         :return (TracerProvider): The tracer provider.
         """
-        _existing_tracer_provider = trace.get_tracer_provider()
-        if isinstance(_existing_tracer_provider, ProxyTracerProvider) or not isinstance(
-            _existing_tracer_provider, TracerProvider
-        ):
-            new_tracer_provider = TracerProvider()
-            trace.set_tracer_provider(new_tracer_provider)
-            return new_tracer_provider
-        return _existing_tracer_provider
+        if existing_tracer_provider := maybe_get_existing_tracer_provider():
+            return existing_tracer_provider
+
+        # If no existing tracer provider is found, we create a new one and set it as the
+        # global tracer provider.
+        new_tracer_provider = TracerProvider()
+        set_tracer_provider(new_tracer_provider)
+        return new_tracer_provider
 
     def instrument_service(
         self, service: str, instrumentors: Sequence[BaseInstrumentor]
