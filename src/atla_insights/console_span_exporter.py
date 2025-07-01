@@ -126,7 +126,12 @@ class ConsoleSpanExporter(SpanExporter):
         self._print_exc_info(exc_event, indent_str)
 
     def _span_text_parts(self, span: ReadableSpan, indent: int) -> tuple[str, TextParts]:
-        """Return the formatted message or span name and parts containing basic span info.
+        """Build up a summary of the span, including formatting for rich, then print it.
+
+        :param span (ReadableSpan): The span to print.
+        :param indent (int): The indent level. Defaults to `0`.
+        :return (tuple[str, TextParts]): The formatted message or span name and parts
+        containing basic span information.
 
         The following information is included:
         * timestamp
@@ -151,7 +156,11 @@ class ConsoleSpanExporter(SpanExporter):
         return span.name, parts
 
     def _print_exc_info(self, exc_event: Event | None, indent_str: str) -> None:
-        """Print exception information if an exception event is present."""
+        """Print exception information if an exception event is present.
+
+        :param exc_event (Event | None): The exception event to print.
+        :param indent_str (str): The indent string.
+        """
         if exc_event is None or not exc_event.attributes:
             return
 
