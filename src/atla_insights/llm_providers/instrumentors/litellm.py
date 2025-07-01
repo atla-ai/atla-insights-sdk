@@ -7,6 +7,8 @@ from typing import Collection, Optional
 
 from opentelemetry import context
 
+from atla_insights.constants import OTEL_MODULE_NAME
+
 try:
     import litellm
     from litellm.integrations.opentelemetry import OpenTelemetry
@@ -33,7 +35,7 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
         """Initialize the Atla LiteLLM OpenTelemetry integration."""
         self.config = {}
         self.tracer = tracer
-        self.callback_name = "atla_insights"
+        self.callback_name = OTEL_MODULE_NAME
         self.span_kind = SpanKind
         self.message_logging = True
 
