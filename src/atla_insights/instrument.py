@@ -2,15 +2,17 @@
 
 import functools
 import inspect
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from typing import Any, AsyncGenerator, Callable, Generator, Optional, overload
 
+from atla_insights.main import ATLA_INSTANCE, AtlaInsights, logger
+
+executor: Optional[ThreadPoolExecutor]
 try:
     from litellm.litellm_core_utils.thread_pool_executor import executor
 except ImportError:
     executor = None
-
-from atla_insights.main import ATLA_INSTANCE, AtlaInsights, logger
 
 
 @overload
@@ -125,7 +127,7 @@ def _execute_in_single_thread(fn: Callable, /, *args, **kwargs) -> Any:
 
 
 @contextmanager
-def _disable_multithreading() -> Generator[None, None, None]:
+def _disable_multithreading() -> Generator:
     """Disable multithreading for the duration of the context manager.
 
     This is used to prevent a litellm ThreadPoolExecutor from scheduling callbacks in
@@ -134,6 +136,6 @@ def _disable_multithreading() -> Generator[None, None, None]:
     """
     if executor is not None:
         original_submit = executor.submit
-        executor.submit = _execute_in_single_thread
+        executor.submit = _execute_in_single_thread  # type: ignore[method-assign]
         yield
-        executor.submit = original_submit
+        executor.submit = original_submit  # type: ignore[method-assign]

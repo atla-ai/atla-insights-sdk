@@ -164,3 +164,32 @@ class TestLitellmInstrumentation(BaseLocalOtel):
         finished_spans = self.get_finished_spans()
 
         assert len(finished_spans) == 1
+
+    def test_nesting(self) -> None:
+        """Test that the Litellm instrumentation is traced."""
+        from atla_insights import instrument, instrument_litellm
+
+        @instrument("my_function")
+        def my_function() -> None:
+            with instrument_litellm():
+                completion(
+                    model="openai/gpt-3.5-turbo",
+                    messages=[{"role": "user", "content": "hello world"}],
+                    mock_response="hello world",
+                )
+
+        my_function()
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 2
+
+        root_span, request = finished_spans
+
+        assert root_span.name == "my_function"
+        assert root_span.context is not None
+        assert root_span.parent is None
+
+        assert request.name == "litellm_request"
+        assert request.parent is not None
+        assert request.parent.span_id == root_span.context.span_id
