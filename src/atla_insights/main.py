@@ -83,7 +83,7 @@ class AtlaInsights:
     def _setup_tracer_provider(self) -> TracerProvider:
         """Setup the tracer provider.
 
-        If a (non-proxy) tracer provider is already set, we return it. All Alta-specific
+        If a (non-proxy) tracer provider is already set, we return it. All Atla-specific
         telemetry will be added to the existing functionality attached to this tracer
         provider.
 

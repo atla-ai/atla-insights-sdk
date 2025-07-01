@@ -56,7 +56,7 @@ def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable
             @functools.wraps(func)
             def gen_wrapper(*args, **kwargs) -> Generator[Any, Any, Any]:
                 if atla_instance.tracer is None:
-                    logger.error("Atla insights not configured, skipping instrumentation")
+                    logger.error("Atla Insights not configured, skipping instrumentation")
                     yield from func(*args, **kwargs)
                 else:
                     with atla_instance.tracer.start_as_current_span(
@@ -71,7 +71,7 @@ def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable
             @functools.wraps(func)
             async def async_gen_wrapper(*args, **kwargs) -> AsyncGenerator[Any, Any]:
                 if atla_instance.tracer is None:
-                    logger.error("Atla insights not configured, skipping instrumentation")
+                    logger.error("Atla Insights not configured, skipping instrumentation")
                     async for x in func(*args, **kwargs):
                         yield x
                 else:
@@ -88,7 +88,7 @@ def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable
             @functools.wraps(func)
             async def async_wrapper(*args, **kwargs) -> Any:
                 if atla_instance.tracer is None:
-                    logger.error("Atla insights not configured, skipping instrumentation")
+                    logger.error("Atla Insights not configured, skipping instrumentation")
                     return await func(*args, **kwargs)
                 with atla_instance.tracer.start_as_current_span(
                     message or func.__qualname__
@@ -100,7 +100,7 @@ def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable
         @functools.wraps(func)
         def wrapper(*args, **kwargs) -> Any:
             if atla_instance.tracer is None:
-                logger.error("Atla insights not configured, skipping instrumentation")
+                logger.error("Atla Insights not configured, skipping instrumentation")
                 return func(*args, **kwargs)
             with atla_instance.tracer.start_as_current_span(message or func.__qualname__):
                 return func(*args, **kwargs)

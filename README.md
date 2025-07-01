@@ -88,7 +88,7 @@ We currently support the following LLM providers:
 | Framework / Provider          | Instrumentation Function   | Notes |
 |-------------------------------|----------------------------|-------|
 | **Anthropic**                 | `instrument_anthropic`     | |
-| **Google GenAI**              | `instrument_google_genai`  | E.g. Gemini |
+| **Google GenAI**              | `instrument_google_genai`  | E.g., Gemini |
 | **LiteLLM**                   | `instrument_litellm`       | Supports all available models in the LiteLLM framework |
 | **OpenAI**                    | `instrument_openai`        | |
 
@@ -123,7 +123,7 @@ We currently support the following frameworks:
 |-------------------------------|----------------------------|-------|
 | **Agno**                      | `instrument_agno`          | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
 | **CrewAI**                    | `instrument_crewai`        | |
-| **LangChain**                 | `instrument_langchain`     | This includes e.g. LangGraph as well |
+| **LangChain**                 | `instrument_langchain`     | This includes e.g., LangGraph as well |
 | **MCP**                       | `instrument_mcp`           | Only includes context propagation. You will need to instrument the model calling the MCP server separately. |
 | **OpenAI Agents**             | `instrument_openai_agents` | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
 | **Smolagents**                | `instrument_smolagents`    | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
@@ -136,10 +136,10 @@ from atla_insights import configure, instrument, instrument_agno
 
 configure(...)
 
-# If you are using a single LLM provider (e.g. via `OpenAIChat`).
+# If you are using a single LLM provider (e.g., via `OpenAIChat`).
 instrument_agno("openai")
 
-# If you are using multiple LLM providers (e.g. `OpenAIChat` and `Claude`).
+# If you are using multiple LLM providers (e.g., `OpenAIChat` and `Claude`).
 instrument_agno(["anthropic", "openai"])
 ```
 
@@ -236,7 +236,7 @@ with our instrumentation / observability providers.
 `atla_insights` instrumentation is generally compatible with most popular observability
 platforms.
 
-E.g. the following code snippet will make tracing available in both Atla and Langfuse.
+E.g., the following code snippet will make tracing available in both Atla and Langfuse.
 
 ```python
 from atla_insights import configure, instrument_openai
@@ -252,11 +252,11 @@ client.chat.completions.create(...)
 
 #### OpenTelemetry compatibility
 
-The Alta Insights SDK is built on the OpenTelemetry standard and fully compatible with
+The Atla Insights SDK is built on the OpenTelemetry standard and fully compatible with
 other OpenTelemetry services.
 
-If you have an existing OpenTelemetry setup (e.g. by setting the relevant otel
-environment variables), Atla Insights will be _additive_ to this setup. I.e. it will add
+If you have an existing OpenTelemetry setup (e.g., by setting the relevant otel
+environment variables), Atla Insights will be _additive_ to this setup. I.e., it will add
 additional logging on top of what is already getting logged.
 
 If you do not have an existing OpenTelemetry setup, Atla Insights will initialize a new
