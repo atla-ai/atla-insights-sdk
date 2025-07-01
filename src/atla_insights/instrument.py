@@ -6,6 +6,8 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from typing import Any, AsyncGenerator, Callable, Generator, Optional, overload
 
+from opentelemetry.trace import Tracer
+
 from atla_insights.main import ATLA_INSTANCE, AtlaInsights, logger
 
 executor: Optional[ThreadPoolExecutor]
@@ -67,9 +69,7 @@ def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable
                     logger.error("Atla Insights not configured, skipping instrumentation")
                     yield from func(*args, **kwargs)
                 else:
-                    with atla_instance.tracer.start_as_current_span(
-                        message or func.__qualname__
-                    ):
+                    with _start_span(atla_instance.tracer, message or func.__qualname__):
                         yield from func(*args, **kwargs)
 
             return gen_wrapper
@@ -83,9 +83,7 @@ def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable
                     async for x in func(*args, **kwargs):
                         yield x
                 else:
-                    with atla_instance.tracer.start_as_current_span(
-                        message or func.__qualname__
-                    ):
+                    with _start_span(atla_instance.tracer, message or func.__qualname__):
                         async for x in func(*args, **kwargs):
                             yield x
 
@@ -98,9 +96,8 @@ def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable
                 if atla_instance.tracer is None:
                     logger.error("Atla Insights not configured, skipping instrumentation")
                     return await func(*args, **kwargs)
-                with atla_instance.tracer.start_as_current_span(
-                    message or func.__qualname__
-                ):
+
+                with _start_span(atla_instance.tracer, message or func.__qualname__):
                     return await func(*args, **kwargs)
 
             return async_wrapper
@@ -110,10 +107,8 @@ def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable
             if atla_instance.tracer is None:
                 logger.error("Atla Insights not configured, skipping instrumentation")
                 return func(*args, **kwargs)
-            with (
-                atla_instance.tracer.start_as_current_span(message or func.__qualname__),
-                _disable_multithreading(),
-            ):
+
+            with _start_span(atla_instance.tracer, message or func.__qualname__):
                 return func(*args, **kwargs)
 
         return sync_wrapper
@@ -121,21 +116,31 @@ def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable
     return decorator
 
 
-def _execute_in_single_thread(fn: Callable, /, *args, **kwargs) -> Any:
-    """Execute a function in a single thread."""
-    return fn(*args, **kwargs)
-
-
 @contextmanager
-def _disable_multithreading() -> Generator:
-    """Disable multithreading for the duration of the context manager.
+def _start_span(tracer: Tracer, span_name: str) -> Generator:
+    """Start a new span in the tracer's current context.
+
+    This context manager will also disable multithreaded litellm callbacks for the
+    duration of the context.
 
     This is used to prevent a litellm ThreadPoolExecutor from scheduling callbacks in
     different threads, as these will only get executed after a thread lock is released,
     at which point the OTEL context is already lost.
+
+    :param tracer (Tracer): The tracer to use for instrumentation.
+    :param span_name (str): The name of the span.
     """
-    if executor is not None:
-        original_submit = executor.submit
-        executor.submit = _execute_in_single_thread  # type: ignore[method-assign]
+    with tracer.start_as_current_span(span_name):
+        if executor is not None:
+            original_submit = executor.submit
+            executor.submit = _execute_in_single_thread  # type: ignore[method-assign]
+
         yield
-        executor.submit = original_submit  # type: ignore[method-assign]
+
+        if executor is not None:
+            executor.submit = original_submit  # type: ignore[method-assign]
+
+
+def _execute_in_single_thread(fn: Callable, /, *args, **kwargs) -> Any:
+    """Execute a function in a single thread."""
+    return fn(*args, **kwargs)
