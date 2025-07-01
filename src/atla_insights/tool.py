@@ -42,14 +42,10 @@ def tool(func: Callable[..., Any]) -> Callable[..., Any]:
     Returns:
         Callable[..., Any]: The wrapped function.
     """
-    tracer = ATLA_INSTANCE.tracer
-
-    if tracer is None:
-        raise ValueError("Atla insights must be configured before instrumenting tools.")
 
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
-        with tracer.start_as_current_span(
+        with ATLA_INSTANCE.get_tracer().start_as_current_span(
             func.__name__,
             attributes={
                 SpanAttributes.OPENINFERENCE_SPAN_KIND: OpenInferenceSpanKindValues.TOOL.value,  # noqa: E501

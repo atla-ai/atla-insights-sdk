@@ -101,6 +101,16 @@ class AtlaInsights:
         set_tracer_provider(new_tracer_provider)
         return new_tracer_provider
 
+    def get_tracer(self) -> Tracer:
+        """Get the current active tracer.
+
+        :return (Tracer): The tracer.
+        """
+        tracer = self.tracer
+        if tracer is None:
+            raise ValueError("Atla Insights must be configured before instrumenting")
+        return tracer
+
     def instrument_service(
         self, service: str, instrumentors: Sequence[BaseInstrumentor]
     ) -> ContextManager[None]:

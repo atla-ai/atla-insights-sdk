@@ -23,10 +23,7 @@ def instrument_litellm() -> ContextManager[None]:
     from atla_insights.llm_providers.instrumentors.litellm import AtlaLiteLLMIntrumentor
 
     # Create an instrumentor for Litellm.
-    if ATLA_INSTANCE.tracer is None:
-        raise ValueError("Atla insights must be configured before instrumenting Litellm")
-
-    litellm_instrumentor = AtlaLiteLLMIntrumentor(tracer=ATLA_INSTANCE.tracer)
+    litellm_instrumentor = AtlaLiteLLMIntrumentor(tracer=ATLA_INSTANCE.get_tracer())
 
     return ATLA_INSTANCE.instrument_service(
         service=AtlaLiteLLMIntrumentor.name,
