@@ -2,7 +2,13 @@
 
 import functools
 import inspect
+from contextlib import contextmanager
 from typing import Any, AsyncGenerator, Callable, Generator, Optional, overload
+
+try:
+    from litellm.litellm_core_utils.thread_pool_executor import executor
+except ImportError:
+    executor = None
 
 from atla_insights.main import ATLA_INSTANCE, AtlaInsights, logger
 
@@ -102,9 +108,32 @@ def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable
             if atla_instance.tracer is None:
                 logger.error("Atla Insights not configured, skipping instrumentation")
                 return func(*args, **kwargs)
-            with atla_instance.tracer.start_as_current_span(message or func.__qualname__):
+            with (
+                atla_instance.tracer.start_as_current_span(message or func.__qualname__),
+                _disable_multithreading(),
+            ):
                 return func(*args, **kwargs)
 
         return sync_wrapper
 
     return decorator
+
+
+def _execute_in_single_thread(fn: Callable, /, *args, **kwargs) -> Any:
+    """Execute a function in a single thread."""
+    return fn(*args, **kwargs)
+
+
+@contextmanager
+def _disable_multithreading() -> Generator[None, None, None]:
+    """Disable multithreading for the duration of the context manager.
+
+    This is used to prevent a litellm ThreadPoolExecutor from scheduling callbacks in
+    different threads, as these will only get executed after a thread lock is released,
+    at which point the OTEL context is already lost.
+    """
+    if executor is not None:
+        original_submit = executor.submit
+        executor.submit = _execute_in_single_thread
+        yield
+        executor.submit = original_submit
