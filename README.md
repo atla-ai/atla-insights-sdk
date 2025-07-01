@@ -250,16 +250,20 @@ client = OpenAI()
 client.chat.completions.create(...)
 ```
 
-#### Logfire compatibility
-
-The `atla_insights` package's instrumentation is powered by [Pydantic Logfire](logfire.pydantic.dev/docs/).
-> ⚠️ This means that we do not (currently) support compatibility with existing LogFire
-instrumentation / observability.
-
 #### OpenTelemetry compatibility
 
-Next to the above, you also have the ability to export traces to any arbitrary additional
-opentelemetry provider by following this example:
+The Alta Insights SDK is built on the OpenTelemetry standard and fully compatible with
+other OpenTelemetry services.
+
+If you have an existing OpenTelemetry setup (e.g. by setting the relevant otel
+environment variables), Atla Insights will be _additive_ to this setup. I.e. it will add
+additional logging on top of what is already getting logged.
+
+If you do not have an existing OpenTelemetry setup, Atla Insights will initialize a new
+(global) tracer provider.
+
+Next to the above, you also have the ability to add any arbitrary additional span
+processors by following the example below:
 
 ```python
 from atla_insights import configure
