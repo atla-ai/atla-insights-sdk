@@ -3,12 +3,12 @@
 import json
 import logging
 import time
-from datetime import datetime
 from typing import Collection, Optional
+
+from opentelemetry import context
 
 try:
     import litellm
-    from litellm.integrations.custom_logger import CustomLogger
     from litellm.integrations.opentelemetry import OpenTelemetry
     from litellm.proxy._types import SpanAttributes
 except ImportError as e:
@@ -29,15 +29,13 @@ logger = logging.getLogger(__name__)
 class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
     """An Atla LiteLLM OpenTelemetry integration."""
 
-    def __init__(self, tracer: Tracer, **kwargs) -> None:
+    def __init__(self, tracer: Tracer) -> None:
         """Initialize the Atla LiteLLM OpenTelemetry integration."""
         self.config = {}
         self.tracer = tracer
-        self.callback_name = None
+        self.callback_name = "atla_insights"
         self.span_kind = SpanKind
-
-        CustomLogger.__init__(self, **kwargs)
-        self._init_otel_logger_on_litellm_proxy()
+        self.message_logging = True
 
     def _set_attributes_atla(self, span, kwargs, response_obj) -> None:
         # Set LiteLLM otel attributes
@@ -75,14 +73,12 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
                                     )
 
     def _handle_sucess(self, kwargs, response_obj, start_time, end_time) -> None:
-        _parent_context, parent_otel_span = self._get_span_context(kwargs)
-
         self._add_dynamic_span_processor_if_needed(kwargs)
 
         span = self.tracer.start_span(
-            name=self._get_span_name(kwargs),
+            name="litellm_request",
             start_time=self._to_ns(start_time),
-            context=_parent_context,
+            context=context.get_current(),
         )
         span.set_status(Status(StatusCode.OK))
         self._set_attributes_atla(span, kwargs, response_obj)
@@ -90,23 +86,15 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
 
         span.end(end_time=self._to_ns(end_time))
 
-        if parent_otel_span is not None:
-            parent_otel_span.end(end_time=self._to_ns(datetime.now()))
-
     def _handle_failure(self, kwargs, response_obj, start_time, end_time) -> None:
-        _parent_context, parent_otel_span = self._get_span_context(kwargs)
-
         span = self.tracer.start_span(
-            name=self._get_span_name(kwargs),
+            name="litellm_request",
             start_time=self._to_ns(start_time),
-            context=_parent_context,
+            context=context.get_current(),
         )
         span.set_status(Status(StatusCode.ERROR))
         self._set_attributes_atla(span, kwargs, response_obj)
         span.end(end_time=self._to_ns(end_time))
-
-        if parent_otel_span is not None:
-            parent_otel_span.end(end_time=self._to_ns(datetime.now()))
 
 
 class AtlaLiteLLMIntrumentor(BaseInstrumentor):

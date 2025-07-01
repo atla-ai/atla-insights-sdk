@@ -98,13 +98,13 @@ def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable
             return async_wrapper
 
         @functools.wraps(func)
-        def wrapper(*args, **kwargs) -> Any:
+        def sync_wrapper(*args, **kwargs) -> Any:
             if atla_instance.tracer is None:
                 logger.error("Atla Insights not configured, skipping instrumentation")
                 return func(*args, **kwargs)
             with atla_instance.tracer.start_as_current_span(message or func.__qualname__):
                 return func(*args, **kwargs)
 
-        return wrapper
+        return sync_wrapper
 
     return decorator
