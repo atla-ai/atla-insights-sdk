@@ -5,6 +5,7 @@ from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-de
 )
 
 from atla_insights.constants import LLM_PROVIDER_TYPE
+from atla_insights.main import ATLA_INSTANCE
 
 
 def get_instrumentors_for_provider(
@@ -46,7 +47,9 @@ def get_instrumentors_for_provider(
                     AtlaLiteLLMIntrumentor,
                 )
 
-                instrumentors.append(AtlaLiteLLMIntrumentor())
+                instrumentors.append(
+                    AtlaLiteLLMIntrumentor(tracer=ATLA_INSTANCE.get_tracer())
+                )
             case "openai":
                 try:
                     from openinference.instrumentation.openai import OpenAIInstrumentor

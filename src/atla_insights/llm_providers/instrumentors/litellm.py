@@ -3,12 +3,14 @@
 import json
 import logging
 import time
-from datetime import datetime
 from typing import Collection, Optional
+
+from opentelemetry import context
+
+from atla_insights.constants import OTEL_MODULE_NAME
 
 try:
     import litellm
-    from litellm.integrations.custom_logger import CustomLogger
     from litellm.integrations.opentelemetry import OpenTelemetry
     from litellm.proxy._types import SpanAttributes
 except ImportError as e:
@@ -17,11 +19,10 @@ except ImportError as e:
         'Please install it via `pip install "atla-insights[litellm]"`.'
     ) from e
 
-from opentelemetry import trace
 from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
     BaseInstrumentor,
 )
-from opentelemetry.trace import SpanKind, Status, StatusCode
+from opentelemetry.trace import SpanKind, Status, StatusCode, Tracer
 
 logger = logging.getLogger(__name__)
 
@@ -30,15 +31,13 @@ logger = logging.getLogger(__name__)
 class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
     """An Atla LiteLLM OpenTelemetry integration."""
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, tracer: Tracer) -> None:
         """Initialize the Atla LiteLLM OpenTelemetry integration."""
         self.config = {}
-        self.tracer = trace.get_tracer("logfire")
-        self.callback_name = None
+        self.tracer = tracer
+        self.callback_name = OTEL_MODULE_NAME
         self.span_kind = SpanKind
-
-        CustomLogger.__init__(self, **kwargs)
-        self._init_otel_logger_on_litellm_proxy()
+        self.message_logging = True
 
     def _set_attributes_atla(self, span, kwargs, response_obj) -> None:
         # Set LiteLLM otel attributes
@@ -76,14 +75,12 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
                                     )
 
     def _handle_sucess(self, kwargs, response_obj, start_time, end_time) -> None:
-        _parent_context, parent_otel_span = self._get_span_context(kwargs)
-
         self._add_dynamic_span_processor_if_needed(kwargs)
 
         span = self.tracer.start_span(
-            name=self._get_span_name(kwargs),
+            name="litellm_request",
             start_time=self._to_ns(start_time),
-            context=_parent_context,
+            context=context.get_current(),
         )
         span.set_status(Status(StatusCode.OK))
         self._set_attributes_atla(span, kwargs, response_obj)
@@ -91,23 +88,15 @@ class AtlaLiteLLMOpenTelemetry(OpenTelemetry):
 
         span.end(end_time=self._to_ns(end_time))
 
-        if parent_otel_span is not None:
-            parent_otel_span.end(end_time=self._to_ns(datetime.now()))
-
     def _handle_failure(self, kwargs, response_obj, start_time, end_time) -> None:
-        _parent_context, parent_otel_span = self._get_span_context(kwargs)
-
         span = self.tracer.start_span(
-            name=self._get_span_name(kwargs),
+            name="litellm_request",
             start_time=self._to_ns(start_time),
-            context=_parent_context,
+            context=context.get_current(),
         )
         span.set_status(Status(StatusCode.ERROR))
         self._set_attributes_atla(span, kwargs, response_obj)
         span.end(end_time=self._to_ns(end_time))
-
-        if parent_otel_span is not None:
-            parent_otel_span.end(end_time=self._to_ns(datetime.now()))
 
 
 class AtlaLiteLLMIntrumentor(BaseInstrumentor):
@@ -115,6 +104,10 @@ class AtlaLiteLLMIntrumentor(BaseInstrumentor):
 
     atla_otel_logger: Optional[AtlaLiteLLMOpenTelemetry] = None
     name = "litellm"
+
+    def __init__(self, tracer: Tracer) -> None:
+        """Initialize the Atla LiteLLM instrumentor."""
+        self.tracer = tracer
 
     def instrumentation_dependencies(self) -> Collection[str]:
         """Get the dependencies for the Litellm instrumentor."""
@@ -128,7 +121,7 @@ class AtlaLiteLLMIntrumentor(BaseInstrumentor):
             logger.warning("Attempting to instrument already instrumented litellm")
             return
 
-        self.atla_otel_logger = AtlaLiteLLMOpenTelemetry()
+        self.atla_otel_logger = AtlaLiteLLMOpenTelemetry(tracer=self.tracer)
         litellm.callbacks.append(self.atla_otel_logger)
 
     def _uninstrument(self) -> None:

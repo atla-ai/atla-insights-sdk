@@ -26,10 +26,7 @@ def instrument_crewai() -> ContextManager[None]:
     from atla_insights.frameworks.instrumentors.crewai import AtlaCrewAIInstrumentor
 
     # Create an instrumentor for the CrewAI framework.
-    if ATLA_INSTANCE.tracer is None:
-        raise ValueError("Atla insights must be configured before instrumenting CrewAI")
-
-    crewai_instrumentor = AtlaCrewAIInstrumentor(ATLA_INSTANCE.tracer)
+    crewai_instrumentor = AtlaCrewAIInstrumentor(ATLA_INSTANCE.get_tracer())
 
     # Create an instrumentor for the underlying LLM provider (always litellm).
     [llm_provider_instrumentor] = get_instrumentors_for_provider("litellm")

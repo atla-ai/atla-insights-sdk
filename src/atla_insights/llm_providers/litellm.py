@@ -22,7 +22,8 @@ def instrument_litellm() -> ContextManager[None]:
     """
     from atla_insights.llm_providers.instrumentors.litellm import AtlaLiteLLMIntrumentor
 
-    litellm_instrumentor = AtlaLiteLLMIntrumentor()
+    # Create an instrumentor for Litellm.
+    litellm_instrumentor = AtlaLiteLLMIntrumentor(tracer=ATLA_INSTANCE.get_tracer())
 
     return ATLA_INSTANCE.instrument_service(
         service=AtlaLiteLLMIntrumentor.name,
