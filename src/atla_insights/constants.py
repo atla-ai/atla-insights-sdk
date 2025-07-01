@@ -11,7 +11,8 @@ MAX_METADATA_VALUE_CHARS = 100
 METADATA_MARK = "atla.metadata"
 SUCCESS_MARK = "atla.mark.success"
 
-LOGFIRE_OTEL_TRACES_ENDPOINT = "https://logfire-eu.pydantic.dev/v1/traces"
+OTEL_MODULE_NAME = "atla_insights"
+OTEL_TRACES_ENDPOINT = "https://logfire-eu.pydantic.dev/v1/traces"
 
 SUPPORTED_LLM_PROVIDER = Literal["anthropic", "google-genai", "litellm", "openai"]
 LLM_PROVIDER_TYPE = Union[Sequence[SUPPORTED_LLM_PROVIDER], SUPPORTED_LLM_PROVIDER]

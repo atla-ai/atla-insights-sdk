@@ -1,26 +1,27 @@
 """Core functionality for the atla_insights package."""
 
-import importlib
 import logging
 import os
 from contextlib import contextmanager
 from typing import ContextManager, Optional, Sequence
 
-import logfire
-import opentelemetry.trace
-from opentelemetry import trace
 from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
     BaseInstrumentor,
 )
 from opentelemetry.sdk.environment_variables import OTEL_ATTRIBUTE_COUNT_LIMIT
-from opentelemetry.sdk.trace import SpanProcessor
-from opentelemetry.trace import Tracer, TracerProvider
+from opentelemetry.sdk.trace import SpanProcessor, TracerProvider
+from opentelemetry.trace import Tracer, set_tracer_provider
 
-from atla_insights.constants import DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT
+from atla_insights.constants import DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT, OTEL_MODULE_NAME
 from atla_insights.metadata import set_metadata
-from atla_insights.span_processors import AtlaRootSpanProcessor, get_atla_span_processor
+from atla_insights.span_processors import (
+    AtlaRootSpanProcessor,
+    get_atla_console_span_processor,
+    get_atla_span_processor,
+)
+from atla_insights.utils import maybe_get_existing_tracer_provider
 
-logger = logging.getLogger("atla_insights")
+logger = logging.getLogger(OTEL_MODULE_NAME)
 
 
 # Override the OTEL default attribute count limit (128), if not user-specified. This is
@@ -57,8 +58,6 @@ class AtlaInsights:
         :param verbose (bool): Whether to print verbose output to console.
             Defaults to `True`.
         """
-        self._maybe_reset_tracer_provider()
-
         if metadata is not None:
             set_metadata(metadata)
 
@@ -69,27 +68,38 @@ class AtlaInsights:
             *additional_span_processors,
         ]
 
-        logfire_instance = logfire.configure(
-            additional_span_processors=span_processors,
-            console=None if verbose else False,
-            environment=os.getenv("_ATLA_ENV", "prod"),
-            send_to_logfire=False,
-            scrubbing=False,
-        )
-        self.tracer = logfire_instance._get_tracer(is_span_tracer=True)
-        self.configured = True
+        if verbose:
+            span_processors.append(get_atla_console_span_processor())
 
+        self.tracer_provider = self._setup_tracer_provider()
+        self.tracer = self.tracer_provider.get_tracer(OTEL_MODULE_NAME)
+
+        for processor in span_processors:
+            self.tracer_provider.add_span_processor(processor)
+
+        self.configured = True
         logger.info("Atla insights configured correctly ✅")
 
-    def _maybe_reset_tracer_provider(self) -> None:
-        """Reset the existing OpenTelemetry tracer provider, if one exists.
+    def _setup_tracer_provider(self) -> TracerProvider:
+        """Setup the tracer provider.
 
-        Removes any existing tracer provider to allow the Atla tracer provider to get
-        initialized correctly. OpenTelemetry tracer providers cannot be re-initialized, so
-        we need to reload the module.
+        If a (non-proxy) tracer provider is already set, we return it. All Atla-specific
+        telemetry will be added to the existing functionality attached to this tracer
+        provider.
+
+        If no tracer provider is set, we create a new one and set it as the global tracer
+        provider.
+
+        :return (TracerProvider): The tracer provider.
         """
-        if isinstance(trace.get_tracer_provider(), TracerProvider):
-            importlib.reload(opentelemetry.trace)
+        if existing_tracer_provider := maybe_get_existing_tracer_provider():
+            return existing_tracer_provider
+
+        # If no existing tracer provider is found, we create a new one and set it as the
+        # global tracer provider.
+        new_tracer_provider = TracerProvider()
+        set_tracer_provider(new_tracer_provider)
+        return new_tracer_provider
 
     def instrument_service(
         self, service: str, instrumentors: Sequence[BaseInstrumentor]

@@ -43,7 +43,7 @@ def main() -> None:
     client = OpenAI()
 
     # Instrument the OpenAI client
-    instrument_openai(client)
+    instrument_openai()
 
     # Calling the instrumented OpenAI client will create spans behind the scenes
     my_app(client)

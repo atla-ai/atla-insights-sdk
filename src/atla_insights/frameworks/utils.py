@@ -31,7 +31,7 @@ def get_instrumentors_for_provider(
                 except ImportError as e:
                     raise ImportError(
                         "Anthropic instrumentation needs to be installed. "
-                        "Please install it via `pip install atla-insights[anthropic]`."
+                        'Please install it via `pip install "atla-insights[anthropic]"`.'
                     ) from e
 
                 instrumentors.append(AnthropicInstrumentor())
@@ -53,7 +53,7 @@ def get_instrumentors_for_provider(
                 except ImportError as e:
                     raise ImportError(
                         "OpenAI instrumentation needs to be installed. "
-                        "Please install it via `pip install atla-insights[openai]`."
+                        'Please install it via `pip install "atla-insights[openai]"`.'
                     ) from e
 
                 instrumentors.append(OpenAIInstrumentor())

@@ -212,13 +212,13 @@ name = "atla-insights"
 version = "0.0.1"
 source = { editable = "." }
 dependencies = [
-    { name = "logfire" },
     { name = "openai" },
     { name = "openinference-instrumentation" },
     { name = "openinference-semantic-conventions" },
     { name = "opentelemetry-api" },
     { name = "opentelemetry-exporter-otlp-proto-grpc" },
     { name = "pydantic" },
+    { name = "rich" },
     { name = "wrapt" },
 ]
 
@@ -312,7 +312,6 @@ requires-dist = [
     { name = "langgraph", marker = "extra == 'langchain'", specifier = ">=0.3.20" },
     { name = "litellm", marker = "extra == 'crewai'", specifier = ">=1.72.0" },
     { name = "litellm", marker = "extra == 'litellm'", specifier = ">=1.72.0" },
-    { name = "logfire", specifier = ">=3.14.1" },
     { name = "mcp", marker = "extra == 'mcp'", specifier = ">=1.9.0" },
     { name = "mypy", marker = "extra == 'ci'", specifier = ">=1.15.0" },
     { name = "openai", specifier = ">=1.77.0" },
@@ -335,6 +334,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'ci'", specifier = ">=8.3.4" },
     { name = "pytest-asyncio", marker = "extra == 'ci'", specifier = ">=0.26.0" },
     { name = "pytest-httpserver", marker = "extra == 'ci'", specifier = ">=1.1.3" },
+    { name = "rich", specifier = ">=13.9.4" },
     { name = "ruff", marker = "extra == 'ci'", specifier = ">=0.11.7" },
     { name = "smolagents", marker = "extra == 'smolagents'", specifier = ">=1.17.0" },
     { name = "wrapt", specifier = ">=1.17.2" },
@@ -1800,25 +1800,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/55/d3/f1a8c9c9ffdd3bab1bc410254c8140b1346f05a01b8c6b37c48b56abb4b0/litellm-1.72.0.tar.gz", hash = "sha256:135022b9b8798f712ffa84e71ac419aa4310f1d0a70f79dd2007f7ef3a381e43", size = 8082337, upload-time = "2025-06-01T02:12:54.203Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c2/98/bec08f5a3e504013db6f52b5fd68375bd92b463c91eb454d5a6460e957af/litellm-1.72.0-py3-none-any.whl", hash = "sha256:88360a7ae9aa9c96278ae1bb0a459226f909e711c5d350781296d0640386a824", size = 7979630, upload-time = "2025-06-01T02:12:50.458Z" },
-]
-
-[[package]]
-name = "logfire"
-version = "3.21.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "executing" },
-    { name = "opentelemetry-exporter-otlp-proto-http" },
-    { name = "opentelemetry-instrumentation" },
-    { name = "opentelemetry-sdk" },
-    { name = "protobuf" },
-    { name = "rich" },
-    { name = "tomli", marker = "python_full_version < '3.11'" },
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/89/58/cf07fae73c1eccb34d44904451c4a62fc05df21754ce80621ed8235e07ed/logfire-3.21.1.tar.gz", hash = "sha256:421b7741cfe3c02f2f0c91159a35312d3f3a4aa0d855af01c958d0e243472367", size = 489303, upload-time = "2025-06-18T12:57:40.935Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/9c/d1/7e51d3a5c8dd90897d2e0ca36d1195b0fc7e9d0afc04a7cd1aacaaa95e52/logfire-3.21.1-py3-none-any.whl", hash = "sha256:baecd3ec189e76c95775612a66ab23fe6d3fee53d5a4fa60dce42082370cdd4c", size = 201333, upload-time = "2025-06-18T12:57:37.676Z" },
 ]
 
 [[package]]

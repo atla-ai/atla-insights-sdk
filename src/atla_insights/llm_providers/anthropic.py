@@ -25,7 +25,7 @@ def instrument_anthropic() -> ContextManager[None]:
     except ImportError as e:
         raise ImportError(
             "Anthropic instrumentation needs to be installed. "
-            "Please install it via `pip install atla-insights[anthropic]`."
+            'Please install it via `pip install "atla-insights[anthropic]"`.'
         ) from e
 
     anthropic_instrumentor = AnthropicInstrumentor()

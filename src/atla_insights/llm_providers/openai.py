@@ -25,7 +25,7 @@ def instrument_openai() -> ContextManager[None]:
     except ImportError as e:
         raise ImportError(
             "OpenAI instrumentation needs to be installed. "
-            "Please install it via `pip install atla-insights[openai]`."
+            'Please install it via `pip install "atla-insights[openai]"`.'
         ) from e
 
     openai_instrumentor = OpenAIInstrumentor()

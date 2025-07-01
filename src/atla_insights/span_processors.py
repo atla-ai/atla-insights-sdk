@@ -6,13 +6,10 @@ from typing import Optional
 from opentelemetry.context import Context
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 
-from atla_insights.constants import (
-    LOGFIRE_OTEL_TRACES_ENDPOINT,
-    METADATA_MARK,
-    SUCCESS_MARK,
-)
+from atla_insights.console_span_exporter import ConsoleSpanExporter
+from atla_insights.constants import METADATA_MARK, OTEL_TRACES_ENDPOINT, SUCCESS_MARK
 from atla_insights.context import metadata_var, root_span_var
 
 
@@ -42,7 +39,16 @@ def get_atla_span_processor(token: str) -> SpanProcessor:
     :return (SpanProcessor): An Atla span processor.
     """
     span_exporter = OTLPSpanExporter(
-        endpoint=LOGFIRE_OTEL_TRACES_ENDPOINT,
+        endpoint=OTEL_TRACES_ENDPOINT,
         headers={"Authorization": f"Bearer {token}"},
     )
     return SimpleSpanProcessor(span_exporter)
+
+
+def get_atla_console_span_processor() -> BatchSpanProcessor:
+    """Get an Atla console span processor.
+
+    :return (BatchSpanProcessor): An Atla console span processor.
+    """
+    span_exporter = ConsoleSpanExporter()
+    return BatchSpanProcessor(span_exporter)

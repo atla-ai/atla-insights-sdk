@@ -23,7 +23,7 @@ try:
 except ImportError as e:
     raise ImportError(
         "SmolAgents instrumentation needs to be installed. "
-        "Please install it via `pip install atla-insights[smolagents]`."
+        'Please install it via `pip install "atla-insights[smolagents]"`.'
     ) from e
 
 

@@ -32,7 +32,7 @@ def instrument_mcp() -> ContextManager[None]:
     except ImportError as e:
         raise ImportError(
             "MCP instrumentation needs to be installed. "
-            "Please install it via `pip install atla-insights[mcp]`."
+            'Please install it via `pip install "atla-insights[mcp]"`.'
         ) from e
 
     return ATLA_INSTANCE.instrument_service(
