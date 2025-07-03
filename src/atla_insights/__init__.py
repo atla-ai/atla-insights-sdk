@@ -1,5 +1,6 @@
 """Atla package for PyPI distribution."""
 
+from atla_insights.causal import link_from
 from atla_insights.frameworks import (
     instrument_agno,
     instrument_crewai,
@@ -44,6 +45,7 @@ __all__ = [
     "instrument_openai",
     "instrument_openai_agents",
     "instrument_smolagents",
+    "link_from",
     "mark_failure",
     "mark_success",
     "set_metadata",
