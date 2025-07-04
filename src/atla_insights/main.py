@@ -104,8 +104,6 @@ class AtlaInsights:
         add_sampling_to_tracer_provider(self.tracer_provider, sampling)
         self.tracer_provider.id_generator = NoSeedIdGenerator()
 
-        self.tracer = self.tracer_provider.get_tracer(OTEL_MODULE_NAME)
-
         for processor in span_processors:
             self.tracer_provider.add_span_processor(processor)
 
