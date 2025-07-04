@@ -17,11 +17,7 @@ from atla_insights.constants import DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT, OTEL_MOD
 from atla_insights.id_generator import NoSeedIdGenerator
 from atla_insights.metadata import set_metadata
 from atla_insights.sampling import TRACE_SAMPLING_TYPE, add_sampling_to_tracer_provider
-from atla_insights.span_processors import (
-    AtlaRootSpanProcessor,
-    get_atla_console_span_processor,
-    get_atla_span_processor,
-)
+from atla_insights.span_processors import add_span_processors_to_tracer_provider
 from atla_insights.utils import maybe_get_existing_tracer_provider
 
 logger = logging.getLogger(OTEL_MODULE_NAME)
@@ -89,23 +85,19 @@ class AtlaInsights:
         if metadata is not None:
             set_metadata(metadata)
 
-        additional_span_processors = additional_span_processors or []
-        span_processors = [
-            get_atla_span_processor(token),
-            AtlaRootSpanProcessor(),
-            *additional_span_processors,
-        ]
-
-        if verbose:
-            span_processors.append(get_atla_console_span_processor())
-
         self.tracer_provider = self._setup_tracer_provider()
 
-        add_sampling_to_tracer_provider(self.tracer_provider, sampling)
+        add_span_processors_to_tracer_provider(
+            tracer_provider=self.tracer_provider,
+            token=token,
+            additional_span_processors=additional_span_processors,
+            verbose=verbose,
+        )
+        add_sampling_to_tracer_provider(
+            tracer_provider=self.tracer_provider,
+            sampling=sampling,
+        )
         self.tracer_provider.id_generator = NoSeedIdGenerator()
-
-        for processor in span_processors:
-            self.tracer_provider.add_span_processor(processor)
 
         self.tracer = self.get_tracer()
 
