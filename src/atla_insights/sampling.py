@@ -3,7 +3,7 @@
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Union
+from typing import Union, get_args
 
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.sampling import (
@@ -47,7 +47,7 @@ def add_sampling_to_tracer_provider(
 ) -> None:
     """Add sampling to a tracer provider."""
     if isinstance(sampling, Sampler):
-        if not isinstance(sampling, TRACE_SAMPLER_TYPE):
+        if not isinstance(sampling, get_args(TRACE_SAMPLER_TYPE)):
             logger.warning(
                 "Passed a custom sampler that is not `ParentBased` or `StaticSampler`. "
                 "This can result in partial traces being sent to Atla Insights and "
