@@ -183,6 +183,69 @@ def my_tool(my_arg: str) -> str:
 decorate your tools in this way.
 
 
+### Sampling
+
+By default, Atla Insights will instrument & log all traces. In high-throughput scenarios,
+you may not want to log every trace you produce. In these cases, you can specify a
+sampler at configuration time.
+
+- **Using a built-in sampling method**:
+
+If you want a basic, reliable sampler, you can use one of our pre-built sampling methods.
+
+```python
+from atla_insights import configure
+from atla_insights.sampling import TraceRatioSamplingOptions
+
+# We want to log 10% of traces
+sampling_options = TraceRatioSamplingOptions(ratio=0.10)
+
+configure(
+    token="<MY_ATLA_INSIGHTS_TOKEN>",
+    sampling=sampling_options,
+)
+```
+
+- **Using a custom sampling method**:
+
+If you want to implement your own custom sampling method, you can pass in your own
+[OpenTelemery Sampler](https://opentelemetry-python.readthedocs.io/en/latest/sdk/trace.sampling.html).
+
+```python
+from atla_insights import configure
+from opentelemetry.sdk.trace.sampling import Sampler
+
+class MySampler(Sampler):
+    ...
+
+my_sampler = MySampler()
+
+configure(
+    token="<MY_ATLA_INSIGHTS_TOKEN>",
+    sampling=my_sampler,
+)
+```
+
+⚠️ Note that the Atla Insights platform is **not** intended to work well with partial
+traces. Therefore, we highly recommend using either `ParentBased` or `StaticSampler`
+samplers. This ensures either all traces are treated the same way or all spans in the
+same trace are treated the same way.
+
+```python
+from atla_insights import configure
+from opentelemetry.sdk.trace.sampling import ParentBased, Sampler
+
+class MySampler(Sampler):
+    ...
+
+my_sampler = ParentBased(root=MySampler())
+
+configure(
+    token="<MY_ATLA_INSIGHTS_TOKEN>",
+    sampling=my_sampler,
+)
+```
+
 ### Marking trace success / failure
 
 The logical notion of _success_ or _failure_ plays a prominent role in the observability

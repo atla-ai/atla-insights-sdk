@@ -10,16 +10,14 @@ from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-de
 )
 from opentelemetry.sdk.environment_variables import OTEL_ATTRIBUTE_COUNT_LIMIT
 from opentelemetry.sdk.trace import SpanProcessor, TracerProvider
+from opentelemetry.sdk.trace.sampling import ALWAYS_ON
 from opentelemetry.trace import Tracer, set_tracer_provider
 
 from atla_insights.constants import DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT, OTEL_MODULE_NAME
 from atla_insights.id_generator import NoSeedIdGenerator
 from atla_insights.metadata import set_metadata
-from atla_insights.span_processors import (
-    AtlaRootSpanProcessor,
-    get_atla_console_span_processor,
-    get_atla_span_processor,
-)
+from atla_insights.sampling import TRACE_SAMPLING_TYPE, add_sampling_to_tracer_provider
+from atla_insights.span_processors import add_span_processors_to_tracer_provider
 from atla_insights.utils import maybe_get_existing_tracer_provider
 
 logger = logging.getLogger(OTEL_MODULE_NAME)
@@ -40,18 +38,43 @@ class AtlaInsights:
         self._active_instrumentors: dict[str, Sequence[BaseInstrumentor]] = {}
 
         self.configured = False
+
+        self.tracer_provider: Optional[TracerProvider] = None
         self.tracer: Optional[Tracer] = None
 
     def configure(
         self,
         token: str,
+        sampling: TRACE_SAMPLING_TYPE = ALWAYS_ON,
         metadata: Optional[dict[str, str]] = None,
         additional_span_processors: Optional[Sequence[SpanProcessor]] = None,
         verbose: bool = True,
     ) -> None:
         """Configure Atla insights.
 
-        :param token (str): The write access token.
+        The configure method authenticates to the Atla Insights platform, and sets up
+        the relevant OpenTelemetry components.
+
+        This method is intended to be called once at the start of the application, before
+        any other Atla Insights functionality is called.
+
+        If an existing tracer provider is already set, the Atla Insights platform will
+        be added to the existing functionality attached to this tracer provider.
+        Otherwise, a new tracer provider will be created and set as the global tracer
+        provider.
+
+        ```py
+        from atla_insights import configure
+
+        configure(token="your-token")
+        ```
+
+        :param token (str): The Atla Insights token associated with your organization.
+            This can be found in the [Atla Insights platform](https://app.atla-ai.com).
+        :param sampling (TRACE_SAMPLER_TYPE): The OpenTelemetry sampler to use. This must
+            be a `ParentBased` or `StaticSampler` to ensure that the Atla Insights
+            platform never receives partial traces. Defaults to a static sampler that
+            samples all traces.
         :param metadata (Optional[dict[str, str]]): A dictionary of metadata to be added
             to the trace.
         :param additional_span_processors (Optional[Sequence[SpanProcessor]]): Additional
@@ -62,23 +85,21 @@ class AtlaInsights:
         if metadata is not None:
             set_metadata(metadata)
 
-        additional_span_processors = additional_span_processors or []
-        span_processors = [
-            get_atla_span_processor(token),
-            AtlaRootSpanProcessor(),
-            *additional_span_processors,
-        ]
-
-        if verbose:
-            span_processors.append(get_atla_console_span_processor())
-
         self.tracer_provider = self._setup_tracer_provider()
+
+        add_span_processors_to_tracer_provider(
+            tracer_provider=self.tracer_provider,
+            token=token,
+            additional_span_processors=additional_span_processors,
+            verbose=verbose,
+        )
+        add_sampling_to_tracer_provider(
+            tracer_provider=self.tracer_provider,
+            sampling=sampling,
+        )
         self.tracer_provider.id_generator = NoSeedIdGenerator()
 
-        self.tracer = self.tracer_provider.get_tracer(OTEL_MODULE_NAME)
-
-        for processor in span_processors:
-            self.tracer_provider.add_span_processor(processor)
+        self.tracer = self.get_tracer()
 
         self.configured = True
         logger.info("Atla insights configured correctly ✅")
@@ -109,10 +130,9 @@ class AtlaInsights:
 
         :return (Tracer): The tracer.
         """
-        tracer = self.tracer
-        if tracer is None:
+        if self.tracer_provider is None:
             raise ValueError("Atla Insights must be configured before instrumenting")
-        return tracer
+        return self.tracer_provider.get_tracer(OTEL_MODULE_NAME)
 
     def instrument_service(
         self, service: str, instrumentors: Sequence[BaseInstrumentor]

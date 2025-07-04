@@ -8,8 +8,10 @@ MAX_METADATA_FIELDS = 25
 MAX_METADATA_KEY_CHARS = 40
 MAX_METADATA_VALUE_CHARS = 100
 
-METADATA_MARK = "atla.metadata"
-SUCCESS_MARK = "atla.mark.success"
+OTEL_NAMESPACE = "atla"
+
+METADATA_MARK = f"{OTEL_NAMESPACE}.metadata"
+SUCCESS_MARK = f"{OTEL_NAMESPACE}.mark.success"
 
 OTEL_MODULE_NAME = "atla_insights"
 OTEL_TRACES_ENDPOINT = "https://logfire-eu.pydantic.dev/v1/traces"
