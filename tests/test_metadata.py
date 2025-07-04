@@ -127,3 +127,27 @@ class TestMetadata(BaseLocalOtel):
         # Test multiple async "requests"
         assert await simulate_async_api_request("user1", "session1")
         assert await simulate_async_api_request("user2", "session2")
+
+    @pytest.mark.parametrize(
+        "metadata, is_valid",
+        [
+            pytest.param({"key": "value"}, True, id="valid"),
+            pytest.param({"key": "value" * 100}, False, id="long values"),
+            pytest.param({"key" * 100: "value"}, False, id="long keys"),
+            pytest.param({f"{i}": f"{i}" for i in range(100)}, False, id="too much data"),
+        ],
+    )
+    def test_validate_metadata(self, metadata: dict[str, str], is_valid: bool) -> None:
+        """Test validate_metadata function."""
+        from atla_insights.metadata import validate_metadata
+
+        validated_metadata = validate_metadata(metadata)
+
+        if is_valid:
+            assert validated_metadata == metadata
+        else:
+            assert validated_metadata != metadata
+
+            # If the metadata is invalid, the truncated metadata should be valid.
+            revalidated_metadata = validate_metadata(validated_metadata)
+            assert revalidated_metadata == validated_metadata

@@ -1,6 +1,8 @@
 """Utils for the atla_insights package."""
 
 import json
+import logging
+from itertools import islice
 from typing import Optional
 
 from atla_insights.constants import (
@@ -8,41 +10,64 @@ from atla_insights.constants import (
     MAX_METADATA_KEY_CHARS,
     MAX_METADATA_VALUE_CHARS,
     METADATA_MARK,
+    OTEL_MODULE_NAME,
 )
 from atla_insights.context import metadata_var, root_span_var
 
+logger = logging.getLogger(OTEL_MODULE_NAME)
 
-def validate_metadata(metadata: Optional[dict[str, str]]) -> None:
+
+def _truncate_value(value: str, max_chars: int) -> str:
+    """Truncate a value to a maximum number of characters.
+
+    :param value (str): The value to truncate.
+    :param max_chars (int): The maximum number of characters to allow.
+    :return (str): The truncated value.
+    """
+    if len(value) > max_chars:
+        return value[: (max_chars - 3)] + "..."
+    return value
+
+
+def validate_metadata(metadata: dict[str, str]) -> dict[str, str]:
     """Validate the user-provided metadata field.
 
-    :param metadata (Optional[dict[str, str]]): The metadata field to validate.
+    :param metadata (dict[str, str]): The metadata field to validate.
+    :return (dict[str, str]): The validated metadata.
     """
-    if metadata is None:
-        return
-
     if not isinstance(metadata, dict):
         raise ValueError("The metadata field must be a dictionary.")
 
     if not all(isinstance(k, str) and isinstance(v, str) for k, v in metadata.items()):
-        raise ValueError("The metadata field must be a mapping of string to string.")
+        logger.error("The metadata field must be a mapping of string to string.")
+        metadata = {str(k): str(v) for k, v in metadata.items()}
 
     if len(metadata) > MAX_METADATA_FIELDS:
-        raise ValueError(
+        logger.error(
             f"The metadata field has {len(metadata)} fields, "
             f"but the maximum is {MAX_METADATA_FIELDS}."
         )
+        metadata = dict(islice(metadata.items(), MAX_METADATA_FIELDS))
 
     if any(len(k) > MAX_METADATA_KEY_CHARS for k in metadata.keys()):
-        raise ValueError(
+        logger.error(
             "The metadata field must have keys with less than "
             f"{MAX_METADATA_KEY_CHARS} characters."
         )
+        metadata = {
+            _truncate_value(k, MAX_METADATA_KEY_CHARS): v for k, v in metadata.items()
+        }
 
     if any(len(v) > MAX_METADATA_VALUE_CHARS for v in metadata.values()):
-        raise ValueError(
+        logger.error(
             "The metadata field must have values with less than "
             f"{MAX_METADATA_VALUE_CHARS} characters."
         )
+        metadata = {
+            k: _truncate_value(v, MAX_METADATA_VALUE_CHARS) for k, v in metadata.items()
+        }
+
+    return metadata
 
 
 def get_metadata() -> Optional[dict[str, str]]:
@@ -67,7 +92,7 @@ def set_metadata(metadata: dict[str, str]) -> None:
 
     :param metadata (dict[str, str]): The metadata to set for the current trace.
     """
-    validate_metadata(metadata)
+    metadata = validate_metadata(metadata)
 
     metadata_var.set(metadata)
     if root_span := root_span_var.get():
