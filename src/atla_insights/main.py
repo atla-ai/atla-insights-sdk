@@ -97,12 +97,13 @@ class AtlaInsights:
             span_processors.append(get_atla_console_span_processor())
 
         self.tracer_provider = self._setup_tracer_provider()
-        self.tracer = self.tracer_provider.get_tracer(OTEL_MODULE_NAME)
 
         add_sampling_to_tracer_provider(self.tracer_provider, sampling)
 
         for processor in span_processors:
             self.tracer_provider.add_span_processor(processor)
+
+        self.tracer = self.tracer_provider.get_tracer(OTEL_MODULE_NAME)
 
         self.configured = True
         logger.info("Atla insights configured correctly ✅")
