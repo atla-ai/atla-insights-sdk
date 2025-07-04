@@ -14,6 +14,7 @@ from opentelemetry.sdk.trace.sampling import ALWAYS_ON
 from opentelemetry.trace import Tracer, set_tracer_provider
 
 from atla_insights.constants import DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT, OTEL_MODULE_NAME
+from atla_insights.id_generator import NoSeedIdGenerator
 from atla_insights.metadata import set_metadata
 from atla_insights.sampling import TRACE_SAMPLING_TYPE, add_sampling_to_tracer_provider
 from atla_insights.span_processors import (
@@ -101,6 +102,9 @@ class AtlaInsights:
         self.tracer_provider = self._setup_tracer_provider()
 
         add_sampling_to_tracer_provider(self.tracer_provider, sampling)
+        self.tracer_provider.id_generator = NoSeedIdGenerator()
+
+        self.tracer = self.tracer_provider.get_tracer(OTEL_MODULE_NAME)
 
         for processor in span_processors:
             self.tracer_provider.add_span_processor(processor)
