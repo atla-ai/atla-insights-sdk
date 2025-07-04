@@ -27,19 +27,19 @@ def set_custom_sampler(sampler: Sampler) -> Generator:
     :param sampler (Sampler): The sampler to set.
     :return (Generator): A context manager that sets the sampler.
     """
-    from atla_insights.constants import OTEL_MODULE_NAME
     from atla_insights.main import ATLA_INSTANCE
 
+    assert ATLA_INSTANCE.tracer_provider is not None
+
     original_sampler = ATLA_INSTANCE.tracer_provider.sampler
-    original_tracer = ATLA_INSTANCE.tracer
 
     ATLA_INSTANCE.tracer_provider.sampler = sampler
-    ATLA_INSTANCE.tracer = ATLA_INSTANCE.tracer_provider.get_tracer(OTEL_MODULE_NAME)
+    ATLA_INSTANCE.tracer = ATLA_INSTANCE.get_tracer()
 
     yield
 
     ATLA_INSTANCE.tracer_provider.sampler = original_sampler
-    ATLA_INSTANCE.tracer = original_tracer
+    ATLA_INSTANCE.tracer = ATLA_INSTANCE.get_tracer()
 
 
 class TestSampling(BaseLocalOtel):

@@ -41,6 +41,8 @@ class AtlaInsights:
         self._active_instrumentors: dict[str, Sequence[BaseInstrumentor]] = {}
 
         self.configured = False
+
+        self.tracer_provider: Optional[TracerProvider] = None
         self.tracer: Optional[Tracer] = None
 
     def configure(
@@ -103,7 +105,7 @@ class AtlaInsights:
         for processor in span_processors:
             self.tracer_provider.add_span_processor(processor)
 
-        self.tracer = self.tracer_provider.get_tracer(OTEL_MODULE_NAME)
+        self.tracer = self.get_tracer()
 
         self.configured = True
         logger.info("Atla insights configured correctly ✅")
@@ -134,10 +136,9 @@ class AtlaInsights:
 
         :return (Tracer): The tracer.
         """
-        tracer = self.tracer
-        if tracer is None:
+        if self.tracer_provider is None:
             raise ValueError("Atla Insights must be configured before instrumenting")
-        return tracer
+        return self.tracer_provider.get_tracer(OTEL_MODULE_NAME)
 
     def instrument_service(
         self, service: str, instrumentors: Sequence[BaseInstrumentor]
