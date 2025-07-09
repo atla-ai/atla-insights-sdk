@@ -15,7 +15,7 @@ from opentelemetry.trace import Tracer, set_tracer_provider
 
 from atla_insights.constants import DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT, OTEL_MODULE_NAME
 from atla_insights.id_generator import NoSeedIdGenerator
-from atla_insights.metadata import set_metadata
+from atla_insights.metadata import set_global_metadata
 from atla_insights.sampling import TRACE_SAMPLING_TYPE, add_sampling_to_tracer_provider
 from atla_insights.span_processors import add_span_processors_to_tracer_provider
 from atla_insights.utils import maybe_get_existing_tracer_provider
@@ -83,7 +83,7 @@ class AtlaInsights:
             Defaults to `True`.
         """
         if metadata is not None:
-            set_metadata(metadata)
+            set_global_metadata(metadata)
 
         self.tracer_provider = self._setup_tracer_provider()
 
