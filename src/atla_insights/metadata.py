@@ -85,6 +85,8 @@ def set_global_metadata(metadata: dict[str, str]) -> None:
 
     :param metadata (dict[str, str]): The global metadata.
     """
+    metadata = validate_metadata(metadata)
+
     global _GLOBAL_METADATA
     _GLOBAL_METADATA = metadata
 
