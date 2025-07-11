@@ -45,7 +45,11 @@ def _parse_function_call(
             function_id,
         )
 
-    function_args_json = json.dumps(getattr(function_call, "args", {}))
+    function_args_json = "{}"
+    if function_args := getattr(function_call, "args", None):
+        if isinstance(function_args, Mapping):
+            function_args = dict(function_args)
+        function_args_json = json.dumps(function_args)
 
     yield (
         ".".join(
