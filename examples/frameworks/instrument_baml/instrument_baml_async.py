@@ -4,15 +4,16 @@ See https://docs.boundaryml.com/guide/installation-language/python for details o
 BAML setup for this example.
 """
 
+import asyncio
 import os
 
-from baml_client.sync_client import b
+from baml_client.async_client import b
 
 from atla_insights import configure, instrument, instrument_baml
 
 
 @instrument("My BAML application")
-def my_app() -> None:
+async def my_app() -> None:
     """My application."""
     raw_resume = """
       Vaibhav Gupta
@@ -28,11 +29,11 @@ def my_app() -> None:
       - C++
     """
 
-    response = b.ExtractResume(raw_resume)
+    response = await b.ExtractResume(raw_resume)
     print(response)
 
 
-def main() -> None:
+async def main() -> None:
     """Main function."""
     # Configure the client
     configure(token=os.environ["ATLA_INSIGHTS_TOKEN"])
@@ -41,8 +42,8 @@ def main() -> None:
     instrument_baml("anthropic")
 
     # Calling the instrumented function will create spans behind the scenes
-    my_app()
+    await my_app()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
