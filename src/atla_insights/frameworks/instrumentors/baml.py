@@ -1,100 +1,42 @@
 """BAML instrumentation."""
 
-import importlib
-import importlib.util
 import logging
 from importlib import import_module
-from typing import Any, Callable, Collection, Generator, Mapping
+from typing import Any, Callable, Collection, Mapping, Optional
+
+try:
+    from baml_py import Collector
+except ImportError as e:
+    raise ImportError(
+        "BAML instrumentation needs to be installed. "
+        'Please install it via `pip install "atla-insights[baml]"`.'
+    ) from e
 
 from openinference.semconv.trace import (
-    OpenInferenceLLMProviderValues,
-    OpenInferenceLLMSystemValues,
-    OpenInferenceMimeTypeValues,
     OpenInferenceSpanKindValues,
     SpanAttributes,
 )
 from opentelemetry import trace as trace_api
-from opentelemetry.instrumentation.instrumentor import BaseInstrumentor
+from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
+    BaseInstrumentor,
+)
 from opentelemetry.trace import get_tracer
 from wrapt import wrap_function_wrapper
 
 from atla_insights.constants import SUPPORTED_LLM_FORMAT
+from atla_insights.parsers import get_llm_parser
 
 logger = logging.getLogger(__name__)
 
-_ATLA_COLLECTOR = None
+_ATLA_COLLECTOR: Optional[Collector] = None
 
 
-def _get_baml_collector() -> Any:
+def _get_baml_collector() -> Collector:
     """Get the BAML collector."""
-    from baml_py import Collector
-
     global _ATLA_COLLECTOR
     if _ATLA_COLLECTOR is None:
         _ATLA_COLLECTOR = Collector(name="atla-insights")
     return _ATLA_COLLECTOR
-
-
-def _parse_anthropic_request_body(
-    request: dict[str, Any],
-) -> Generator[tuple[str, Any], None, None]:
-    """Parse the Anthropic request."""
-    from openinference.instrumentation.anthropic._wrappers import (
-        _get_llm_input_messages,
-        _get_llm_tools,
-    )
-
-    yield SpanAttributes.LLM_PROVIDER, OpenInferenceLLMProviderValues.ANTHROPIC.value
-    yield SpanAttributes.LLM_SYSTEM, OpenInferenceLLMSystemValues.ANTHROPIC.value
-
-    if model := request.get("model", request.get("anthropic_version")):
-        yield SpanAttributes.LLM_MODEL_NAME, model
-
-    if messages := request.get("messages"):
-        yield from _get_llm_input_messages(messages)
-
-    if tools := request.get("tools"):
-        yield from _get_llm_tools(tools)
-
-
-def _parse_llm_request_body(
-    request: dict[str, Any],
-    llm_provider: SUPPORTED_LLM_FORMAT,
-) -> Generator[tuple[str, Any], None, None]:
-    """Parse the LLM request."""
-    match llm_provider:
-        case "anthropic":
-            yield from _parse_anthropic_request_body(request)
-        case _:
-            logger.error(f"Unsupported LLM provider: {llm_provider}")
-
-
-def _parse_anthropic_response_body(
-    response: dict[str, Any],
-) -> Generator[tuple[str, Any], None, None]:
-    """Parse the Anthropic response."""
-    from anthropic.types.message import Message
-    from openinference.instrumentation.anthropic._wrappers import _get_output_messages
-
-    try:
-        message = Message(**response)
-    except Exception as e:
-        logger.error(f"Failed to parse Anthropic response: {e}")
-        return
-
-    yield from _get_output_messages(message)
-
-
-def _parse_llm_response_body(
-    response: dict[str, Any],
-    llm_provider: SUPPORTED_LLM_FORMAT,
-) -> Generator[tuple[str, Any], None, None]:
-    """Parse the LLM response."""
-    match llm_provider:
-        case "anthropic":
-            yield from _parse_anthropic_response_body(response)
-        case _:
-            logger.error(f"Unsupported LLM provider: {llm_provider}")
 
 
 class AtlaBamlInstrumentor(BaseInstrumentor):
@@ -106,22 +48,8 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         """Initialize the Atla BAML instrumentator."""
         super().__init__()
 
-        match llm_provider:
-            case "anthropic":
-                if (
-                    importlib.util.find_spec("openinference.instrumentation.anthropic")
-                    is None
-                ):
-                    raise ImportError(
-                        "Anthropic instrumentation needs to be installed. "
-                        'Please install it via `pip install "atla-insights[anthropic]"`.'
-                    )
-
-            case _:
-                raise ValueError(f"Unsupported LLM provider: {llm_provider}")
-
+        self.llm_parser = get_llm_parser(llm_provider)
         self.tracer = get_tracer("openinference.instrumentation.baml")
-        self.llm_provider: SUPPORTED_LLM_FORMAT = llm_provider
 
         self.original_call_function_sync = None
         self.original_call_function_async = None
@@ -164,38 +92,15 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
                 and atla_collector.last.selected_call is not None
             ):
                 if llm_request := atla_collector.last.selected_call.http_request:
+                    request_body = llm_request.body.json()
                     span.set_attributes(
-                        {
-                            SpanAttributes.INPUT_VALUE: llm_request.body.text(),
-                            SpanAttributes.INPUT_MIME_TYPE: (
-                                OpenInferenceMimeTypeValues.TEXT.value
-                            ),
-                        }
-                    )
-
-                    span.set_attributes(
-                        dict(
-                            _parse_llm_request_body(
-                                llm_request.body.json(), self.llm_provider
-                            )
-                        )
+                        dict(self.llm_parser.parse_request_body(request_body))
                     )
 
                 if llm_response := atla_collector.last.selected_call.http_response:
+                    response_body = llm_response.body.json()
                     span.set_attributes(
-                        {
-                            SpanAttributes.OUTPUT_VALUE: llm_response.body.text(),
-                            SpanAttributes.OUTPUT_MIME_TYPE: (
-                                OpenInferenceMimeTypeValues.JSON.value
-                            ),
-                        }
-                    )
-                    span.set_attributes(
-                        dict(
-                            _parse_llm_response_body(
-                                llm_response.body.json(), self.llm_provider
-                            )
-                        )
+                        dict(self.llm_parser.parse_response_body(response_body))
                     )
 
         return result
@@ -238,38 +143,15 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
                 and atla_collector.last.selected_call is not None
             ):
                 if llm_request := atla_collector.last.selected_call.http_request:
+                    request_body = llm_request.body.json()
                     span.set_attributes(
-                        {
-                            SpanAttributes.INPUT_VALUE: llm_request.body.text(),
-                            SpanAttributes.INPUT_MIME_TYPE: (
-                                OpenInferenceMimeTypeValues.TEXT.value
-                            ),
-                        }
-                    )
-
-                    span.set_attributes(
-                        dict(
-                            _parse_llm_request_body(
-                                llm_request.body.json(), self.llm_provider
-                            )
-                        )
+                        dict(self.llm_parser.parse_request_body(request_body))
                     )
 
                 if llm_response := atla_collector.last.selected_call.http_response:
+                    response_body = llm_response.body.json()
                     span.set_attributes(
-                        {
-                            SpanAttributes.OUTPUT_VALUE: llm_response.body.text(),
-                            SpanAttributes.OUTPUT_MIME_TYPE: (
-                                OpenInferenceMimeTypeValues.JSON.value
-                            ),
-                        }
-                    )
-                    span.set_attributes(
-                        dict(
-                            _parse_llm_response_body(
-                                llm_response.body.json(), self.llm_provider
-                            )
-                        )
+                        dict(self.llm_parser.parse_response_body(response_body))
                     )
 
         return result
