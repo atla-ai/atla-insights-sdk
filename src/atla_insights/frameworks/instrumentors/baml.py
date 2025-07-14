@@ -422,10 +422,11 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
     def _instrument(self, **kwargs: Any) -> None:
         # Instrument the sync call function
         self.original_call_function_sync = getattr(
-            import_module("baml_client.runtime"),
-            "DoNotUseDirectlyCallManager.call_function_sync",
+            import_module("baml_client.runtime").DoNotUseDirectlyCallManager,
+            "call_function_sync",
             None,
         )
+
         wrap_function_wrapper(
             module="baml_client.runtime",
             name="DoNotUseDirectlyCallManager.call_function_sync",
