@@ -13,6 +13,7 @@ except ImportError as e:
     ) from e
 
 from openinference.semconv.trace import (
+    MessageAttributes,
     OpenInferenceSpanKindValues,
     SpanAttributes,
 )
@@ -21,6 +22,7 @@ from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-de
     BaseInstrumentor,
 )
 from opentelemetry.trace import get_tracer
+from pydantic import BaseModel
 from wrapt import wrap_function_wrapper
 
 from atla_insights.constants import SUPPORTED_LLM_FORMAT
@@ -39,6 +41,29 @@ def _get_baml_collector() -> Collector:
     return _ATLA_COLLECTOR
 
 
+def _get_updated_collectors(
+    original_state: Mapping[str, Any],
+    atla_collector: Collector,
+) -> list[Collector]:
+    """Get the updated collectors."""
+    original_collectors = original_state.get("baml_options", {}).get("collector")
+
+    new_collectors = [atla_collector]
+    if original_collectors is not None:
+        if isinstance(original_collectors, list):
+            new_collectors.extend(
+                [
+                    collector
+                    for collector in original_collectors
+                    if collector != atla_collector
+                ]
+            )
+        elif original_collectors != atla_collector:
+            new_collectors.append(original_collectors)
+
+    return new_collectors
+
+
 class AtlaBamlInstrumentor(BaseInstrumentor):
     """Atla BAML instrumentor class."""
 
@@ -52,7 +77,12 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         self.tracer = get_tracer("openinference.instrumentation.baml")
 
         self.original_call_function_sync = None
+        self.original_create_stream_function_sync = None
+        self.original_stream_function_sync = None
+
         self.original_call_function_async = None
+        self.original_create_stream_function_async = None
+        self.original_stream_function_async = None
 
     def _call_function_sync_wrapper(
         self,
@@ -64,16 +94,7 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         """Wrap the BAML call function."""
         atla_collector = _get_baml_collector()
 
-        original_state = instance.__getstate__()
-        original_collectors = original_state.get("baml_options", {}).get("collector")
-
-        new_collectors = [atla_collector]
-        if original_collectors is not None:
-            if isinstance(original_collectors, list):
-                new_collectors.extend(original_collectors)
-            else:
-                new_collectors.append(original_collectors)
-
+        new_collectors = _get_updated_collectors(instance.__getstate__(), atla_collector)
         instance.__setstate__({"baml_options": {"collector": new_collectors}})
 
         with self.tracer.start_as_current_span(
@@ -115,6 +136,72 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
 
         return result
 
+    def _create_stream_wrapper(
+        self,
+        wrapped: Callable[..., Any],
+        instance: Any,
+        args: tuple[Any, ...],
+        kwargs: Mapping[str, Any],
+    ) -> Any:
+        """Wrap the BAML create sync stream function."""
+        atla_collector = _get_baml_collector()
+        new_collectors = _get_updated_collectors(instance.__getstate__(), atla_collector)
+        instance.__setstate__({"baml_options": {"collector": new_collectors}})
+        return wrapped(*args, **kwargs)
+
+    def _sync_stream_wrapper(
+        self,
+        wrapped: Callable[..., Any],
+        instance: Any,
+        args: tuple[Any, ...],
+        kwargs: Mapping[str, Any],
+    ) -> Any:
+        """Wrap the BAML stream function."""
+        atla_collector = _get_baml_collector()
+
+        with self.tracer.start_as_current_span(
+            name="GenerateStreamSync",  # TODO: Add function name
+            attributes={
+                SpanAttributes.OPENINFERENCE_SPAN_KIND: (
+                    OpenInferenceSpanKindValues.LLM.value
+                ),
+            },
+            record_exception=False,
+            set_status_on_exception=False,
+        ) as span:
+            try:
+                for item in wrapped(*args, **kwargs):
+                    yield item
+            except Exception as exception:
+                span.set_status(
+                    trace_api.Status(trace_api.StatusCode.ERROR, str(exception))
+                )
+                span.record_exception(exception)
+                raise
+
+            span.set_status(trace_api.StatusCode.OK)
+
+            if (
+                atla_collector.last is not None
+                and atla_collector.last.selected_call is not None
+            ):
+                if llm_request := atla_collector.last.selected_call.http_request:
+                    request_body = llm_request.body.json()
+                    span.set_attributes(
+                        dict(self.llm_parser.parse_request_body(request_body))
+                    )
+
+            if isinstance(item, BaseModel):
+                response_body = item.model_dump_json()
+                span.set_attribute(
+                    f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.0.{MessageAttributes.MESSAGE_CONTENT}",
+                    response_body,
+                )
+                span.set_attribute(
+                    f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.0.{MessageAttributes.MESSAGE_ROLE}",
+                    "assistant",
+                )
+
     async def _call_function_async_wrapper(
         self,
         wrapped: Callable[..., Any],
@@ -125,16 +212,7 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         """Wrap the BAML async call function."""
         atla_collector = _get_baml_collector()
 
-        original_state = instance.__getstate__()
-        original_collectors = original_state.get("baml_options", {}).get("collector")
-
-        new_collectors = [atla_collector]
-        if original_collectors is not None:
-            if isinstance(original_collectors, list):
-                new_collectors.extend(original_collectors)
-            else:
-                new_collectors.append(original_collectors)
-
+        new_collectors = _get_updated_collectors(instance.__getstate__(), atla_collector)
         instance.__setstate__({"baml_options": {"collector": new_collectors}})
 
         with self.tracer.start_as_current_span(
@@ -176,14 +254,68 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
 
         return result
 
+    async def _async_stream_wrapper(
+        self,
+        wrapped: Callable[..., Any],
+        instance: Any,
+        args: tuple[Any, ...],
+        kwargs: Mapping[str, Any],
+    ) -> Any:
+        """Wrap the BAML stream function."""
+        atla_collector = _get_baml_collector()
+
+        with self.tracer.start_as_current_span(
+            name="GenerateStreamAsync",  # TODO: Add function name
+            attributes={
+                SpanAttributes.OPENINFERENCE_SPAN_KIND: (
+                    OpenInferenceSpanKindValues.LLM.value
+                ),
+            },
+            record_exception=False,
+            set_status_on_exception=False,
+        ) as span:
+            try:
+                async for item in wrapped(*args, **kwargs):
+                    yield item
+            except Exception as exception:
+                span.set_status(
+                    trace_api.Status(trace_api.StatusCode.ERROR, str(exception))
+                )
+                span.record_exception(exception)
+                raise
+
+            span.set_status(trace_api.StatusCode.OK)
+
+            if (
+                atla_collector.last is not None
+                and atla_collector.last.selected_call is not None
+            ):
+                if llm_request := atla_collector.last.selected_call.http_request:
+                    request_body = llm_request.body.json()
+                    span.set_attributes(
+                        dict(self.llm_parser.parse_request_body(request_body))
+                    )
+
+            if isinstance(item, BaseModel):
+                response_body = item.model_dump_json()
+                span.set_attribute(
+                    f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.0.{MessageAttributes.MESSAGE_CONTENT}",
+                    response_body,
+                )
+                span.set_attribute(
+                    f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.0.{MessageAttributes.MESSAGE_ROLE}",
+                    "assistant",
+                )
+
     def instrumentation_dependencies(self) -> Collection[str]:
         """Return a list of python packages that the will be instrumented."""
         return ("baml-py",)
 
     def _instrument(self, **kwargs: Any) -> None:
+        # Instrument the sync call function
         self.original_call_function_sync = getattr(
-            import_module("baml_client.runtime").DoNotUseDirectlyCallManager,
-            "call_function_sync",
+            import_module("baml_client.runtime"),
+            "DoNotUseDirectlyCallManager.call_function_sync",
             None,
         )
         wrap_function_wrapper(
@@ -192,6 +324,29 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
             wrapper=self._call_function_sync_wrapper,
         )
 
+        # Instrument the sync stream function
+        self.original_create_stream_function_sync = getattr(
+            import_module("baml_client.runtime").DoNotUseDirectlyCallManager,
+            "create_sync_stream",
+            None,
+        )
+        wrap_function_wrapper(
+            module="baml_client.runtime",
+            name="DoNotUseDirectlyCallManager.create_sync_stream",
+            wrapper=self._create_stream_wrapper,
+        )
+        self.original_stream_function_sync = getattr(
+            import_module("baml_py.stream").BamlSyncStream,
+            "__iter__",
+            None,
+        )
+        wrap_function_wrapper(
+            module="baml_py.stream",
+            name="BamlSyncStream.__iter__",
+            wrapper=self._sync_stream_wrapper,
+        )
+
+        # Instrument the async call function
         self.original_call_function_async = getattr(
             import_module("baml_client.runtime").DoNotUseDirectlyCallManager,
             "call_function_async",
@@ -203,6 +358,28 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
             wrapper=self._call_function_async_wrapper,
         )
 
+        # Instrument the async stream function
+        self.original_create_stream_function_async = getattr(
+            import_module("baml_client.runtime").DoNotUseDirectlyCallManager,
+            "create_async_stream",
+            None,
+        )
+        wrap_function_wrapper(
+            module="baml_client.runtime",
+            name="DoNotUseDirectlyCallManager.create_async_stream",
+            wrapper=self._create_stream_wrapper,
+        )
+        self.original_stream_function_async = getattr(
+            import_module("baml_py.stream").BamlStream,
+            "__aiter__",
+            None,
+        )
+        wrap_function_wrapper(
+            module="baml_py.stream",
+            name="BamlStream.__aiter__",
+            wrapper=self._async_stream_wrapper,
+        )
+
     def _uninstrument(self, **kwargs: Any) -> None:
         if self.original_call_function_sync is not None:
             runtime_module = import_module("baml_client.runtime")
@@ -211,9 +388,33 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
             )
             self.original_call_function_sync = None
 
+        if self.original_create_stream_function_sync is not None:
+            runtime_module = import_module("baml_client.runtime")
+            runtime_module.DoNotUseDirectlyCallManager.create_sync_stream = (
+                self.original_create_stream_function_sync
+            )
+            self.original_create_stream_function_sync = None
+
+        if self.original_stream_function_sync is not None:
+            stream_module = import_module("baml_py.stream")
+            stream_module.BamlSyncStream.__iter__ = self.original_stream_function_sync
+            self.original_stream_function_sync = None
+
         if self.original_call_function_async is not None:
             runtime_module = import_module("baml_client.runtime")
             runtime_module.DoNotUseDirectlyCallManager.call_function_async = (
                 self.original_call_function_async
             )
             self.original_call_function_async = None
+
+        if self.original_create_stream_function_async is not None:
+            runtime_module = import_module("baml_client.runtime")
+            runtime_module.DoNotUseDirectlyCallManager.create_async_stream = (
+                self.original_create_stream_function_async
+            )
+            self.original_create_stream_function_async = None
+
+        if self.original_stream_function_async is not None:
+            stream_module = import_module("baml_py.stream")
+            stream_module.BamlStream.__aiter__ = self.original_stream_function_async
+            self.original_stream_function_async = None
