@@ -7,11 +7,18 @@
         "choices": [
             {
                 "index": 0,
-                "message": { "role": "assistant", "content": "hello world" },
+                "message": {
+                    "role": "assistant",
+                    "content": "hello world"
+                },
                 "finish_reason": "stop"
             }
         ],
-        "usage": { "prompt_tokens": 9, "completion_tokens": 12, "total_tokens": 21 }
+        "usage": {
+            "prompt_tokens": 9,
+            "completion_tokens": 12,
+            "total_tokens": 21
+        }
     },
     "openai_responses": {
         "id": "resp_abc123",
@@ -30,17 +37,46 @@
                 "status": "completed",
                 "role": "assistant",
                 "content": [
-                    { "type": "output_text", "text": "hello world", "annotations": [] }
+                    {
+                        "type": "output_text",
+                        "text": "hello world",
+                        "annotations": []
+                    }
                 ]
             }
         ]
     },
     "anthropic_messages": {
         "id": "msg_abc123",
-        "content": [{ "text": "Hi! My name is Claude.", "type": "text" }],
+        "content": [
+            {
+                "text": "Hi! My name is Claude.",
+                "type": "text"
+            }
+        ],
         "model": "claude-3-7-sonnet-20250219",
         "role": "assistant",
-        "usage": { "input_tokens": 2095, "output_tokens": 503 }
+        "usage": {
+            "input_tokens": 2095,
+            "output_tokens": 503
+        }
+    },
+    "anthropic_bedrock_messages": {
+        "id": "msg_bdrk_01737gTBn92eyn29YmeZDJBe",
+        "content": [
+            {
+                "text": "Hello! How are you doing today?",
+                "type": "text"
+            }
+        ],
+        "model": "claude-3-5-haiku-20241022",
+        "role": "assistant",
+        "stop_reason": "end_turn",
+        "type": "message",
+        "usage": {
+            "input_tokens": 10,
+            "output_tokens": 11
+        }
     },
     "google_genai_content": {
         "candidates": [
@@ -124,5 +160,24 @@
         },
         "modelVersion": "some-tool-call-model",
         "responseId": "abc123"
+    },
+    "bedrock_anthropic_invoke_model": {
+        "id": "msg_bdrk_01VCUGeYvqjLAajjJMAhVSE8",
+        "type": "message",
+        "role": "assistant",
+        "model": "claude-3-5-haiku-20241022",
+        "content": [
+            {
+                "type": "text",
+                "text": "Hello! How are you doing today? Is there anything I can help you with?"
+            }
+        ],
+        "stop_reason": "end_turn",
+        "usage": {
+            "input_tokens": 10,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "output_tokens": 20
+        }
     }
 }

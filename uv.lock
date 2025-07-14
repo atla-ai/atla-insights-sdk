@@ -165,6 +165,12 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/b3/8f/ba982f539db40f49a610f61562e9b54fb9c85e7b9ede9a46ff6f9e79042f/anthropic-0.55.0-py3-none-any.whl", hash = "sha256:3518433fc0372a13f2b793b4cabecc7734ec9176e063a0f28dac19aa17c57f94", size = 289318, upload-time = "2025-06-23T18:52:24.478Z" },
 ]
 
+[package.optional-dependencies]
+bedrock = [
+    { name = "boto3" },
+    { name = "botocore" },
+]
+
 [[package]]
 name = "anyio"
 version = "4.9.0"
@@ -231,7 +237,7 @@ agno = [
 ]
 all = [
     { name = "agno" },
-    { name = "anthropic" },
+    { name = "anthropic", extra = ["bedrock"] },
     { name = "crewai" },
     { name = "google-genai" },
     { name = "google-generativeai" },
@@ -243,6 +249,7 @@ all = [
     { name = "openai-agents" },
     { name = "openinference-instrumentation-agno" },
     { name = "openinference-instrumentation-anthropic" },
+    { name = "openinference-instrumentation-bedrock" },
     { name = "openinference-instrumentation-crewai" },
     { name = "openinference-instrumentation-google-genai" },
     { name = "openinference-instrumentation-langchain" },
@@ -255,6 +262,10 @@ all = [
 anthropic = [
     { name = "anthropic" },
     { name = "openinference-instrumentation-anthropic" },
+]
+anthropic-bedrock = [
+    { name = "anthropic", extra = ["bedrock"] },
+    { name = "openinference-instrumentation-bedrock" },
 ]
 ci = [
     { name = "mypy" },
@@ -311,7 +322,8 @@ dev = [
 requires-dist = [
     { name = "agno", marker = "extra == 'agno'", specifier = ">=1.5.0" },
     { name = "anthropic", marker = "extra == 'anthropic'", specifier = ">=0.52.1" },
-    { name = "atla-insights", extras = ["agno", "anthropic", "crewai", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "smolagents"], marker = "extra == 'all'" },
+    { name = "anthropic", extras = ["bedrock"], marker = "extra == 'anthropic-bedrock'", specifier = ">=0.52.1" },
+    { name = "atla-insights", extras = ["agno", "anthropic", "anthropic-bedrock", "crewai", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "smolagents"], marker = "extra == 'all'" },
     { name = "crewai", marker = "extra == 'crewai'", specifier = ">=0.130.0" },
     { name = "google-genai", marker = "extra == 'google-genai'", specifier = ">=1.19.0" },
     { name = "google-generativeai", marker = "extra == 'google-generativeai'", specifier = ">=0.7.0" },
@@ -327,6 +339,7 @@ requires-dist = [
     { name = "openinference-instrumentation", specifier = ">=0.1.32" },
     { name = "openinference-instrumentation-agno", marker = "extra == 'agno'", specifier = ">=0.1.4" },
     { name = "openinference-instrumentation-anthropic", marker = "extra == 'anthropic'", specifier = ">=0.1.18" },
+    { name = "openinference-instrumentation-bedrock", marker = "extra == 'anthropic-bedrock'", specifier = ">=0.1.26" },
     { name = "openinference-instrumentation-crewai", marker = "extra == 'crewai'", specifier = ">=0.1.10" },
     { name = "openinference-instrumentation-google-genai", marker = "extra == 'google-genai'", specifier = ">=0.1.2" },
     { name = "openinference-instrumentation-google-genai", marker = "extra == 'google-generativeai'", specifier = ">=0.1.2" },
@@ -350,7 +363,7 @@ requires-dist = [
     { name = "smolagents", marker = "extra == 'smolagents'", specifier = ">=1.17.0" },
     { name = "wrapt", specifier = ">=1.17.2" },
 ]
-provides-extras = ["agno", "anthropic", "all", "ci", "crewai", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "smolagents"]
+provides-extras = ["agno", "anthropic", "anthropic-bedrock", "all", "ci", "crewai", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "smolagents"]
 
 [package.metadata.requires-dev]
 dev = [{ name = "atla-insights", extras = ["all", "ci"] }]
@@ -477,6 +490,34 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/21/28/9b3f50ce0e048515135495f198351908d99540d69bfdc8c1d15b73dc55ce/blinker-1.9.0.tar.gz", hash = "sha256:b4ce2265a7abece45e7cc896e98dbebe6cead56bcf805a3d23136d145f5445bf", size = 22460, upload-time = "2024-11-08T17:25:47.436Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/10/cb/f2ad4230dc2eb1a74edf38f1a38b9b52277f75bef262d8908e60d957e13c/blinker-1.9.0-py3-none-any.whl", hash = "sha256:ba0efaa9080b619ff2f3459d1d500c57bddea4a6b424b60a91141db6fd2f08bc", size = 8458, upload-time = "2024-11-08T17:25:46.184Z" },
+]
+
+[[package]]
+name = "boto3"
+version = "1.39.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "botocore" },
+    { name = "jmespath" },
+    { name = "s3transfer" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6a/1f/b7510dcd26eb14735d6f4b2904e219b825660425a0cf0b6f35b84c7249b0/boto3-1.39.4.tar.gz", hash = "sha256:6c955729a1d70181bc8368e02a7d3f350884290def63815ebca8408ee6d47571", size = 111829, upload-time = "2025-07-09T19:23:01.512Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/12/5c/93292e4d8c809950c13950b3168e0eabdac828629c21047959251ad3f28c/boto3-1.39.4-py3-none-any.whl", hash = "sha256:f8e9534b429121aa5c5b7c685c6a94dd33edf14f87926e9a182d5b50220ba284", size = 139908, upload-time = "2025-07-09T19:22:59.808Z" },
+]
+
+[[package]]
+name = "botocore"
+version = "1.39.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "jmespath" },
+    { name = "python-dateutil" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e6/9f/21c823ea2fae3fa5a6c9e8caaa1f858acd55018e6d317505a4f14c5bb999/botocore-1.39.4.tar.gz", hash = "sha256:e662ac35c681f7942a93f2ec7b4cde8f8b56dd399da47a79fa3e370338521a56", size = 14136116, upload-time = "2025-07-09T19:22:49.811Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/58/44/f120319e0a9afface645e99f300175b9b308e4724cb400b32e1bd6eb3060/botocore-1.39.4-py3-none-any.whl", hash = "sha256:c41e167ce01cfd1973c3fa9856ef5244a51ddf9c82cb131120d8617913b6812a", size = 13795516, upload-time = "2025-07-09T19:22:44.446Z" },
 ]
 
 [[package]]
@@ -797,6 +838,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/c0/76/f95b83359012ee0e670da3e41c164a0c256aeedd81886f878911581d852f/cryptography-45.0.4-pp311-pypy311_pp73-manylinux_2_34_aarch64.whl", hash = "sha256:0339a692de47084969500ee455e42c58e449461e0ec845a34a6a9b9bf7df7fb8", size = 4146422, upload-time = "2025-06-10T00:03:41.827Z" },
     { url = "https://files.pythonhosted.org/packages/09/ad/5429fcc4def93e577a5407988f89cf15305e64920203d4ac14601a9dc876/cryptography-45.0.4-pp311-pypy311_pp73-manylinux_2_34_x86_64.whl", hash = "sha256:0cf13c77d710131d33e63626bd55ae7c0efb701ebdc2b3a7952b9b23a0412862", size = 4388475, upload-time = "2025-06-10T00:03:43.493Z" },
     { url = "https://files.pythonhosted.org/packages/99/49/0ab9774f64555a1b50102757811508f5ace451cf5dc0a2d074a4b9deca6a/cryptography-45.0.4-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:bbc505d1dc469ac12a0a064214879eac6294038d6b24ae9f71faae1448a9608d", size = 3337594, upload-time = "2025-06-10T00:03:45.523Z" },
+]
+
+[[package]]
+name = "dacite"
+version = "1.9.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/55/a0/7ca79796e799a3e782045d29bf052b5cde7439a2bbb17f15ff44f7aacc63/dacite-1.9.2.tar.gz", hash = "sha256:6ccc3b299727c7aa17582f0021f6ae14d5de47c7227932c47fec4cdfefd26f09", size = 22420, upload-time = "2025-02-05T09:27:29.757Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/94/35/386550fd60316d1e37eccdda609b074113298f23cef5bddb2049823fe666/dacite-1.9.2-py3-none-any.whl", hash = "sha256:053f7c3f5128ca2e9aceb66892b1a3c8936d02c686e707bee96e19deef4bc4a0", size = 16600, upload-time = "2025-02-05T09:27:24.345Z" },
 ]
 
 [[package]]
@@ -1656,6 +1706,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/d8/b3/2bd02071c5a2430d0b70403a34411fc519c2f227da7b03da9ba6a956f931/jiter-0.10.0-cp314-cp314-win32.whl", hash = "sha256:ac509f7eccca54b2a29daeb516fb95b6f0bd0d0d8084efaf8ed5dfc7b9f0b357", size = 210127, upload-time = "2025-05-18T19:04:38.837Z" },
     { url = "https://files.pythonhosted.org/packages/03/0c/5fe86614ea050c3ecd728ab4035534387cd41e7c1855ef6c031f1ca93e3f/jiter-0.10.0-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:5ed975b83a2b8639356151cef5c0d597c68376fc4922b45d0eb384ac058cfa00", size = 318527, upload-time = "2025-05-18T19:04:40.612Z" },
     { url = "https://files.pythonhosted.org/packages/b3/4a/4175a563579e884192ba6e81725fc0448b042024419be8d83aa8a80a3f44/jiter-0.10.0-cp314-cp314t-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3aa96f2abba33dc77f79b4cf791840230375f9534e5fac927ccceb58c5e604a5", size = 354213, upload-time = "2025-05-18T19:04:41.894Z" },
+]
+
+[[package]]
+name = "jmespath"
+version = "1.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/00/2a/e867e8531cf3e36b41201936b7fa7ba7b5702dbef42922193f05c8976cd6/jmespath-1.0.1.tar.gz", hash = "sha256:90261b206d6defd58fdd5e85f478bf633a2901798906be2ad389150c5c60edbe", size = 25843, upload-time = "2022-06-17T18:00:12.224Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/31/b4/b9b800c45527aadd64d5b442f9b932b00648617eb5d63d2c7a6587b7cafc/jmespath-1.0.1-py3-none-any.whl", hash = "sha256:02e2e4cc71b5bcab88332eebf907519190dd9e6e82107fa7f83b1003a6252980", size = 20256, upload-time = "2022-06-17T18:00:10.251Z" },
 ]
 
 [[package]]
@@ -2643,6 +2702,25 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/34/4f/66ff7cd9f7d60fde67759fca05c53053a02ea654203354bf7ee5d5dca1d4/openinference_instrumentation_anthropic-0.1.18.tar.gz", hash = "sha256:0a4cb556235dbcf8003e41204841b35be17e4e240ba5436218f5f837f36b0733", size = 14108, upload-time = "2025-05-20T05:03:54.3Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e3/36/2ab55c22e17f1b426e4205fdb82925e69a22dd34bd2918e72254d5df3237/openinference_instrumentation_anthropic-0.1.18-py3-none-any.whl", hash = "sha256:c0aeb5b6fdfecc308b1e286ff66dd69d23371b999a545590811de14142716904", size = 17218, upload-time = "2025-05-20T05:03:52.788Z" },
+]
+
+[[package]]
+name = "openinference-instrumentation-bedrock"
+version = "0.1.26"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "dacite" },
+    { name = "openinference-instrumentation" },
+    { name = "openinference-semantic-conventions" },
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-instrumentation" },
+    { name = "opentelemetry-semantic-conventions" },
+    { name = "typing-extensions" },
+    { name = "wrapt" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d4/b6/5c0167e364da21bd0b2aea3b88fbde0a8d77e14fccfe7948d3608c438b22/openinference_instrumentation_bedrock-0.1.26.tar.gz", hash = "sha256:2191f664ec9791f8f42d15fb6af43f3937640249c1aeeb7edbd6a719b3cfd77b", size = 170038, upload-time = "2025-06-19T16:54:19.165Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f0/d3/6d52f61360abe0cda5cdd7be71fb64f3953718fe74f03be82cd1087af631/openinference_instrumentation_bedrock-0.1.26-py3-none-any.whl", hash = "sha256:953d1bc8b958d56b03263a5752b2e9a8c6a33069d05e1233527a21a6dd1505ce", size = 50677, upload-time = "2025-06-19T16:54:17.805Z" },
 ]
 
 [[package]]
@@ -4114,6 +4192,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/6a/ef/b960ab4818f90ff59e571d03c3f992828d4683561095e80f9ef31f3d58b7/ruff-0.12.0-py3-none-win32.whl", hash = "sha256:7162a4c816f8d1555eb195c46ae0bd819834d2a3f18f98cc63819a7b46f474fb", size = 10525289, upload-time = "2025-06-17T15:19:19.688Z" },
     { url = "https://files.pythonhosted.org/packages/34/93/8b16034d493ef958a500f17cda3496c63a537ce9d5a6479feec9558f1695/ruff-0.12.0-py3-none-win_amd64.whl", hash = "sha256:d00b7a157b8fb6d3827b49d3324da34a1e3f93492c1f97b08e222ad7e9b291e0", size = 11598311, upload-time = "2025-06-17T15:19:21.785Z" },
     { url = "https://files.pythonhosted.org/packages/d0/33/4d3e79e4a84533d6cd526bfb42c020a23256ae5e4265d858bd1287831f7d/ruff-0.12.0-py3-none-win_arm64.whl", hash = "sha256:8cd24580405ad8c1cc64d61725bca091d6b6da7eb3d36f72cc605467069d7e8b", size = 10724946, upload-time = "2025-06-17T15:19:23.952Z" },
+]
+
+[[package]]
+name = "s3transfer"
+version = "0.13.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "botocore" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ed/5d/9dcc100abc6711e8247af5aa561fc07c4a046f72f659c3adea9a449e191a/s3transfer-0.13.0.tar.gz", hash = "sha256:f5e6db74eb7776a37208001113ea7aa97695368242b364d73e91c981ac522177", size = 150232, upload-time = "2025-05-22T19:24:50.245Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/18/17/22bf8155aa0ea2305eefa3a6402e040df7ebe512d1310165eda1e233c3f8/s3transfer-0.13.0-py3-none-any.whl", hash = "sha256:0148ef34d6dd964d0d8cf4311b2b21c474693e57c2e069ec708ce043d2b527be", size = 85152, upload-time = "2025-05-22T19:24:48.703Z" },
 ]
 
 [[package]]

@@ -17,10 +17,12 @@ from atla_insights.frameworks import (
 from atla_insights.instrument import instrument
 from atla_insights.llm_providers import (
     instrument_anthropic,
+    instrument_bedrock,
     instrument_google_genai,
     instrument_litellm,
     instrument_openai,
     uninstrument_anthropic,
+    uninstrument_bedrock,
     uninstrument_google_genai,
     uninstrument_litellm,
     uninstrument_openai,
@@ -36,6 +38,7 @@ __all__ = [
     "instrument",
     "instrument_agno",
     "instrument_anthropic",
+    "instrument_bedrock",
     "instrument_crewai",
     "instrument_google_genai",
     "instrument_langchain",
@@ -50,6 +53,7 @@ __all__ = [
     "tool",
     "uninstrument_agno",
     "uninstrument_anthropic",
+    "uninstrument_bedrock",
     "uninstrument_crewai",
     "uninstrument_google_genai",
     "uninstrument_langchain",
