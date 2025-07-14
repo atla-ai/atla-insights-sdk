@@ -64,7 +64,17 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         """Wrap the BAML call function."""
         atla_collector = _get_baml_collector()
 
-        instance.__setstate__({"baml_options": {"collector": atla_collector}})
+        original_state = instance.__getstate__()
+        original_collectors = original_state.get("baml_options", {}).get("collector")
+
+        new_collectors = [atla_collector]
+        if original_collectors is not None:
+            if isinstance(original_collectors, list):
+                new_collectors.extend(original_collectors)
+            else:
+                new_collectors.append(original_collectors)
+
+        instance.__setstate__({"baml_options": {"collector": new_collectors}})
 
         with self.tracer.start_as_current_span(
             name=kwargs.get("function_name", "GenerateSync"),
@@ -115,7 +125,17 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         """Wrap the BAML async call function."""
         atla_collector = _get_baml_collector()
 
-        instance.__setstate__({"baml_options": {"collector": atla_collector}})
+        original_state = instance.__getstate__()
+        original_collectors = original_state.get("baml_options", {}).get("collector")
+
+        new_collectors = [atla_collector]
+        if original_collectors is not None:
+            if isinstance(original_collectors, list):
+                new_collectors.extend(original_collectors)
+            else:
+                new_collectors.append(original_collectors)
+
+        instance.__setstate__({"baml_options": {"collector": new_collectors}})
 
         with self.tracer.start_as_current_span(
             name=kwargs.get("function_name", "GenerateAsync"),
