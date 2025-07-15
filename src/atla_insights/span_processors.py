@@ -9,7 +9,13 @@ from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor, TracerPro
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 
 from atla_insights.console_span_exporter import ConsoleSpanExporter
-from atla_insights.constants import METADATA_MARK, OTEL_TRACES_ENDPOINT, SUCCESS_MARK
+from atla_insights.constants import (
+    METADATA_MARK,
+    OTEL_TRACES_ENDPOINT,
+    SUCCESS_MARK,
+    VERSION_MARK,
+    __version__,
+)
 from atla_insights.context import root_span_var
 from atla_insights.metadata import get_metadata
 
@@ -19,6 +25,8 @@ class AtlaRootSpanProcessor(SpanProcessor):
 
     def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
         """On start span processing."""
+        span.set_attribute(VERSION_MARK, __version__)
+
         if span.parent is not None:
             return
 
