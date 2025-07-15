@@ -37,8 +37,8 @@ def main() -> None:
     # Configure the client
     configure(token=os.environ["ATLA_INSIGHTS_TOKEN"])
 
-    # Instrument BAML with Anthropic
-    instrument_baml("anthropic")
+    # Instrument BAML with OpenAI
+    instrument_baml("openai")
 
     # Calling the instrumented function will create spans behind the scenes
     my_app()
