@@ -110,7 +110,11 @@ def mock_anthropic_bedrock_client() -> Generator[AnthropicBedrock, None, None]:
         httpserver.expect_request("/model/some-model/invoke").respond_with_json(
             _MOCK_RESPONSES["anthropic_bedrock_messages"]
         )
-        yield AnthropicBedrock(base_url=httpserver.url_for(""))
+        yield AnthropicBedrock(
+            base_url=httpserver.url_for(""),
+            aws_access_key="mock-access-key",
+            aws_secret_key="mock-secret-key",
+        )
 
 
 @pytest.fixture(scope="class")
@@ -120,7 +124,11 @@ def mock_async_anthropic_bedrock_client() -> Generator[AsyncAnthropicBedrock, No
         httpserver.expect_request("/model/some-model/invoke").respond_with_json(
             _MOCK_RESPONSES["anthropic_bedrock_messages"]
         )
-        yield AsyncAnthropicBedrock(base_url=httpserver.url_for(""))
+        yield AsyncAnthropicBedrock(
+            base_url=httpserver.url_for(""),
+            aws_access_key="mock-access-key",
+            aws_secret_key="mock-secret-key",
+        )
 
 
 @pytest.fixture(scope="class")
