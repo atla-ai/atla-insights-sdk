@@ -120,14 +120,15 @@ def run_my_agent() -> None:
 
 We currently support the following frameworks:
 
-| Framework         | Instrumentation Function   | Notes                                                                                                       |
-| ----------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **Agno**          | `instrument_agno`          | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
-| **CrewAI**        | `instrument_crewai`        |                                                                                                             |
-| **LangChain**     | `instrument_langchain`     | This includes e.g., LangGraph as well                                                                       |
-| **MCP**           | `instrument_mcp`           | Only includes context propagation. You will need to instrument the model calling the MCP server separately. |
-| **OpenAI Agents** | `instrument_openai_agents` | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
-| **Smolagents**    | `instrument_smolagents`    | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
+| Framework                     | Instrumentation Function   | Notes |
+|-------------------------------|----------------------------|-------|
+| **Agno**                      | `instrument_agno`          | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
+| **BAML**                      | `instrument_baml`          | Supported with `openai`, `anthropic` or `bedrock` models* |
+| **CrewAI**                    | `instrument_crewai`        | |
+| **LangChain**                 | `instrument_langchain`     | This includes e.g., LangGraph as well |
+| **MCP**                       | `instrument_mcp`           | Only includes context propagation. You will need to instrument the model calling the MCP server separately. |
+| **OpenAI Agents**             | `instrument_openai_agents` | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
+| **Smolagents**                | `instrument_smolagents`    | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
 
 ⚠️ \*Note that some frameworks do not provide their own LLM interface. In these cases, you will
 need to instrument both the framework _and_ the underlying LLM provider(s) as follows:

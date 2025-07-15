@@ -16,6 +16,6 @@ SUCCESS_MARK = f"{OTEL_NAMESPACE}.mark.success"
 OTEL_MODULE_NAME = "atla_insights"
 OTEL_TRACES_ENDPOINT = "https://logfire-eu.pydantic.dev/v1/traces"
 
-SUPPORTED_LLM_FORMAT = Literal["anthropic"]
+SUPPORTED_LLM_FORMAT = Literal["anthropic", "bedrock", "openai"]
 SUPPORTED_LLM_PROVIDER = Literal["anthropic", "google-genai", "litellm", "openai"]
 LLM_PROVIDER_TYPE = Union[Sequence[SUPPORTED_LLM_PROVIDER], SUPPORTED_LLM_PROVIDER]
