@@ -1,3 +1,5 @@
+"""Test Bedrock instrumentation."""
+
 import json
 
 from tests._otel import BaseLocalOtel
