@@ -1,7 +1,7 @@
 """Parsers for the OpenAI LLM."""
 
 import logging
-from typing import Any, Generator
+from typing import Any, Generator, Literal
 
 try:
     from openinference.instrumentation.openai._request_attributes_extractor import (
@@ -18,6 +18,7 @@ except ImportError as e:
 
 import openai
 from openai.types.chat import ChatCompletion
+from openai.types.responses import Response
 from openinference.semconv.trace import (
     OpenInferenceLLMProviderValues,
     OpenInferenceLLMSystemValues,
@@ -35,11 +36,23 @@ class OpenAIChatCompletionParser(BaseParser):
 
     name = "openai"
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        api_endpoint: Literal["chat_completions", "responses"] = "chat_completions",
+    ) -> None:
         """Initialize the OpenAIParser."""
         super().__init__()
         self._request_attributes_extractor = _RequestAttributesExtractor(openai)
         self._response_attributes_extractor = _ResponseAttributesExtractor(openai)
+
+        self.cast_to: type[ChatCompletion | Response]
+        match api_endpoint:
+            case "chat_completions":
+                self.cast_to = ChatCompletion
+            case "responses":
+                self.cast_to = Response
+            case _:
+                raise ValueError(f"Invalid API endpoint: {api_endpoint}")
 
     def parse_request_body(
         self, request: dict[str, Any]
@@ -56,7 +69,7 @@ class OpenAIChatCompletionParser(BaseParser):
 
         yield from self._request_attributes_extractor.get_attributes_from_request(
             request_parameters=request,
-            cast_to=ChatCompletion,
+            cast_to=self.cast_to,
         )
 
     def parse_response_body(
@@ -67,7 +80,7 @@ class OpenAIChatCompletionParser(BaseParser):
         yield SpanAttributes.OUTPUT_MIME_TYPE, OpenInferenceMimeTypeValues.JSON.value
 
         try:
-            parsed_response = ChatCompletion.model_validate(response)
+            parsed_response = self.cast_to.model_validate(response)
         except Exception as e:
             logger.error(f"Failed to parse OpenAI response: {e}")
             return

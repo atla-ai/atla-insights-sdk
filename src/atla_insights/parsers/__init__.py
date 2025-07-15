@@ -11,6 +11,10 @@ def get_llm_parser(llm_provider: SUPPORTED_LLM_FORMAT) -> BaseParser:
             from atla_insights.parsers.parse_anthropic import AnthropicParser
 
             return AnthropicParser()
+        case "bedrock":
+            from atla_insights.parsers.parse_bedrock import BedrockParser
+
+            return BedrockParser()
         case "openai":
             from atla_insights.parsers.parse_openai import OpenAIChatCompletionParser
 

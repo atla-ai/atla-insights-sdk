@@ -43,7 +43,7 @@ class AnthropicParser(BaseParser):
         yield SpanAttributes.LLM_PROVIDER, OpenInferenceLLMProviderValues.ANTHROPIC.value
         yield SpanAttributes.LLM_SYSTEM, OpenInferenceLLMSystemValues.ANTHROPIC.value
 
-        if model := request.get("model", request.get("anthropic_version")):
+        if model := request.get("model"):
             yield SpanAttributes.LLM_MODEL_NAME, model
 
         if messages := request.get("messages"):
