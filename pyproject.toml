@@ -37,12 +37,12 @@ anthropic = [
     "anthropic>=0.52.1",
     "openinference-instrumentation-anthropic>=0.1.18",
 ]
-anthropic-bedrock = [
+bedrock = [
     "anthropic[bedrock]>=0.52.1",
     "openinference-instrumentation-bedrock>=0.1.26",
 ]
 all = [
-    "atla-insights[agno,anthropic,anthropic-bedrock,crewai,google-genai,google-generativeai,langchain,litellm,mcp,openai,openai-agents,smolagents]",
+    "atla-insights[agno,anthropic,bedrock,crewai,google-genai,google-generativeai,langchain,litellm,mcp,openai,openai-agents,smolagents]",
 ]
 ci = [
     "mypy>=1.15.0",
