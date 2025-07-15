@@ -122,6 +122,7 @@ We currently support the following frameworks:
 | Framework                     | Instrumentation Function   | Notes |
 |-------------------------------|----------------------------|-------|
 | **Agno**                      | `instrument_agno`          | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
+| **BAML**                      | `instrument_baml`          | Supported with `openai` or `anthropic` models* |
 | **CrewAI**                    | `instrument_crewai`        | |
 | **LangChain**                 | `instrument_langchain`     | This includes e.g., LangGraph as well |
 | **MCP**                       | `instrument_mcp`           | Only includes context propagation. You will need to instrument the model calling the MCP server separately. |
