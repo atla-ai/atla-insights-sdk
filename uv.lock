@@ -238,6 +238,7 @@ agno = [
 all = [
     { name = "agno" },
     { name = "anthropic", extra = ["bedrock"] },
+    { name = "boto3" },
     { name = "crewai" },
     { name = "google-genai" },
     { name = "google-generativeai" },
@@ -260,11 +261,11 @@ all = [
     { name = "smolagents" },
 ]
 anthropic = [
-    { name = "anthropic" },
+    { name = "anthropic", extra = ["bedrock"] },
     { name = "openinference-instrumentation-anthropic" },
 ]
 bedrock = [
-    { name = "anthropic", extra = ["bedrock"] },
+    { name = "boto3" },
     { name = "openinference-instrumentation-bedrock" },
 ]
 ci = [
@@ -322,8 +323,9 @@ dev = [
 requires-dist = [
     { name = "agno", marker = "extra == 'agno'", specifier = ">=1.5.0" },
     { name = "anthropic", marker = "extra == 'anthropic'", specifier = ">=0.52.1" },
-    { name = "anthropic", extras = ["bedrock"], marker = "extra == 'bedrock'", specifier = ">=0.52.1" },
+    { name = "anthropic", extras = ["bedrock"], marker = "extra == 'anthropic'", specifier = ">=0.52.1" },
     { name = "atla-insights", extras = ["agno", "anthropic", "bedrock", "crewai", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "smolagents"], marker = "extra == 'all'" },
+    { name = "boto3", marker = "extra == 'bedrock'", specifier = ">=1.38.17" },
     { name = "crewai", marker = "extra == 'crewai'", specifier = ">=0.130.0" },
     { name = "google-genai", marker = "extra == 'google-genai'", specifier = ">=1.19.0" },
     { name = "google-generativeai", marker = "extra == 'google-generativeai'", specifier = ">=0.7.0" },

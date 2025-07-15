@@ -35,12 +35,10 @@ dev = ["atla-insights[all,ci]"]
 agno = ["agno>=1.5.0", "openinference-instrumentation-agno>=0.1.4"]
 anthropic = [
     "anthropic>=0.52.1",
+    "anthropic[bedrock]>=0.52.1",
     "openinference-instrumentation-anthropic>=0.1.18",
 ]
-bedrock = [
-    "anthropic[bedrock]>=0.52.1",
-    "openinference-instrumentation-bedrock>=0.1.26",
-]
+bedrock = ["boto3>=1.38.17", "openinference-instrumentation-bedrock>=0.1.26"]
 all = [
     "atla-insights[agno,anthropic,bedrock,crewai,google-genai,google-generativeai,langchain,litellm,mcp,openai,openai-agents,smolagents]",
 ]

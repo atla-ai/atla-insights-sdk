@@ -49,8 +49,8 @@ See the section below to find out which frameworks & providers we currently supp
 
 All instrumentation methods share a common interface, which allows you to do the following:
 
-- **Session-wide (un)instrumentation**:
-You can manually enable/disable instrumentation throughout your application.
+-   **Session-wide (un)instrumentation**:
+    You can manually enable/disable instrumentation throughout your application.
 
 ```python
 from atla_insights import configure, instrument_my_framework, uninstrument_my_framework
@@ -65,8 +65,8 @@ uninstrument_my_framework()
 # All framework code from this point onwards will **no longer** be instrumented
 ```
 
-- **Instrumented contexts**:
-All instrumentation methods also behave as context managers that automatically handle (un)instrumentation.
+-   **Instrumented contexts**:
+    All instrumentation methods also behave as context managers that automatically handle (un)instrumentation.
 
 ```python
 from atla_insights import configure, instrument_my_framework
@@ -85,12 +85,13 @@ with instrument_my_framework():
 
 We currently support the following LLM providers:
 
-| Provider                      | Instrumentation Function   | Notes |
-|-------------------------------|----------------------------|-------|
-| **Anthropic**                 | `instrument_anthropic`     | |
-| **Google GenAI**              | `instrument_google_genai`  | E.g., Gemini |
-| **LiteLLM**                   | `instrument_litellm`       | Supports all available models in the LiteLLM framework |
-| **OpenAI**                    | `instrument_openai`        | |
+| Provider         | Instrumentation Function  | Notes                                                  |
+| ---------------- | ------------------------- | ------------------------------------------------------ |
+| **Anthropic**    | `instrument_anthropic`    | Also supports `AnthropicBedrock` client from Anthropic |
+| **Google GenAI** | `instrument_google_genai` | E.g., Gemini                                           |
+| **LiteLLM**      | `instrument_litellm`      | Supports all available models in the LiteLLM framework |
+| **OpenAI**       | `instrument_openai`       |                                                        |
+| **Bedrock**      | `instrument_bedrock`      |                                                        |
 
 ⚠️ Note that, by default, instrumented LLM calls will be treated independently from one
 another. In order to logically group LLM calls into a trace, you will need to group them
@@ -119,16 +120,16 @@ def run_my_agent() -> None:
 
 We currently support the following frameworks:
 
-| Framework                     | Instrumentation Function   | Notes |
-|-------------------------------|----------------------------|-------|
-| **Agno**                      | `instrument_agno`          | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
-| **CrewAI**                    | `instrument_crewai`        | |
-| **LangChain**                 | `instrument_langchain`     | This includes e.g., LangGraph as well |
-| **MCP**                       | `instrument_mcp`           | Only includes context propagation. You will need to instrument the model calling the MCP server separately. |
-| **OpenAI Agents**             | `instrument_openai_agents` | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
-| **Smolagents**                | `instrument_smolagents`    | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
+| Framework         | Instrumentation Function   | Notes                                                                                                       |
+| ----------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Agno**          | `instrument_agno`          | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
+| **CrewAI**        | `instrument_crewai`        |                                                                                                             |
+| **LangChain**     | `instrument_langchain`     | This includes e.g., LangGraph as well                                                                       |
+| **MCP**           | `instrument_mcp`           | Only includes context propagation. You will need to instrument the model calling the MCP server separately. |
+| **OpenAI Agents** | `instrument_openai_agents` | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
+| **Smolagents**    | `instrument_smolagents`    | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
 
-⚠️ *Note that some frameworks do not provide their own LLM interface. In these cases, you will
+⚠️ \*Note that some frameworks do not provide their own LLM interface. In these cases, you will
 need to instrument both the framework _and_ the underlying LLM provider(s) as follows:
 
 ```python
@@ -182,14 +183,13 @@ def my_tool(my_arg: str) -> str:
 ⚠️ Note that if you are using an instrumented framework, you do **not** need to manually
 decorate your tools in this way.
 
-
 ### Sampling
 
 By default, Atla Insights will instrument & log all traces. In high-throughput scenarios,
 you may not want to log every trace you produce. In these cases, you can specify a
 sampler at configuration time.
 
-- **Using a built-in sampling method**:
+-   **Using a built-in sampling method**:
 
 If you want a basic, reliable sampler, you can use one of our pre-built sampling methods.
 
@@ -206,7 +206,7 @@ configure(
 )
 ```
 
-- **Using a custom sampling method**:
+-   **Using a custom sampling method**:
 
 If you want to implement your own custom sampling method, you can pass in your own
 [OpenTelemery Sampler](https://opentelemetry-python.readthedocs.io/en/latest/sdk/trace.sampling.html).
