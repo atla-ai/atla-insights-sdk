@@ -1,12 +1,17 @@
 """Fixtures for the tests."""
 
+import io
 import json
 from pathlib import Path
-from typing import Generator
+from typing import Callable, Generator, Tuple
 from unittest.mock import patch
 
+import boto3
 import pytest
-from anthropic import Anthropic, AsyncAnthropic
+from anthropic import Anthropic, AnthropicBedrock, AsyncAnthropic, AsyncAnthropicBedrock
+from botocore.client import BaseClient
+from botocore.response import StreamingBody
+from botocore.stub import ANY, Stubber
 from google.genai import Client
 from google.genai.types import HttpOptions
 from openai import AsyncOpenAI, OpenAI
@@ -99,6 +104,34 @@ def mock_async_anthropic_client() -> Generator[AsyncAnthropic, None, None]:
 
 
 @pytest.fixture(scope="class")
+def mock_anthropic_bedrock_client() -> Generator[AnthropicBedrock, None, None]:
+    """Mock the Anthropic Bedrock client."""
+    with HTTPServer() as httpserver:
+        httpserver.expect_request("/model/some-model/invoke").respond_with_json(
+            _MOCK_RESPONSES["anthropic_bedrock_messages"]
+        )
+        yield AnthropicBedrock(
+            base_url=httpserver.url_for(""),
+            aws_access_key="mock-access-key",
+            aws_secret_key="mock-secret-key",
+        )
+
+
+@pytest.fixture(scope="class")
+def mock_async_anthropic_bedrock_client() -> Generator[AsyncAnthropicBedrock, None, None]:
+    """Mock the Async Anthropic Bedrock client."""
+    with HTTPServer() as httpserver:
+        httpserver.expect_request("/model/some-model/invoke").respond_with_json(
+            _MOCK_RESPONSES["anthropic_bedrock_messages"]
+        )
+        yield AsyncAnthropicBedrock(
+            base_url=httpserver.url_for(""),
+            aws_access_key="mock-access-key",
+            aws_secret_key="mock-secret-key",
+        )
+
+
+@pytest.fixture(scope="class")
 def mock_google_genai_client() -> Generator[Client, None, None]:
     """Mock the Google GenAI client."""
     with HTTPServer() as httpserver:
@@ -113,3 +146,50 @@ def mock_google_genai_client() -> Generator[Client, None, None]:
             api_key="unit-test",
             http_options=HttpOptions(base_url=httpserver.url_for("")),
         )
+
+
+@pytest.fixture(scope="function")
+def bedrock_client_factory() -> Generator[
+    Callable[[str, dict], Tuple[BaseClient, Stubber]], None, None
+]:
+    """Factory function to create a stubbed Bedrock client."""
+
+    def _create_client_with_response(model_id: str, response_content: dict):
+        client = boto3.client(
+            service_name="bedrock-runtime",
+            region_name="us-east-1",
+        )
+        stubber = Stubber(client)
+        stubber.activate()
+
+        response_body = json.dumps(response_content).encode()
+        mock_response = {
+            "body": StreamingBody(io.BytesIO(response_body), len(response_body)),
+            "contentType": "application/json",
+            "ResponseMetadata": {"HTTPStatusCode": 200},
+        }
+
+        stubber.add_response(
+            "invoke_model",
+            mock_response,
+            {
+                "body": ANY,
+                "modelId": model_id,
+            },
+        )
+
+        return client, stubber
+
+    clients_and_stubbers: list[Tuple[BaseClient, Stubber]] = []
+
+    def factory(model_id: str, response_content: dict):
+        client_stubber = _create_client_with_response(model_id, response_content)
+        clients_and_stubbers.append(client_stubber)
+        return client_stubber
+
+    yield factory
+
+    # Cleanup all created clients
+    for _, stubber in clients_and_stubbers:
+        stubber.deactivate()
+        stubber.assert_no_pending_responses()
