@@ -16,6 +16,8 @@ from atla_insights.context import metadata_var, root_span_var
 
 logger = logging.getLogger(OTEL_MODULE_NAME)
 
+_GLOBAL_METADATA: Optional[dict[str, str]] = None
+
 
 def _truncate_value(value: str, max_chars: int) -> str:
     """Truncate a value to a maximum number of characters.
@@ -75,7 +77,18 @@ def get_metadata() -> Optional[dict[str, str]]:
 
     :return (Optional[dict[str, str]]): The metadata for the current trace.
     """
-    return metadata_var.get()
+    return metadata_var.get() or _GLOBAL_METADATA
+
+
+def set_global_metadata(metadata: dict[str, str]) -> None:
+    """Set the global metadata.
+
+    :param metadata (dict[str, str]): The global metadata.
+    """
+    metadata = validate_metadata(metadata)
+
+    global _GLOBAL_METADATA
+    _GLOBAL_METADATA = metadata
 
 
 def set_metadata(metadata: dict[str, str]) -> None:

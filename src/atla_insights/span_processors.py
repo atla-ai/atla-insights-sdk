@@ -16,7 +16,8 @@ from atla_insights.constants import (
     VERSION_MARK,
     __version__,
 )
-from atla_insights.context import metadata_var, root_span_var
+from atla_insights.context import root_span_var
+from atla_insights.metadata import get_metadata
 
 
 class AtlaRootSpanProcessor(SpanProcessor):
@@ -32,7 +33,7 @@ class AtlaRootSpanProcessor(SpanProcessor):
         root_span_var.set(span)
         span.set_attribute(SUCCESS_MARK, -1)
 
-        if metadata := metadata_var.get():
+        if metadata := get_metadata():
             span.set_attribute(METADATA_MARK, json.dumps(metadata))
 
     def on_end(self, span: ReadableSpan) -> None:
