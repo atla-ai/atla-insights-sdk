@@ -73,7 +73,7 @@ class TestLangChainInstrumentation(BaseLocalOtel):
             workflow.add_edge("generate", END)
 
             app = workflow.compile()
-            app.invoke({"messages": []})  # type: ignore[arg-type]
+            app.invoke(TestState(messages=[]))
 
         finished_spans = self.get_finished_spans()
 
