@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "atla-insights"
-version = "0.0.5"
+version = "0.0.6a2"
 description = "Atla is a platform for monitoring and improving AI agents."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -32,16 +32,17 @@ dependencies = [
 dev = ["atla-insights[all,ci]"]
 
 [project.optional-dependencies]
+all = [
+    "atla-insights[agno,anthropic,baml,bedrock,crewai,google-genai,google-generativeai,langchain,litellm,mcp,openai,openai-agents,smolagents]",
+]
 agno = ["agno>=1.5.0", "openinference-instrumentation-agno>=0.1.4"]
 anthropic = [
     "anthropic>=0.52.1",
     "anthropic[bedrock]>=0.52.1",
     "openinference-instrumentation-anthropic>=0.1.18",
 ]
+baml = ["baml-py>=0.201.0"]
 bedrock = ["boto3>=1.38.17", "openinference-instrumentation-bedrock>=0.1.26"]
-all = [
-    "atla-insights[agno,anthropic,bedrock,crewai,google-genai,google-generativeai,langchain,litellm,mcp,openai,openai-agents,smolagents]",
-]
 ci = [
     "mypy>=1.15.0",
     "ruff>=0.11.7",
@@ -109,7 +110,7 @@ ignore_missing_imports = true
 follow_imports = "skip"
 
 [tool.ruff]
-exclude = [".venv"]
+exclude = [".venv", "examples/frameworks/instrument_baml/baml_client"]
 line-length = 90
 indent-width = 4
 
