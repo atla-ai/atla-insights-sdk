@@ -6,19 +6,26 @@ from atla_insights.main import ATLA_INSTANCE
 
 
 def instrument_bedrock() -> ContextManager[None]:
-    """Instrument the Bedrock LLM provider.
+    """Context manager to instrument the Bedrock LLM provider for tracing.
 
-    This function creates a context manager that instruments the Bedrock LLM provider,
-    within its context.
+    This context manager wraps the *creation* of boto3 Bedrock clients, not
+    individual requests.
+    You must enter this context *before* creating your boto3 Bedrock client(s) for
+    instrumentation to take effect.
+    Do not use this with other Bedrock-compatible clients (e.g., AnthropicBedrock);
+    it is intended only for boto3.
 
-    ```py
-    from atla_insights import instrument_bedrock
+    Example:
+        ```py
+        from atla_insights import instrument_bedrock
+        import boto3
 
-    with instrument_bedrock():
-        # My Bedrock code here
-    ```
+        with instrument_bedrock():
+            client = boto3.client("bedrock-runtime")
+            # All requests made with this client will be instrumented
+        ```
 
-    :return (ContextManager[None]): A context manager that instruments Bedrock.
+    :return: A context manager that instruments boto3 Bedrock client creation.
     """
     try:
         from openinference.instrumentation.bedrock import BedrockInstrumentor
