@@ -1,9 +1,36 @@
 """Constants for the atla_insights package."""
 
 import importlib.metadata
+import json
+from importlib.metadata import distributions
 from typing import Literal, Sequence, Union
 
 __version__ = importlib.metadata.version("atla-insights")
+
+LIB_VERSIONS = json.dumps(
+    {
+        distribution.name: distribution.version
+        for distribution in distributions()
+        if distribution.name.startswith("openinference")
+        or distribution.name.startswith("langchain")
+        or distribution.name
+        in [
+            "agno",
+            "anthropic",
+            "baml-py",
+            "boto3",
+            "crewai",
+            "google-genai",
+            "google-generativeai",
+            "langgraph",
+            "litellm",
+            "mcp",
+            "openai",
+            "openai-agents",
+            "smolagents",
+        ]
+    }
+)
 
 DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT = 4096
 
@@ -13,6 +40,7 @@ MAX_METADATA_VALUE_CHARS = 100
 
 OTEL_NAMESPACE = "atla"
 
+LIB_VERSIONS_MARK = f"{OTEL_NAMESPACE}.debug.versions"
 METADATA_MARK = f"{OTEL_NAMESPACE}.metadata"
 SUCCESS_MARK = f"{OTEL_NAMESPACE}.mark.success"
 VERSION_MARK = f"{OTEL_NAMESPACE}.sdk.version"

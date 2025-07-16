@@ -49,6 +49,7 @@ class AtlaInsights:
         metadata: Optional[dict[str, str]] = None,
         additional_span_processors: Optional[Sequence[SpanProcessor]] = None,
         verbose: bool = True,
+        debug: bool = False,
     ) -> None:
         """Configure Atla insights.
 
@@ -81,6 +82,7 @@ class AtlaInsights:
             span processors. Defaults to `None`.
         :param verbose (bool): Whether to print verbose output to console.
             Defaults to `True`.
+        :param debug (bool): Whether to log debug outputs. Defaults to `False`.
         """
         if metadata is not None:
             set_global_metadata(metadata)
@@ -92,6 +94,7 @@ class AtlaInsights:
             token=token,
             additional_span_processors=additional_span_processors,
             verbose=verbose,
+            debug=debug,
         )
         add_sampling_to_tracer_provider(
             tracer_provider=self.tracer_provider,
