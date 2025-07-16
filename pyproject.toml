@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "atla-insights"
-version = "0.0.6"
+version = "0.0.7"
 description = "Atla is a platform for monitoring and improving AI agents."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -61,7 +61,7 @@ google-genai = [
 ]
 google-generativeai = [
     "google-generativeai>=0.7.0",
-    "openinference-instrumentation-google-genai>=0.1.2",
+    "openinference-instrumentation-google-genai==0.1.2",
 ]
 langchain = [
     "langchain>=0.3.18",

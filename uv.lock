@@ -215,7 +215,7 @@ wheels = [
 
 [[package]]
 name = "atla-insights"
-version = "0.0.6"
+version = "0.0.7"
 source = { editable = "." }
 dependencies = [
     { name = "openai" },
@@ -349,7 +349,7 @@ requires-dist = [
     { name = "openinference-instrumentation-bedrock", marker = "extra == 'bedrock'", specifier = ">=0.1.26" },
     { name = "openinference-instrumentation-crewai", marker = "extra == 'crewai'", specifier = ">=0.1.10" },
     { name = "openinference-instrumentation-google-genai", marker = "extra == 'google-genai'", specifier = "==0.1.2" },
-    { name = "openinference-instrumentation-google-genai", marker = "extra == 'google-generativeai'", specifier = ">=0.1.2" },
+    { name = "openinference-instrumentation-google-genai", marker = "extra == 'google-generativeai'", specifier = "==0.1.2" },
     { name = "openinference-instrumentation-langchain", marker = "extra == 'langchain'", specifier = "==0.1.43" },
     { name = "openinference-instrumentation-mcp", marker = "extra == 'mcp'", specifier = ">=1.3.0" },
     { name = "openinference-instrumentation-openai", marker = "extra == 'openai'", specifier = ">=0.1.30" },
