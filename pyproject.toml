@@ -61,7 +61,7 @@ google-genai = [
 ]
 google-generativeai = [
     "google-generativeai>=0.7.0",
-    "openinference-instrumentation-google-genai>=0.1.2",
+    "openinference-instrumentation-google-genai==0.1.2",
 ]
 langchain = [
     "langchain>=0.3.18",
