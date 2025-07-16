@@ -9,9 +9,6 @@ __version__ = importlib.metadata.version("atla-insights")
 
 LIB_VERSIONS = json.dumps(
     {
-        "atla-insights": __version__,
-    }
-    | {
         distribution.name: distribution.version
         for distribution in distributions()
         if distribution.name.startswith("openinference")
@@ -43,9 +40,10 @@ MAX_METADATA_VALUE_CHARS = 100
 
 OTEL_NAMESPACE = "atla"
 
-LIB_VERSIONS_MARK = f"{OTEL_NAMESPACE}.versions"
+LIB_VERSIONS_MARK = f"{OTEL_NAMESPACE}.debug.versions"
 METADATA_MARK = f"{OTEL_NAMESPACE}.metadata"
 SUCCESS_MARK = f"{OTEL_NAMESPACE}.mark.success"
+VERSION_MARK = f"{OTEL_NAMESPACE}.sdk.version"
 
 OTEL_MODULE_NAME = "atla_insights"
 OTEL_TRACES_ENDPOINT = "https://logfire-eu.pydantic.dev/v1/traces"

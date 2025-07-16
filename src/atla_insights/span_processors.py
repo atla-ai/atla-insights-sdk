@@ -15,6 +15,8 @@ from atla_insights.constants import (
     METADATA_MARK,
     OTEL_TRACES_ENDPOINT,
     SUCCESS_MARK,
+    VERSION_MARK,
+    __version__,
 )
 from atla_insights.context import root_span_var
 from atla_insights.metadata import get_metadata
@@ -23,9 +25,16 @@ from atla_insights.metadata import get_metadata
 class AtlaRootSpanProcessor(SpanProcessor):
     """An Atla root span processor."""
 
+    def __init__(self, debug: bool) -> None:
+        """Initialize the Atla root span processor."""
+        self.debug = debug
+
     def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
         """On start span processing."""
-        span.set_attribute(LIB_VERSIONS_MARK, LIB_VERSIONS)
+        span.set_attribute(VERSION_MARK, __version__)
+
+        if self.debug:
+            span.set_attribute(LIB_VERSIONS_MARK, LIB_VERSIONS)
 
         if span.parent is not None:
             return
@@ -68,6 +77,7 @@ def add_span_processors_to_tracer_provider(
     token: str,
     additional_span_processors: Optional[Sequence[SpanProcessor]],
     verbose: bool,
+    debug: bool,
 ) -> None:
     """Adds all relevant span processors to a tracer provider.
 
@@ -77,8 +87,9 @@ def add_span_processors_to_tracer_provider(
     :param additional_span_processors (Optional[Sequence[SpanProcessor]]): Additional
         span processors.
     :param verbose (bool): Whether to print verbose output to console.
+    :param debug (bool): Whether to log debug outputs.
     """
-    span_processors = [get_atla_span_processor(token), AtlaRootSpanProcessor()]
+    span_processors = [get_atla_span_processor(token), AtlaRootSpanProcessor(debug)]
 
     if additional_span_processors:
         span_processors.extend(additional_span_processors)
