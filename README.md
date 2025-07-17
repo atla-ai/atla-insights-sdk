@@ -199,7 +199,7 @@ from atla_insights import configure
 from atla_insights.sampling import TraceRatioSamplingOptions
 
 # We want to log 10% of traces
-sampling_options = TraceRatioSamplingOptions(ratio=0.10)
+sampling_options = TraceRatioSamplingOptions(rate=0.10)
 
 configure(
     token="<MY_ATLA_INSIGHTS_TOKEN>",
