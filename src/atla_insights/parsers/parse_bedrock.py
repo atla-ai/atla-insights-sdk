@@ -5,7 +5,10 @@ from typing import Any, Generator, Literal
 
 try:
     from openinference.instrumentation import safe_json_dumps
-    from openinference.instrumentation.bedrock import _get_attributes_from_message_param
+    from openinference.instrumentation.bedrock import (
+        _get_attributes_from_message_param,
+        is_iterable_of,
+    )
     from openinference.instrumentation.bedrock.utils.anthropic import _attributes
 except ImportError as e:
     raise ImportError(
@@ -71,7 +74,9 @@ class BedrockParser(BaseParser):
                 continue
 
             msg_copy = msg.copy()
-            msg_copy.pop("image", None)  # TODO: remove when support multimodal messages.
+            if content := msg_copy.get("content"):
+                if is_iterable_of(content, dict):
+                    msg_copy["content"] = [c for c in content if "image" not in c.keys()]
 
             for key, value in _get_attributes_from_message_param(msg_copy):
                 yield f"{SpanAttributes.LLM_INPUT_MESSAGES}.{idx}.{key}", value
