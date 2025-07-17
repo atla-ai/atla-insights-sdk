@@ -73,7 +73,7 @@ class BedrockParser(BaseParser):
             msg_copy = msg.copy()
             msg_copy.pop("image", None)  # TODO: remove when support multimodal messages.
 
-            for key, value in _get_attributes_from_message_param(msg):
+            for key, value in _get_attributes_from_message_param(msg_copy):
                 yield f"{SpanAttributes.LLM_INPUT_MESSAGES}.{idx}.{key}", value
 
         last_message = aggregated_messages[-1]
