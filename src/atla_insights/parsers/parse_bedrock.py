@@ -69,6 +69,10 @@ class BedrockParser(BaseParser):
             if not isinstance(msg, dict):
                 # Only dictionaries supported for now
                 continue
+
+            msg_copy = msg.copy()
+            msg_copy.pop("image", None)  # TODO: remove when support multimodal messages.
+
             for key, value in _get_attributes_from_message_param(msg):
                 yield f"{SpanAttributes.LLM_INPUT_MESSAGES}.{idx}.{key}", value
 
