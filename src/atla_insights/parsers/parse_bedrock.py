@@ -1,7 +1,7 @@
 """Parsers for the Bedrock LLM provider."""
 
 import logging
-from typing import Any, Generator, Literal
+from typing import Any, Generator, Literal, cast
 
 try:
     from openinference.instrumentation import safe_json_dumps
@@ -72,11 +72,13 @@ class BedrockParser(BaseParser):
             if not isinstance(msg, dict):
                 # Only dictionaries supported for now
                 continue
-
             msg_copy = msg.copy()
             if content := msg_copy.get("content"):
                 if is_iterable_of(content, dict):
-                    msg_copy["content"] = [c for c in content if "image" not in c.keys()]
+                    # Cast b/c we just checked is_iterable_of.
+                    msg_copy["content"] = [
+                        c for c in content if "image" not in cast(dict, c).keys()
+                    ]
 
             for key, value in _get_attributes_from_message_param(msg_copy):
                 yield f"{SpanAttributes.LLM_INPUT_MESSAGES}.{idx}.{key}", value
