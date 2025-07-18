@@ -1,6 +1,7 @@
 """BAML instrumentation."""
 
 import logging
+from contextvars import ContextVar
 from importlib import import_module
 from typing import Any, Callable, Collection, Mapping
 
@@ -29,6 +30,9 @@ from atla_insights.constants import SUPPORTED_LLM_FORMAT
 from atla_insights.parsers import get_llm_parser
 
 logger = logging.getLogger(__name__)
+
+# Context variable to store the collector for each call
+_atla_collector: ContextVar[Collector] = ContextVar("atla_collector")
 
 
 def _get_updated_collectors(
@@ -63,7 +67,6 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         """Initialize the Atla BAML instrumentator."""
         super().__init__()
 
-        self.atla_collector = Collector(name="atla-insights")
         self.llm_parser = get_llm_parser(llm_provider)
         self.tracer = get_tracer("openinference.instrumentation.baml")
 
@@ -85,9 +88,10 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         kwargs: Mapping[str, Any],
     ) -> Any:
         """Wrap the BAML call function."""
-        new_collectors = _get_updated_collectors(
-            instance.__getstate__(), self.atla_collector
-        )
+        atla_collector = Collector(name="atla-insights")
+        _atla_collector.set(atla_collector)
+
+        new_collectors = _get_updated_collectors(instance.__getstate__(), atla_collector)
         instance.__setstate__({"baml_options": {"collector": new_collectors}})
 
         with self.tracer.start_as_current_span(
@@ -111,17 +115,18 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
 
             span.set_status(trace_api.StatusCode.OK)
 
+            atla_collector = _atla_collector.get()
             if (
-                self.atla_collector.last is not None
-                and self.atla_collector.last.selected_call is not None
+                atla_collector.last is not None
+                and atla_collector.last.selected_call is not None
             ):
-                if llm_request := self.atla_collector.last.selected_call.http_request:
+                if llm_request := atla_collector.last.selected_call.http_request:
                     request_body = llm_request.body.json()
                     span.set_attributes(
                         dict(self.llm_parser.parse_request_body(request_body))
                     )
 
-                if llm_response := self.atla_collector.last.selected_call.http_response:
+                if llm_response := atla_collector.last.selected_call.http_response:
                     response_body = llm_response.body.json()
                     span.set_attributes(
                         dict(self.llm_parser.parse_response_body(response_body))
@@ -137,9 +142,10 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         kwargs: Mapping[str, Any],
     ) -> Any:
         """Wrap the BAML create sync stream function."""
-        new_collectors = _get_updated_collectors(
-            instance.__getstate__(), self.atla_collector
-        )
+        atla_collector = Collector(name="atla-insights")
+        _atla_collector.set(atla_collector)
+
+        new_collectors = _get_updated_collectors(instance.__getstate__(), atla_collector)
         instance.__setstate__({"baml_options": {"collector": new_collectors}})
         return wrapped(*args, **kwargs)
 
@@ -173,11 +179,12 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
 
             span.set_status(trace_api.StatusCode.OK)
 
+            atla_collector = _atla_collector.get()
             if (
-                self.atla_collector.last is not None
-                and self.atla_collector.last.selected_call is not None
+                atla_collector.last is not None
+                and atla_collector.last.selected_call is not None
             ):
-                if llm_request := self.atla_collector.last.selected_call.http_request:
+                if llm_request := atla_collector.last.selected_call.http_request:
                     request_body = llm_request.body.json()
                     span.set_attributes(
                         dict(self.llm_parser.parse_request_body(request_body))
@@ -223,11 +230,12 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
 
             span.set_status(trace_api.StatusCode.OK)
 
+            atla_collector = _atla_collector.get()
             if (
-                self.atla_collector.last is not None
-                and self.atla_collector.last.selected_call is not None
+                atla_collector.last is not None
+                and atla_collector.last.selected_call is not None
             ):
-                if llm_request := self.atla_collector.last.selected_call.http_request:
+                if llm_request := atla_collector.last.selected_call.http_request:
                     request_body = llm_request.body.json()
                     span.set_attributes(
                         dict(self.llm_parser.parse_request_body(request_body))
@@ -253,9 +261,10 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         kwargs: Mapping[str, Any],
     ) -> Any:
         """Wrap the BAML async call function."""
-        new_collectors = _get_updated_collectors(
-            instance.__getstate__(), self.atla_collector
-        )
+        atla_collector = Collector(name="atla-insights")
+        _atla_collector.set(atla_collector)
+
+        new_collectors = _get_updated_collectors(instance.__getstate__(), atla_collector)
         instance.__setstate__({"baml_options": {"collector": new_collectors}})
 
         with self.tracer.start_as_current_span(
@@ -280,16 +289,16 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
             span.set_status(trace_api.StatusCode.OK)
 
             if (
-                self.atla_collector.last is not None
-                and self.atla_collector.last.selected_call is not None
+                atla_collector.last is not None
+                and atla_collector.last.selected_call is not None
             ):
-                if llm_request := self.atla_collector.last.selected_call.http_request:
+                if llm_request := atla_collector.last.selected_call.http_request:
                     request_body = llm_request.body.json()
                     span.set_attributes(
                         dict(self.llm_parser.parse_request_body(request_body))
                     )
 
-                if llm_response := self.atla_collector.last.selected_call.http_response:
+                if llm_response := atla_collector.last.selected_call.http_response:
                     response_body = llm_response.body.json()
                     span.set_attributes(
                         dict(self.llm_parser.parse_response_body(response_body))
@@ -327,11 +336,12 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
 
             span.set_status(trace_api.StatusCode.OK)
 
+            atla_collector = _atla_collector.get()
             if (
-                self.atla_collector.last is not None
-                and self.atla_collector.last.selected_call is not None
+                atla_collector.last is not None
+                and atla_collector.last.selected_call is not None
             ):
-                if llm_request := self.atla_collector.last.selected_call.http_request:
+                if llm_request := atla_collector.last.selected_call.http_request:
                     request_body = llm_request.body.json()
                     span.set_attributes(
                         dict(self.llm_parser.parse_request_body(request_body))
@@ -377,11 +387,12 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
 
             span.set_status(trace_api.StatusCode.OK)
 
+            atla_collector = _atla_collector.get()
             if (
-                self.atla_collector.last is not None
-                and self.atla_collector.last.selected_call is not None
+                atla_collector.last is not None
+                and atla_collector.last.selected_call is not None
             ):
-                if llm_request := self.atla_collector.last.selected_call.http_request:
+                if llm_request := atla_collector.last.selected_call.http_request:
                     request_body = llm_request.body.json()
                     span.set_attributes(
                         dict(self.llm_parser.parse_request_body(request_body))
@@ -494,7 +505,8 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         )
 
     def _uninstrument(self, **kwargs: Any) -> None:
-        # TODO: Remove atla collector from CallManager state
+        # TODO: Confirm that the collectors are cleaned up. Context vars should be
+        # automatically cleaned up when context ends, but we need to confirm.
 
         if self.original_call_function_sync is not None:
             runtime_module = import_module("baml_client.runtime")
