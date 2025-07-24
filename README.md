@@ -11,6 +11,13 @@ Atla Insights is a platform for monitoring and improving AI agents.
   <a href="https://x.com/Atla_AI"><img src="https://img.shields.io/twitter/follow/Atla_AI?style=social" alt="Twitter Follow"></a>
 </p>
 
+## Getting started
+
+To get started with Atla Insights, you can either follow the instructions below, or let an agent instrument your code for you.
+
+- **If you are using Claude Code**: copy the contents of `Claude.md`.
+- **If you are not using Claude Code**: copy the contents of `onboarding.txt` and paste them into your AI agent of choice.
+
 ## Installation
 
 ```bash
