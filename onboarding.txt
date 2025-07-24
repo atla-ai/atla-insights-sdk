@@ -1,0 +1,508 @@
+# Atla Insights SDK Integration
+
+## Goals
+
+Your goal is to help me integrate the Atla Insights SDK into my codebase.
+
+## Rules
+
+Before you begin, you must understand these three fundamental rules:
+
+1.  Do Not Change Business Logic: You are strictly forbidden from changing, refactoring, or altering any of my existing code's logic. Your only task is to add the necessary code for integration, such as decorators, imports, and environment variable initializations.
+2.  Adhere to the Workflow: You must follow the step-by-step workflow outlined below in the exact sequence.
+3.  You may use your websearch capabilities to find more information about the Atla Insights SDK by visiting `https://github.com/atla-ai/atla-insights-sdk/blob/main/README.md` and/or `https://docs.atla-ai.com/`.
+
+## Integration Workflow
+
+### Step 1: Language and Compatibility Check
+
+First, analyze the codebase to identify the primary programming language.
+
+- If the language is Python, proceed to Step 2.
+- If the language is not Python, you must stop immediately. Inform me that the codebase is currently unsupported for this AI-based setup, and do not proceed further.
+
+## Step 2: Detect Your Python Environment
+
+Automatically detect the package manager by checking for these files:
+
+| File(s) Present                         | Package Manager | Installation Method              |
+| --------------------------------------- | --------------- | -------------------------------- |
+| `pyproject.toml` with `[tool.poetry]`   | Poetry          | `poetry add`                     |
+| `pyproject.toml` with `[tool.uv]`       | uv              | `uv add`                         |
+| `Pipfile`                               | Pipenv          | `pipenv install`                 |
+| `environment.yml` or `environment.yaml` | Conda           | `conda install` or `pip install` |
+| `requirements.txt` only                 | pip/venv        | `pip install`                    |
+
+**If detection fails, ask:** "Which Python package manager are you using for this project?"
+
+### Step 3: Codebase Discovery & Entrypoint Confirmation
+
+Once you have confirmed the language is compatible, explore the entire codebase to understand its purpose.
+
+- Identify all files and functions that contain LLM calls or are likely candidates for tracing.
+- Present this list of files and function names to me.
+- If you are unclear about the main entry point of the application (e.g., the primary API route or the main script to execute), you must ask me for confirmation on which parts are most critical to trace before proceeding to the next step.
+
+### Step 4: Identify LLM framework or LLM provider SDK
+
+After you confirm the files and entry points, identify the AI agent framework(s) (e.g., OpenAI Agents SDK, LangGraph, CrewAI, etc.) that are used in the codebase, if any.
+Visit `https://github.com/atla-ai/atla-insights-sdk/blob/main/README.md` to find out which frameworks and LLM providers are supported & present this to me.
+
+If the codebase uses an AI agent framework, present it to me & verify whether it is supported by the Atla Insights SDK.
+
+If the codebase does not use an AI agent framework, clearly state this and present me a list of the LLM provider SDK(s) (e.g., `litellm`, `openai`, `anthropic`, etc.) in use & verify whether they are supported by the Atla Insights SDK.
+
+**If identification fails, ask:** "Which AI agent framework or LLM provider SDK(s) are you using?"
+
+## Step 5: Configure Atla Insights in Your Entry Point
+
+**Your Action:** Install the latest version of the Atla Insights SDK using the appropriate installation method for the Python environment you detected in Step 2.
+Make sure to include the correct optional dependencies! If you face issues or are unsure, fall back to using `atla-insights[all]`.
+
+**Always** install the latest available version of Atla Insights.
+In case of dependency conflicts, resolve these by continuously adjusting the requirements.
+Do not continue until you resolve any dependency conflicts.
+
+**Your Action:** Add this configuration **at the very beginning** (just after imports & (optionally) environment variable loading) of your main application file (identified in Step 5):
+
+```python
+import os
+from dotenv import load_dotenv
+from atla_insights import configure
+
+# Load environment variables
+load_dotenv()
+
+# Configure Atla Insights - REQUIRED FIRST
+configure(token=os.getenv("ATLA_INSIGHTS_TOKEN"))
+```
+
+## Step 6: Add Framework-Specific Instrumentation
+
+**Your Action:** Based on detected framework from Step 2, add the appropriate instrumentation **at the beginning** of your main application file, just after configuration:
+
+#### If you use `langchain` and/or `langgraph`:
+
+```python
+from atla_insights import instrument_langchain
+
+instrument_langchain()
+```
+
+#### If you chose `crewai`:
+
+```python
+from atla_insights import instrument_crewai
+
+instrument_crewai()
+```
+
+#### If you chose `agno`:
+
+```python
+from atla_insights import instrument_agno
+
+# If using a single LLM provider
+instrument_agno("openai")  # or "anthropic", "google-genai", "litellm"
+
+# If using multiple LLM providers
+instrument_agno(["openai", "anthropic"])  # adjust based on your LLM choices
+```
+
+#### If you chose `openai-agents`:
+
+```python
+from atla_insights import instrument_openai_agents
+
+instrument_openai_agents()
+```
+
+#### If you chose `smolagents`:
+
+```python
+from atla_insights import instrument_smolagents
+
+# If using a single LLM provider
+instrument_smolagents("openai")  # or "anthropic", "google-genai", "litellm"
+
+# If using multiple LLM providers
+instrument_smolagents(["openai", "anthropic"])  # adjust based on your LLM choices
+```
+
+#### If you chose MCP:
+
+```python
+from atla_insights import instrument_mcp
+instrument_mcp()
+```
+
+#### If you chose `baml-py`:
+
+```python
+from atla_insights import instrument_baml
+instrument_baml("openai")  # or `anthropic`, `bedrock`
+```
+
+#### If you chose Custom/None:
+
+Skip framework instrumentation, just add LLM provider instrumentation below.
+
+## Step 7: Add LLM Provider Instrumentation
+
+**Your Action:** Based on detected LLM provider(s) from Step 2, add the appropriate instrumentation:
+
+#### If you use OpenAI:
+
+```python
+from atla_insights import instrument_openai
+instrument_openai()
+```
+
+#### If you use Anthropic:
+
+```python
+from atla_insights import instrument_anthropic
+instrument_anthropic()
+```
+
+#### If you use Google GenAI:
+
+```python
+from atla_insights import instrument_google_genai
+instrument_google_genai()
+```
+
+#### If you use LiteLLM:
+
+```python
+from atla_insights import instrument_litellm
+instrument_litellm()
+```
+
+#### If you use Multiple providers:
+
+Add all the instrumentation calls for each provider you use.
+
+#### If you use a framework:
+
+Skip this step.
+
+## Step 8: Instrument Your Functions
+
+**Your Action:** Add instrumentation decorators to important functions:
+
+### Agent Functions
+
+For important agent functions, add the `@instrument` decorator:
+
+```python
+from atla_insights import instrument
+
+@instrument("My agent doing its thing")
+def run_my_agent() -> None:
+    try:
+        result = client.chat.completions.create(
+            model="gpt-4o-2024-08-06",
+            messages=[
+                {
+                    "role": "user",
+                    "content": "What is 1 + 2? Reply with only the answer, nothing else.",
+                }
+            ]
+        )
+        response = result.choices[0].message.content
+
+        return response
+    except Exception as e:
+        raise
+```
+
+### Custom Tools
+
+For custom tools, add the `@tool` decorator:
+
+```python
+from atla_insights import tool
+
+@tool
+def my_tool(my_arg: str) -> str:
+    """Process the input and return a result"""
+    return f"Processed: {my_arg}"
+```
+
+## Step 9: Complete Integration Examples
+
+**Reference:** Here are complete examples based on common framework choices:
+
+Here are complete examples based on common framework choices:
+
+### Example 1: LangChain + OpenAI
+
+```python
+# main.py
+import os
+from dotenv import load_dotenv
+from atla_insights import configure, instrument, instrument_langchain, instrument_openai, tool
+from langchain.llms import OpenAI
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
+
+# Load environment variables
+load_dotenv()
+
+# Configure Atla Insights - REQUIRED FIRST
+configure(token=os.getenv("ATLA_INSIGHTS_TOKEN"))
+
+# Instrument based on your choices from Step 2
+instrument_langchain()  # Framework choice
+instrument_openai()     # LLM provider choice
+
+# Initialize your components
+llm = OpenAI()
+prompt = PromptTemplate(
+    input_variables=["query"],
+    template="Answer this question: {query}"
+)
+chain = LLMChain(llm=llm, prompt=prompt)
+
+@tool
+def search_web(query: str) -> str:
+    """Search the web for information"""
+    return f"Search results for: {query}"
+
+@instrument("Main agent workflow")
+def run_agent(user_input: str) -> str:
+    try:
+        # Use your instrumented tool
+        search_results = search_web(user_input)
+
+        # Use LangChain (automatically instrumented)
+        response = chain.run(query=f"Based on: {search_results}, respond to: {user_input}")
+
+        return response
+
+    except Exception as e:
+        raise
+
+if __name__ == "__main__":
+    response = run_agent("What's the weather like?")
+    print(response)
+```
+
+### Example 2: CrewAI + Anthropic
+
+```python
+# app.py
+import os
+from dotenv import load_dotenv
+from atla_insights import configure, instrument, instrument_crewai, instrument_anthropic
+from crewai import Agent, Task, Crew
+from anthropic import Anthropic
+
+# Load environment variables
+load_dotenv()
+
+# Configure Atla Insights - REQUIRED FIRST
+configure(token=os.getenv("ATLA_INSIGHTS_TOKEN"))
+
+# Instrument based on your choices from Step 2
+instrument_crewai()     # Framework choice
+instrument_anthropic()  # LLM provider choice
+
+# Initialize your components
+client = Anthropic()
+
+@instrument("CrewAI workflow")
+def run_crew(task_description: str) -> str:
+    try:
+        # Define your CrewAI setup
+        agent = Agent(
+            role="Data Analyst",
+            goal="Analyze data and provide insights",
+            backstory="Expert in data analysis"
+        )
+
+        task = Task(
+            description=task_description,
+            agent=agent
+        )
+
+        crew = Crew(
+            agents=[agent],
+            tasks=[task]
+        )
+
+        # Run the crew (automatically instrumented)
+        result = crew.kickoff()
+
+        return result
+
+    except Exception as e:
+        raise
+
+if __name__ == "__main__":
+    response = run_crew("Analyze the sales data trends")
+    print(response)
+```
+
+### Example 3: Custom Agent + Multiple LLM Providers
+
+```python
+# server.py
+import os
+from dotenv import load_dotenv
+from atla_insights import configure, instrument, instrument_openai, instrument_anthropic, tool
+from openai import OpenAI
+from anthropic import Anthropic
+
+# Load environment variables
+load_dotenv()
+
+# Configure Atla Insights - REQUIRED FIRST
+configure(token=os.getenv("ATLA_INSIGHTS_TOKEN"))
+
+# Instrument multiple LLM providers
+instrument_openai()     # First provider
+instrument_anthropic()  # Second provider
+
+# Initialize clients
+openai_client = OpenAI()
+anthropic_client = Anthropic()
+
+@tool
+def choose_model(task_type: str) -> str:
+    """Choose the best model for the task"""
+    if task_type == "creative":
+        return "anthropic"
+    else:
+        return "openai"
+
+@instrument("Multi-provider agent")
+def run_multi_agent(user_input: str, task_type: str) -> str:
+    try:
+        # Choose provider based on task
+        provider = choose_model(task_type)
+
+        if provider == "openai":
+            response = openai_client.chat.completions.create(
+                model="gpt-4o-2024-08-06",
+                messages=[{"role": "user", "content": user_input}]
+            )
+            result = response.choices[0].message.content
+        else:
+            response = anthropic_client.messages.create(
+                model="claude-3-sonnet-20240229",
+                max_tokens=1000,
+                messages=[{"role": "user", "content": user_input}]
+            )
+            result = response.content[0].text
+
+        return result
+
+    except Exception as e:
+        raise
+
+if __name__ == "__main__":
+    response = run_multi_agent("Write a creative story", "creative")
+    print(response)
+```
+
+### Step 10: Request User Review and Wait
+
+After you have made all the changes, notify me that your work is complete. Explicitly ask me to run the application and confirm that everything is working correctly and that you can make changes/improvements if needed.
+
+### Step 11: Debug and Fix if Necessary
+
+If I report that something is not working correctly, analyze my feedback. Use the knowledge you have to debug the issue. If required, re-crawl the relevant documentation to find a solution, propose a fix to me, and then implement it.
+
+## Integration Checklist
+
+Based on your setup choices:
+
+### Environment Setup
+
+-   [ ] ✅ Detected Python package manager (Step 2)
+-   [ ] ✅ Identified AI framework and LLM provider (Step 4)
+-   [ ] ✅ Installed `atla-insights` with appropriate extras (Step 5)
+-   [ ] ✅ Created `.env` file with `ATLA_INSIGHTS_TOKEN` (Step 5)
+
+### Framework Detection
+
+-   [ ] ✅ Identified application entry point (Step 3)
+-   [ ] ✅ Identified AI agent framework (Step 4)
+-   [ ] ✅ Identified LLM provider(s) (Step 4)
+
+### Code Integration
+
+-   [ ] ✅ Added `configure()` call at the beginning of entry point file (Step 5)
+-   [ ] ✅ Added framework instrumentation (Step 6)
+-   [ ] ✅ Added LLM provider instrumentation (Step 7)
+-   [ ] ✅ Added `@instrument` decorators to key functions (Step 8)
+-   [ ] ✅ Added `@tool` decorators to custom tools (Step 8)
+
+### Testing
+
+-   [ ] ✅ Tested that application runs without errors
+-   [ ] ✅ Verified traces appear in Atla Insights dashboard
+
+## Troubleshooting
+
+| Problem                             | Solution                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------- |
+| **No traces appearing**             | Verify `configure()` is called before any AI framework code in your entry point |
+| **Authentication errors**           | Check that `ATLA_INSIGHTS_TOKEN` is set in `.env` file                          |
+| **Import errors**                   | Ensure packages are installed in correct virtual environment                    |
+| **Wrong framework instrumentation** | Review Step 4 and ensure you're using the correct framework                     |
+| **Multiple entry points**           | Add `configure()` to each entry point file                                      |
+
+## Common Questions
+
+### Q: I use multiple frameworks, what should I do?
+
+A: Add instrumentation for all frameworks you use. For example:
+
+```python
+instrument_langchain()
+instrument_crewai()
+instrument_openai()
+```
+
+### Q: My entry point is a custom file name, will this work?
+
+A: Yes! The key is to add the `configure()` call at the beginning of whichever file starts your application.
+
+### Q: I'm using a web framework like Flask/FastAPI, where do I put the configuration?
+
+A: Add it at the very beginning of your app file, before creating the Flask/FastAPI app instance.
+
+### Q: Can I use this with existing observability tools?
+
+A: Yes! Atla Insights is built on OpenTelemetry and is compatible with existing setups.
+
+## OpenTelemetry Compatibility
+
+Atla Insights is built on OpenTelemetry and is compatible with existing observability setups:
+
+```python
+from atla_insights import configure
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+
+# Add custom span processors
+my_span_exporter = OTLPSpanExporter(endpoint="https://my-otel-provider/v1/traces")
+my_span_processor = SimpleSpanProcessor(my_span_exporter)
+
+configure(
+    token=os.getenv("ATLA_INSIGHTS_TOKEN"),
+    additional_span_processors=[my_span_processor],
+)
+```
+
+## Next Steps
+
+1. **Review your traces** in the [Atla Insights dashboard](https://app.atla-ai.com)
+2. **Explore the examples** in the [SDK repository](https://github.com/atla-ai/atla-insights-sdk/tree/main/examples)
+3. **Add more instrumentation** to additional functions as needed
+4. **Configure metadata** to track different versions or environments
+
+For more advanced usage patterns, visit the [official documentation](https://docs.atla-ai.com).

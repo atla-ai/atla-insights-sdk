@@ -4,6 +4,14 @@
 
 Atla Insights is a platform for monitoring and improving AI agents. This guide provides step-by-step instructions for integrating the Atla Insights SDK into your Python codebase.
 
+## Rules
+
+Before you begin, you must understand these three fundamental rules:
+
+1.  Do Not Change Business Logic: You are strictly forbidden from changing, refactoring, or altering any of my existing code's logic. Your only task is to add the necessary code for integration, such as decorators, imports, and environment variable initializations.
+2.  Adhere to the Workflow: You must follow the step-by-step workflow outlined below in the exact sequence.
+3.  You may use your websearch capabilities to find more information about the Atla Insights SDK by visiting `https://github.com/atla-ai/atla-insights-sdk/blob/main/README.md` and/or `https://docs.atla-ai.com/`.
+
 ## Guide for Claude Code
 
 **What Claude Code should do:**
