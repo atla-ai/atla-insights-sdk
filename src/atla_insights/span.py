@@ -118,13 +118,9 @@ class AtlaSpan:
     ) -> None:
         """Record tools."""
         for tool_idx, tool in enumerate(tools):
-            tool_prefix = f"{prefix}.{tool_idx}"
-
-            if tool_parameters := tool["function"].get("parameters"):
-                self._span.set_attribute(
-                    f"{tool_prefix}.{ToolAttributes.TOOL_JSON_SCHEMA}",
-                    json.dumps(tool_parameters),
-                )
+            self._span.set_attribute(
+                f"{prefix}.{tool_idx}.{ToolAttributes.TOOL_JSON_SCHEMA}", json.dumps(tool)
+            )
 
     def record_generation(
         self,
