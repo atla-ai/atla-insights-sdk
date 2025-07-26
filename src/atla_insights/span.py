@@ -29,11 +29,18 @@ class AtlaSpan:
     """Atla span."""
 
     def __init__(self, span: Span):
-        """Initialize the Atla span."""
+        """Initialize the Atla span.
+
+        :param span (Span): The underlying span.
+        """
         self._span = span
 
     def __getattr__(self, name: str) -> Any:
-        """Get an attribute from the span."""
+        """Get an attribute from the underlying span.
+
+        :param name (str): The name of the attribute to get.
+        :return (Any): The value of the attribute.
+        """
         return getattr(self._span, name)
 
     def _record_messages(
@@ -41,7 +48,11 @@ class AtlaSpan:
         prefix: str,
         messages: Sequence[ChatCompletionMessageParam],
     ) -> None:
-        """Record a message."""
+        """Record OpenAI-compatible messages.
+
+        :param prefix (str): The prefix to use for the message attributes.
+        :param messages (Sequence[ChatCompletionMessageParam]): The messages to record.
+        """
         for message_idx, message in enumerate(messages):
             message_prefix = f"{prefix}.{message_idx}"
 
@@ -122,7 +133,11 @@ class AtlaSpan:
         prefix: str,
         tools: Sequence[ChatCompletionToolParam],
     ) -> None:
-        """Record tools."""
+        """Record OpenAI-compatible tools.
+
+        :param prefix (str): The prefix to use for the tool attributes.
+        :param tools (Sequence[ChatCompletionToolParam]): The tools to record.
+        """
         for tool_idx, tool in enumerate(tools):
             self._span.set_attribute(
                 f"{prefix}.{tool_idx}.{ToolAttributes.TOOL_JSON_SCHEMA}", json.dumps(tool)
@@ -138,6 +153,8 @@ class AtlaSpan:
 
         This method is intended to be used to manually record LLM generations that cannot
         be picked up by built-in framework/provider instrumentation.
+
+        All parameters are expected to be OpenAI-compatible.
 
         ```py
         from atla_insights.span import start_as_current_span
