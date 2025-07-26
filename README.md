@@ -152,6 +152,37 @@ instrument_agno("openai")
 instrument_agno(["anthropic", "openai"])
 ```
 
+#### Manual instrumentation
+
+In is also possible to manually record LLM generations via the lower-level span SDK.
+
+```python
+from atla_insights.span import start_as_current_span
+
+with start_as_current_span("my-llm-generation") as span:
+    input_messages = [{"role": "user", "content": "What is the capital of France?"}]
+    tools = [
+        {
+            "type": "function",
+            "function": {
+                "name": "get_capital",
+                "parameters": {"type": "object", "properties": {"country": {"type": "string"}}},
+            },
+        }
+    ]
+
+    result = my_client.chat.completions.create(messages=input_messages, tools=tools)
+
+    span.record_generation(
+        input_messages=input_messages,
+        output_messages=[choice.message for choice in result.choices],
+        tools=tools,
+    )
+
+```
+
+Note that the expected data format are OpenAI Chat Completions compatible messages / tools.
+
 ### Adding metadata
 
 You can attach metadata to a run that provides additional information about the specs of
