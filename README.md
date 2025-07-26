@@ -154,12 +154,13 @@ instrument_agno(["anthropic", "openai"])
 
 #### Manual instrumentation
 
-In is also possible to manually record LLM generations via the lower-level span SDK.
+It is also possible to manually record LLM generations using the lower-level span SDK.
 
 ```python
 from atla_insights.span import start_as_current_span
 
 with start_as_current_span("my-llm-generation") as span:
+    # Run my LLM generation via an unsupported framework.
     input_messages = [{"role": "user", "content": "What is the capital of France?"}]
     tools = [
         {
@@ -170,9 +171,9 @@ with start_as_current_span("my-llm-generation") as span:
             },
         }
     ]
-
     result = my_client.chat.completions.create(messages=input_messages, tools=tools)
 
+    # Manually record LLM generation.
     span.record_generation(
         input_messages=input_messages,
         output_messages=[choice.message for choice in result.choices],
