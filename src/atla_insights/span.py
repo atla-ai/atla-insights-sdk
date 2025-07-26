@@ -8,8 +8,10 @@ from openai.types.chat import (
     ChatCompletionAssistantMessageParam,
     ChatCompletionContentPartTextParam,
     ChatCompletionMessageParam,
+    ChatCompletionMessageToolCallParam,
     ChatCompletionToolParam,
 )
+from openai.types.chat.chat_completion_assistant_message_param import FunctionCall
 from openinference.semconv.trace import (
     MessageAttributes,
     OpenInferenceMimeTypeValues,
@@ -72,15 +74,17 @@ class AtlaSpan:
             if tool_call_id := message.get("tool_call_id"):
                 self._span.set_attribute(
                     f"{message_prefix}.{MessageAttributes.MESSAGE_TOOL_CALL_ID}",
-                    tool_call_id,
+                    str(tool_call_id),
                 )
 
             if name := message.get("name"):
                 self._span.set_attribute(
-                    f"{message_prefix}.{MessageAttributes.MESSAGE_NAME}", name
+                    f"{message_prefix}.{MessageAttributes.MESSAGE_NAME}", str(name)
                 )
 
             if tool_calls := message.get("tool_calls"):
+                tool_calls = cast(list[ChatCompletionMessageToolCallParam], tool_calls)
+
                 tool_calls_prefix = (
                     f"{message_prefix}.{MessageAttributes.MESSAGE_TOOL_CALLS}"
                 )
@@ -102,6 +106,8 @@ class AtlaSpan:
                     )
 
             if function_call := message.get("function_call"):
+                function_call = cast(FunctionCall, function_call)
+
                 self._span.set_attribute(
                     f"{message_prefix}.{MessageAttributes.MESSAGE_FUNCTION_CALL_NAME}",
                     function_call["name"],
