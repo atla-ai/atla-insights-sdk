@@ -79,8 +79,6 @@ class AtlaSpan:
                                 f"{message_prefix}.{MessageAttributes.MESSAGE_CONTENT}",
                                 text_content,
                             )
-                else:
-                    raise ValueError(f"Unsupported content type: {type(content)}")
 
             if tool_call_id := message.get("tool_call_id"):
                 self._span.set_attribute(
