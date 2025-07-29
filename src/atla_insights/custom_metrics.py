@@ -18,7 +18,7 @@ logger = logging.getLogger(OTEL_MODULE_NAME)
 
 
 class Likert1To5Metric(TypedDict):
-    """Custom metric on a likert scale of 1 to 5."""
+    """Custom metric on a Likert scale of 1 to 5."""
 
     data_type: Literal["likert_1_to_5"]
     value: Literal[1, 2, 3, 4, 5]

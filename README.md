@@ -288,7 +288,7 @@ configure(
 
 ### Adding custom metrics
 
-You can add custom evaluation metrics to your trace at trace creation time.
+You can add custom evaluation metrics to your trace.
 
 ```python
 from atla_insights import instrument, set_custom_metrics
@@ -299,6 +299,10 @@ def my_function():
     eval_result = False
     set_custom_metrics({"my_metric": {"data_type": "boolean", "value": eval_result}})
 ```
+
+The permitted `data_type` fields are:
+- `likert_1_to_5`: a numeric 1-5 scale. In this case, `value` is expected to be an `int` between 1 and 5.
+- `boolean`: a boolean scale. In this case, `value` is expected to be a `bool`.
 
 The primary intended use case is logging custom code evals that benefit from being in the
 active runtime environment. You can, however, log any arbitrary metric - including custom
