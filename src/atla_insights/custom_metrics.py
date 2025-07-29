@@ -1,17 +1,17 @@
 """Custom metrics for the atla_insights package."""
 
+import json
 import logging
 from itertools import islice
-from typing import Annotated, Literal, Optional, TypedDict, Union
-
-from pydantic import Field
+from typing import Literal, Optional, TypedDict, Union, cast
 
 from atla_insights.constants import (
+    CUSTOM_METRICS_MARK,
     MAX_CUSTOM_METRICS_FIELDS,
     MAX_CUSTOM_METRICS_KEY_CHARS,
     OTEL_MODULE_NAME,
 )
-from atla_insights.context import custom_metrics_var
+from atla_insights.context import root_span_var
 from atla_insights.utils import truncate_value
 
 logger = logging.getLogger(OTEL_MODULE_NAME)
@@ -31,9 +31,7 @@ class BooleanMetric(TypedDict):
     value: bool
 
 
-CustomMetric = Annotated[
-    Union[Likert1To5Metric, BooleanMetric], Field(discriminator="data_type")
-]
+CustomMetric = Union[Likert1To5Metric, BooleanMetric]
 
 
 def validate_custom_metrics(
@@ -70,9 +68,26 @@ def validate_custom_metrics(
 def set_custom_metrics(custom_metrics: dict[str, CustomMetric]) -> None:
     """Set the custom metrics for the current trace."""
     custom_metrics = validate_custom_metrics(custom_metrics)
-    custom_metrics_var.set(custom_metrics)
+
+    if root_span := root_span_var.get():
+        root_span.set_attribute(CUSTOM_METRICS_MARK, json.dumps(custom_metrics))
+    else:
+        logger.error("Cannot set custom metrics outside of an active trace.")
 
 
 def get_custom_metrics() -> Optional[dict[str, CustomMetric]]:
     """Get the custom metrics for the current trace."""
-    return custom_metrics_var.get()
+    root_span = root_span_var.get()
+
+    if root_span is None:
+        return None
+
+    if root_span.attributes is None:
+        return None
+
+    custom_metrics = root_span.attributes.get(CUSTOM_METRICS_MARK)
+
+    if custom_metrics is None:
+        return None
+
+    return json.loads(cast(str, custom_metrics))

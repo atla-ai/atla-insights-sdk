@@ -10,7 +10,6 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcess
 
 from atla_insights.console_span_exporter import ConsoleSpanExporter
 from atla_insights.constants import (
-    CUSTOM_METRICS_MARK,
     LIB_VERSIONS,
     LIB_VERSIONS_MARK,
     METADATA_MARK,
@@ -20,7 +19,6 @@ from atla_insights.constants import (
     __version__,
 )
 from atla_insights.context import root_span_var
-from atla_insights.custom_metrics import get_custom_metrics
 from atla_insights.metadata import get_metadata
 
 
@@ -43,9 +41,6 @@ class AtlaRootSpanProcessor(SpanProcessor):
 
         root_span_var.set(span)
         span.set_attribute(SUCCESS_MARK, -1)
-
-        if custom_metrics := get_custom_metrics():
-            span.set_attribute(CUSTOM_METRICS_MARK, json.dumps(custom_metrics))
 
         if metadata := get_metadata():
             span.set_attribute(METADATA_MARK, json.dumps(metadata))
