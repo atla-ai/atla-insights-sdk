@@ -7,6 +7,18 @@ from opentelemetry.sdk.trace import TracerProvider as SDKTracerProvider
 from opentelemetry.trace import ProxyTracerProvider, get_tracer_provider
 
 
+def truncate_value(value: str, max_chars: int) -> str:
+    """Truncate a value to a maximum number of characters.
+
+    :param value (str): The value to truncate.
+    :param max_chars (int): The maximum number of characters to allow.
+    :return (str): The truncated value.
+    """
+    if len(value) > max_chars:
+        return value[: (max_chars - 3)] + "..."
+    return value
+
+
 def maybe_get_existing_tracer_provider() -> SDKTracerProvider | None:
     """Get the existing tracer provider, if it exists."""
     existing_tracer_provider = get_tracer_provider()

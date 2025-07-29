@@ -13,22 +13,11 @@ from atla_insights.constants import (
     OTEL_MODULE_NAME,
 )
 from atla_insights.context import metadata_var, root_span_var
+from atla_insights.utils import truncate_value
 
 logger = logging.getLogger(OTEL_MODULE_NAME)
 
 _GLOBAL_METADATA: Optional[dict[str, str]] = None
-
-
-def _truncate_value(value: str, max_chars: int) -> str:
-    """Truncate a value to a maximum number of characters.
-
-    :param value (str): The value to truncate.
-    :param max_chars (int): The maximum number of characters to allow.
-    :return (str): The truncated value.
-    """
-    if len(value) > max_chars:
-        return value[: (max_chars - 3)] + "..."
-    return value
 
 
 def validate_metadata(metadata: dict[str, str]) -> dict[str, str]:
@@ -57,7 +46,7 @@ def validate_metadata(metadata: dict[str, str]) -> dict[str, str]:
             f"{MAX_METADATA_KEY_CHARS} characters."
         )
         metadata = {
-            _truncate_value(k, MAX_METADATA_KEY_CHARS): v for k, v in metadata.items()
+            truncate_value(k, MAX_METADATA_KEY_CHARS): v for k, v in metadata.items()
         }
 
     if any(len(v) > MAX_METADATA_VALUE_CHARS for v in metadata.values()):
@@ -66,7 +55,7 @@ def validate_metadata(metadata: dict[str, str]) -> dict[str, str]:
             f"{MAX_METADATA_VALUE_CHARS} characters."
         )
         metadata = {
-            k: _truncate_value(v, MAX_METADATA_VALUE_CHARS) for k, v in metadata.items()
+            k: truncate_value(v, MAX_METADATA_VALUE_CHARS) for k, v in metadata.items()
         }
 
     return metadata

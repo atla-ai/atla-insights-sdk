@@ -37,7 +37,7 @@ def mock_configure() -> None:
         "atla_insights.span_processors.get_atla_span_processor",
         return_value=span_processor,
     ):
-        configure(token="dummy", metadata={"environment": "unit-testing"})
+        configure(token="dummy", metadata={"environment": "unit-testing"}, verbose=False)
 
 
 @pytest.fixture(scope="class")
