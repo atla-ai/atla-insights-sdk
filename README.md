@@ -286,6 +286,24 @@ configure(
 )
 ```
 
+### Adding custom metrics
+
+You can add custom evaluation metrics to your trace at trace creation time.
+
+```python
+from atla_insights import instrument, set_custom_metrics
+
+@instrument()
+def my_function():
+    # Some GenAI logic here
+    eval_result = False
+    set_custom_metrics({"my_metric": {"data_type": "boolean", "value": eval_result}})
+```
+
+The primary intended use case is logging custom code evals that benefit from being in the
+active runtime environment. You can, however, log any arbitrary metric - including custom
+LLMJ eval results.
+
 ### Marking trace success / failure
 
 The logical notion of _success_ or _failure_ plays a prominent role in the observability

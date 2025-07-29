@@ -20,7 +20,7 @@ logger = logging.getLogger(OTEL_MODULE_NAME)
 _GLOBAL_METADATA: Optional[dict[str, str]] = None
 
 
-def validate_metadata(metadata: dict[str, str]) -> dict[str, str]:
+def _validate_metadata(metadata: dict[str, str]) -> dict[str, str]:
     """Validate the user-provided metadata field.
 
     :param metadata (dict[str, str]): The metadata field to validate.
@@ -74,7 +74,7 @@ def set_global_metadata(metadata: dict[str, str]) -> None:
 
     :param metadata (dict[str, str]): The global metadata.
     """
-    metadata = validate_metadata(metadata)
+    metadata = _validate_metadata(metadata)
 
     global _GLOBAL_METADATA
     _GLOBAL_METADATA = metadata
@@ -94,7 +94,7 @@ def set_metadata(metadata: dict[str, str]) -> None:
 
     :param metadata (dict[str, str]): The metadata to set for the current trace.
     """
-    metadata = validate_metadata(metadata)
+    metadata = _validate_metadata(metadata)
 
     metadata_var.set(metadata)
     if root_span := root_span_var.get():

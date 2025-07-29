@@ -73,13 +73,13 @@ class TestCustomMetrics(BaseLocalOtel):
 
         @instrument()
         def test_function():
-            metrics_1: dict[str, CustomMetric] = {
+            metrics_1: dict[str, CustomMetric] = {  # type: ignore[annotation-unchecked]
                 "test": {"data_type": "boolean", "value": False}
             }
             set_custom_metrics(metrics_1)
             assert get_custom_metrics() == metrics_1
 
-            metrics_2: dict[str, CustomMetric] = {
+            metrics_2: dict[str, CustomMetric] = {  # type: ignore[annotation-unchecked]
                 "test": {"data_type": "boolean", "value": True}
             }
             set_custom_metrics(metrics_2)

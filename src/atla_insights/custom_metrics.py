@@ -34,7 +34,7 @@ class BooleanMetric(TypedDict):
 CustomMetric = Union[Likert1To5Metric, BooleanMetric]
 
 
-def validate_custom_metrics(
+def _validate_custom_metrics(
     custom_metrics: dict[str, CustomMetric],
 ) -> dict[str, CustomMetric]:
     """Validate the user-provided custom metrics.
@@ -66,8 +66,21 @@ def validate_custom_metrics(
 
 
 def set_custom_metrics(custom_metrics: dict[str, CustomMetric]) -> None:
-    """Set the custom metrics for the current trace."""
-    custom_metrics = validate_custom_metrics(custom_metrics)
+    """Set the custom metrics for the current trace.
+
+    ```py
+    from atla_insights import instrument, set_custom_metrics
+
+    @instrument()
+    def my_function():
+        # Some GenAI logic here
+        eval_result = False
+        set_custom_metrics({"my_metric": {"data_type": "boolean", "value": eval_result}})
+    ```
+
+    :param custom_metrics (dict[str, CustomMetric]): The custom metrics to set.
+    """
+    custom_metrics = _validate_custom_metrics(custom_metrics)
 
     if root_span := root_span_var.get():
         root_span.set_attribute(CUSTOM_METRICS_MARK, json.dumps(custom_metrics))
@@ -76,7 +89,10 @@ def set_custom_metrics(custom_metrics: dict[str, CustomMetric]) -> None:
 
 
 def get_custom_metrics() -> Optional[dict[str, CustomMetric]]:
-    """Get the custom metrics for the current trace."""
+    """Get the custom metrics for the current trace.
+
+    :return (Optional[dict[str, CustomMetric]]): The custom metrics for the current trace.
+    """
     root_span = root_span_var.get()
 
     if root_span is None:
