@@ -62,6 +62,29 @@ def _validate_custom_metrics(
             for k, v in custom_metrics.items()
         }
 
+    for k, v in custom_metrics.copy().items():
+        match v["data_type"]:
+            case "likert_1_to_5":
+                if v["value"] not in [1, 2, 3, 4, 5]:
+                    logger.error(
+                        f"The custom metric {k} has an invalid value: {v['value']}. "
+                        "The value must be an integer between 1 and 5."
+                    )
+                    custom_metrics.pop(k)
+            case "boolean":
+                if v["value"] not in [True, False]:
+                    logger.error(
+                        f"The custom metric {k} has an invalid value: {v['value']}. "
+                        "The value must be a boolean."
+                    )
+                    custom_metrics.pop(k)
+            case _:
+                logger.error(
+                    f"The custom metric {k} has an invalid data type: {v['data_type']}. "
+                    "The data type must be 'likert_1_to_5' or 'boolean'."
+                )
+                custom_metrics.pop(k)
+
     return custom_metrics
 
 

@@ -1,5 +1,6 @@
 """Atla package for PyPI distribution."""
 
+from atla_insights.custom_metrics import get_custom_metrics, set_custom_metrics
 from atla_insights.frameworks import (
     instrument_agno,
     instrument_baml,
@@ -36,6 +37,7 @@ from atla_insights.tool import tool
 
 __all__ = [
     "configure",
+    "get_custom_metrics",
     "get_metadata",
     "instrument",
     "instrument_agno",
@@ -52,6 +54,7 @@ __all__ = [
     "instrument_smolagents",
     "mark_failure",
     "mark_success",
+    "set_custom_metrics",
     "set_metadata",
     "tool",
     "uninstrument_agno",
