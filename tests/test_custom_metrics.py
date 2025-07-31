@@ -1,7 +1,9 @@
 """Tests for the custom metrics module."""
 
 import json
-from typing import cast
+from typing import Any, Literal, cast
+
+import pytest
 
 from tests._otel import BaseLocalOtel
 
@@ -95,3 +97,40 @@ class TestCustomMetrics(BaseLocalOtel):
 
         assert span.attributes is not None
         assert span.attributes.get(CUSTOM_METRICS_MARK) is not None
+
+    @pytest.mark.parametrize(
+        "data_type,value,is_valid",
+        [
+            ("boolean", True, True),
+            ("boolean", False, True),
+            ("boolean", 1, False),
+            ("likert_1_to_5", 1, True),
+            ("likert_1_to_5", 2, True),
+            ("likert_1_to_5", 3, True),
+            ("likert_1_to_5", 4, True),
+            ("likert_1_to_5", 5, True),
+            ("likert_1_to_5", 0, False),
+            ("likert_1_to_5", 6, False),
+            ("likert_1_to_5", "1", False),
+            ("likert_1_to_5", "2", False),
+            ("likert_1_to_5", "3", False),
+            ("likert_1_to_5", "4", False),
+        ],
+    )
+    def test_validate_custom_metrics(
+        self,
+        data_type: Literal["boolean", "likert_1_to_5"],
+        value: Any,
+        is_valid: bool,
+    ) -> None:
+        """Test that the custom metrics are validated correctly."""
+        from atla_insights.custom_metrics import _validate_custom_metrics
+
+        custom_metrics = _validate_custom_metrics(
+            {"test": {"data_type": data_type, "value": value}}
+        )
+
+        if is_valid:
+            assert custom_metrics == {"test": {"data_type": data_type, "value": value}}
+        else:
+            assert custom_metrics == {}

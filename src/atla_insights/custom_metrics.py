@@ -65,14 +65,14 @@ def _validate_custom_metrics(
     for k, v in custom_metrics.copy().items():
         match v["data_type"]:
             case "likert_1_to_5":
-                if v["value"] not in [1, 2, 3, 4, 5]:
+                if not isinstance(v["value"], int) or v["value"] not in [1, 2, 3, 4, 5]:
                     logger.error(
                         f"The custom metric {k} has an invalid value: {v['value']}. "
                         "The value must be an integer between 1 and 5."
                     )
                     custom_metrics.pop(k)
             case "boolean":
-                if v["value"] not in [True, False]:
+                if not isinstance(v["value"], bool):
                     logger.error(
                         f"The custom metric {k} has an invalid value: {v['value']}. "
                         "The value must be a boolean."
@@ -104,6 +104,8 @@ def set_custom_metrics(custom_metrics: dict[str, CustomMetric]) -> None:
     :param custom_metrics (dict[str, CustomMetric]): The custom metrics to set.
     """
     custom_metrics = _validate_custom_metrics(custom_metrics)
+    if not custom_metrics:
+        return
 
     if root_span := root_span_var.get():
         root_span.set_attribute(CUSTOM_METRICS_MARK, json.dumps(custom_metrics))
