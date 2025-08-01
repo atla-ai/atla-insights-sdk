@@ -139,9 +139,9 @@ class TestMetadata(BaseLocalOtel):
     )
     def test_validate_metadata(self, metadata: dict[str, str], is_valid: bool) -> None:
         """Test validate_metadata function."""
-        from atla_insights.metadata import validate_metadata
+        from atla_insights.metadata import _validate_metadata
 
-        validated_metadata = validate_metadata(metadata)
+        validated_metadata = _validate_metadata(metadata)
 
         if is_valid:
             assert validated_metadata == metadata
@@ -149,5 +149,5 @@ class TestMetadata(BaseLocalOtel):
             assert validated_metadata != metadata
 
             # If the metadata is invalid, the truncated metadata should be valid.
-            revalidated_metadata = validate_metadata(validated_metadata)
+            revalidated_metadata = _validate_metadata(validated_metadata)
             assert revalidated_metadata == validated_metadata
