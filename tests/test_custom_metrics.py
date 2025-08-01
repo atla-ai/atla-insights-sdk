@@ -127,7 +127,7 @@ class TestCustomMetrics(BaseLocalOtel):
         from atla_insights.custom_metrics import _validate_custom_metrics
 
         custom_metrics = _validate_custom_metrics(
-            {"test": {"data_type": data_type, "value": value}}
+            {"test": {"data_type": data_type, "value": value}}  # type: ignore
         )
 
         if is_valid:
