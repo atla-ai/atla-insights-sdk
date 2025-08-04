@@ -15,8 +15,8 @@ Atla Insights is a platform for monitoring and improving AI agents.
 
 To get started with Atla Insights, you can either follow the instructions below, or let an agent instrument your code for you.
 
-- **If you are using Claude Code**: copy the contents of `Claude.md`.
-- **If you are not using Claude Code**: copy the contents of `onboarding.txt` and paste them into your AI agent of choice.
+-   **If you are using Claude Code**: copy the contents of `Claude.md`.
+-   **If you are not using Claude Code**: copy the contents of `onboarding.txt` and paste them into your AI agent of choice.
 
 ## Installation
 
@@ -97,7 +97,7 @@ We currently support the following LLM providers:
 | **Anthropic**    | `instrument_anthropic`    | Also supports `AnthropicBedrock` client from Anthropic |
 | **Google GenAI** | `instrument_google_genai` | E.g., Gemini                                           |
 | **LiteLLM**      | `instrument_litellm`      | Supports all available models in the LiteLLM framework |
-| **OpenAI**       | `instrument_openai`       |                                                        |
+| **OpenAI**       | `instrument_openai`       | Includes Azure OpenAI                                  |
 | **Bedrock**      | `instrument_bedrock`      |                                                        |
 
 ⚠️ Note that, by default, instrumented LLM calls will be treated independently from one
@@ -127,15 +127,15 @@ def run_my_agent() -> None:
 
 We currently support the following frameworks:
 
-| Framework                     | Instrumentation Function   | Notes |
-|-------------------------------|----------------------------|-------|
-| **Agno**                      | `instrument_agno`          | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
-| **BAML**                      | `instrument_baml`          | Supported with `openai`, `anthropic` or `bedrock` models* |
-| **CrewAI**                    | `instrument_crewai`        | |
-| **LangChain**                 | `instrument_langchain`     | This includes e.g., LangGraph as well |
-| **MCP**                       | `instrument_mcp`           | Only includes context propagation. You will need to instrument the model calling the MCP server separately. |
-| **OpenAI Agents**             | `instrument_openai_agents` | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
-| **Smolagents**                | `instrument_smolagents`    | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models* |
+| Framework         | Instrumentation Function   | Notes                                                                                                       |
+| ----------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Agno**          | `instrument_agno`          | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
+| **BAML**          | `instrument_baml`          | Supported with `openai`, `anthropic` or `bedrock` models\*                                                  |
+| **CrewAI**        | `instrument_crewai`        |                                                                                                             |
+| **LangChain**     | `instrument_langchain`     | This includes e.g., LangGraph as well                                                                       |
+| **MCP**           | `instrument_mcp`           | Only includes context propagation. You will need to instrument the model calling the MCP server separately. |
+| **OpenAI Agents** | `instrument_openai_agents` | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
+| **Smolagents**    | `instrument_smolagents`    | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
 
 ⚠️ \*Note that some frameworks do not provide their own LLM interface. In these cases, you will
 need to instrument both the framework _and_ the underlying LLM provider(s) as follows:
