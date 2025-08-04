@@ -14,7 +14,7 @@ from botocore.response import StreamingBody
 from botocore.stub import ANY, Stubber
 from google.genai import Client
 from google.genai.types import HttpOptions
-from openai import AsyncOpenAI, OpenAI
+from openai import AsyncAzureOpenAI, AsyncOpenAI, AzureOpenAI, OpenAI
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from pytest_httpserver import HTTPServer
@@ -54,6 +54,24 @@ def mock_openai_client() -> Generator[OpenAI, None, None]:
 
 
 @pytest.fixture(scope="class")
+def mock_azure_openai_client() -> Generator[AzureOpenAI, None, None]:
+    """Mock the OpenAI client."""
+    _AZURE_PREFIX = "/v1/deployments/some-model"
+    with HTTPServer() as httpserver:
+        httpserver.expect_request(f"{_AZURE_PREFIX}/chat/completions").respond_with_json(
+            _MOCK_RESPONSES["openai_chat_completions"]
+        )
+        httpserver.expect_request(f"{_AZURE_PREFIX}/responses").respond_with_json(
+            _MOCK_RESPONSES["openai_responses"]
+        )
+        yield AzureOpenAI(
+            api_key="unit-test",
+            base_url=httpserver.url_for("/v1"),
+            api_version="2024-02-15-preview",
+        )
+
+
+@pytest.fixture(scope="class")
 def mock_async_openai_client() -> Generator[AsyncOpenAI, None, None]:
     """Mock the OpenAI client."""
     with HTTPServer() as httpserver:
@@ -64,6 +82,24 @@ def mock_async_openai_client() -> Generator[AsyncOpenAI, None, None]:
             _MOCK_RESPONSES["openai_responses"]
         )
         yield AsyncOpenAI(api_key="unit-test", base_url=httpserver.url_for("/v1"))
+
+
+@pytest.fixture(scope="class")
+def mock_async_azure_openai_client() -> Generator[AsyncAzureOpenAI, None, None]:
+    """Mock the OpenAI client."""
+    _AZURE_PREFIX = "/v1/deployments/some-model"
+    with HTTPServer() as httpserver:
+        httpserver.expect_request(f"{_AZURE_PREFIX}/chat/completions").respond_with_json(
+            _MOCK_RESPONSES["openai_chat_completions"]
+        )
+        httpserver.expect_request(f"{_AZURE_PREFIX}/responses").respond_with_json(
+            _MOCK_RESPONSES["openai_responses"]
+        )
+        yield AsyncAzureOpenAI(
+            api_key="unit-test",
+            base_url=httpserver.url_for("/v1"),
+            api_version="2024-02-15-preview",
+        )
 
 
 @pytest.fixture(scope="class")

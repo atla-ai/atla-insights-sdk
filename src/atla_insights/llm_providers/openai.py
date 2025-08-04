@@ -20,9 +20,15 @@ def instrument_openai() -> ContextManager[None]:
 
     :return (ContextManager[None]): A context manager that instruments OpenAI.
     """
-    from atla_insights.llm_providers.instrumentors.openai import AtlaOpenAIInstrumentor
+    try:
+        from openinference.instrumentation.openai import OpenAIInstrumentor
+    except ImportError as e:
+        raise ImportError(
+            "OpenAI instrumentation needs to be installed. "
+            'Please install it via `pip install "atla-insights[openai]"`.'
+        ) from e
 
-    openai_instrumentor = AtlaOpenAIInstrumentor()
+    openai_instrumentor = OpenAIInstrumentor()
 
     return ATLA_INSTANCE.instrument_service(
         service="openai",
