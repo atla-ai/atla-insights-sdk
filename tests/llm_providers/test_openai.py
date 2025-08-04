@@ -1,6 +1,7 @@
 """Test the OpenAI instrumentation."""
 
-from openai import OpenAI
+import pytest
+from openai import AsyncAzureOpenAI, AsyncOpenAI, AzureOpenAI, OpenAI
 
 from tests._otel import BaseLocalOtel
 
@@ -14,6 +15,32 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
 
         with instrument_openai():
             mock_openai_client.chat.completions.create(
+                model="some-model",
+                messages=[{"role": "user", "content": "hello world"}],
+            )
+
+        spans = self.get_finished_spans()
+
+        assert len(spans) == 1
+        [span] = spans
+
+        assert span.attributes is not None
+        assert span.attributes.get("llm.input_messages.0.message.role") == "user"
+        assert (
+            span.attributes.get("llm.input_messages.0.message.content") == "hello world"
+        )
+        assert span.attributes.get("llm.output_messages.0.message.role") == "assistant"
+        assert (
+            span.attributes.get("llm.output_messages.0.message.content") == "hello world"
+        )
+
+    @pytest.mark.asyncio
+    async def test_async(self, mock_async_openai_client: AsyncOpenAI) -> None:
+        """Test that the OpenAI instrumentation is traced."""
+        from atla_insights import instrument_openai
+
+        with instrument_openai():
+            await mock_async_openai_client.chat.completions.create(
                 model="some-model",
                 messages=[{"role": "user", "content": "hello world"}],
             )
@@ -191,4 +218,57 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
                 "llm.output_messages.0.message.contents.0.message_content.text"
             )
             == "hello world"
+        )
+
+    def test_azure_openai(self, mock_azure_openai_client: AzureOpenAI) -> None:
+        """Test responses API."""
+        from atla_insights import instrument_openai
+
+        with instrument_openai():
+            mock_azure_openai_client.chat.completions.create(
+                model="some-model",
+                messages=[{"role": "user", "content": "hello world"}],
+            )
+
+        spans = self.get_finished_spans()
+
+        assert len(spans) == 1
+        [span] = spans
+
+        assert span.attributes is not None
+        assert span.attributes.get("llm.input_messages.0.message.role") == "user"
+        assert (
+            span.attributes.get("llm.input_messages.0.message.content") == "hello world"
+        )
+        assert span.attributes.get("llm.output_messages.0.message.role") == "assistant"
+        assert (
+            span.attributes.get("llm.output_messages.0.message.content") == "hello world"
+        )
+
+    @pytest.mark.asyncio
+    async def test_async_azure_openai(
+        self, mock_async_azure_openai_client: AsyncAzureOpenAI
+    ) -> None:
+        """Test responses API."""
+        from atla_insights import instrument_openai
+
+        with instrument_openai():
+            await mock_async_azure_openai_client.chat.completions.create(
+                model="some-model",
+                messages=[{"role": "user", "content": "hello world"}],
+            )
+
+        spans = self.get_finished_spans()
+
+        assert len(spans) == 1
+        [span] = spans
+
+        assert span.attributes is not None
+        assert span.attributes.get("llm.input_messages.0.message.role") == "user"
+        assert (
+            span.attributes.get("llm.input_messages.0.message.content") == "hello world"
+        )
+        assert span.attributes.get("llm.output_messages.0.message.role") == "assistant"
+        assert (
+            span.attributes.get("llm.output_messages.0.message.content") == "hello world"
         )
