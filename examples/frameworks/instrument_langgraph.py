@@ -7,7 +7,7 @@ from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph
 from typing_extensions import TypedDict
 
-from atla_insights import configure, instrument, instrument_langchain, set_custom_metrics
+from atla_insights import configure, instrument, instrument_langchain
 
 
 @instrument("My GenAI application")
@@ -30,19 +30,6 @@ def my_app(client: ChatOpenAI) -> None:
 
     app = workflow.compile()
     app.invoke({"messages": []})
-
-    set_custom_metrics(
-        {
-            "my_sdk_metric": {
-                "value": 1,
-                "data_type": "likert_1_to_5",
-            },
-            "my_sdk_bool_metric": {
-                "value": True,
-                "data_type": "boolean",
-            },
-        }
-    )
 
 
 def main() -> None:
