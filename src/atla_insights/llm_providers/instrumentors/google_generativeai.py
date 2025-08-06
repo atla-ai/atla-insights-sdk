@@ -228,6 +228,13 @@ class GoogleGenerativeAIInstrumentor(BaseInstrumentor):
 
     name = "google-generativeai"
 
+    def __init__(self) -> None:
+        """Initialize the GoogleGenerativeAIInstrumentor."""
+        super().__init__()
+
+        self._original_generate_content = None
+        self._original_async_generate_content = None
+
     def instrumentation_dependencies(self) -> Collection[str]:
         """The instrumentation dependencies for `google-generativeai`."""
         return ("google-generativeai",)
