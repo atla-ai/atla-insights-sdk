@@ -53,7 +53,7 @@ def instrument(func_or_message: Callable | Optional[str] = None) -> Callable:
     return _instrument(atla_instance=ATLA_INSTANCE, message=func_or_message)
 
 
-def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable:
+def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable:  # noqa: C901
     """Instrument a function.
 
     :param tracer (Optional[Tracer]): The tracer to use for instrumentation.
@@ -61,14 +61,15 @@ def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable
     :return (Callable): A decorator that instruments the function.
     """
 
-    def decorator(func: Callable) -> Callable:
-        if is_instrumentation_suppressed():
-            return func
-
+    def decorator(func: Callable) -> Callable:  # noqa: C901
         if inspect.isgeneratorfunction(func):
 
             @functools.wraps(func)
             def gen_wrapper(*args, **kwargs) -> Generator[Any, Any, Any]:
+                if is_instrumentation_suppressed():
+                    yield from func(*args, **kwargs)
+                    return
+
                 if atla_instance.tracer is None:
                     logger.error("Atla Insights not configured, skipping instrumentation")
                     yield from func(*args, **kwargs)
@@ -82,6 +83,11 @@ def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable
 
             @functools.wraps(func)
             async def async_gen_wrapper(*args, **kwargs) -> AsyncGenerator[Any, Any]:
+                if is_instrumentation_suppressed():
+                    async for x in func(*args, **kwargs):
+                        yield x
+                    return
+
                 if atla_instance.tracer is None:
                     logger.error("Atla Insights not configured, skipping instrumentation")
                     async for x in func(*args, **kwargs):
@@ -97,6 +103,9 @@ def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable
 
             @functools.wraps(func)
             async def async_wrapper(*args, **kwargs) -> Any:
+                if is_instrumentation_suppressed():
+                    return await func(*args, **kwargs)
+
                 if atla_instance.tracer is None:
                     logger.error("Atla Insights not configured, skipping instrumentation")
                     return await func(*args, **kwargs)
@@ -108,6 +117,9 @@ def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable
 
         @functools.wraps(func)
         def sync_wrapper(*args, **kwargs) -> Any:
+            if is_instrumentation_suppressed():
+                return func(*args, **kwargs)
+
             if atla_instance.tracer is None:
                 logger.error("Atla Insights not configured, skipping instrumentation")
                 return func(*args, **kwargs)

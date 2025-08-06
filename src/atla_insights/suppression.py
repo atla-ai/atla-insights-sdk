@@ -38,16 +38,30 @@ def suppress_instrumentation() -> Generator[None, None, None]:
             pass
     ```
     """
-    token = suppress_instrumentation_var.set(True)
+    from atla_insights.main import ATLA_INSTANCE
+
+    suppress_instrumentation_var.set(True)
+
     try:
+        for instrumentors in ATLA_INSTANCE._active_instrumentors.values():
+            for instrumentor in instrumentors:
+                instrumentor.uninstrument()
+
         yield
+
     finally:
-        suppress_instrumentation_var.reset(token)
+        enable_instrumentation()
 
 
 def enable_instrumentation() -> None:
     """Enable Atla Insights instrumentation."""
+    from atla_insights.main import ATLA_INSTANCE
+
     suppress_instrumentation_var.set(False)
+
+    for instrumentors in ATLA_INSTANCE._active_instrumentors.values():
+        for instrumentor in instrumentors:
+            instrumentor.instrument()
 
 
 class NoOpContextManager:
