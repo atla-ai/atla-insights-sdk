@@ -9,6 +9,7 @@ from typing import Any, AsyncGenerator, Callable, Generator, Optional, overload
 from opentelemetry.trace import Tracer
 
 from atla_insights.main import ATLA_INSTANCE, AtlaInsights, logger
+from atla_insights.suppression import is_instrumentation_suppressed
 
 executor: Optional[ThreadPoolExecutor]
 try:
@@ -61,6 +62,9 @@ def _instrument(atla_instance: AtlaInsights, message: Optional[str]) -> Callable
     """
 
     def decorator(func: Callable) -> Callable:
+        if is_instrumentation_suppressed():
+            return func
+
         if inspect.isgeneratorfunction(func):
 
             @functools.wraps(func)

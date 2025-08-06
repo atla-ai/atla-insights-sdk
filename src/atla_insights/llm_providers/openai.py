@@ -3,6 +3,10 @@
 from typing import ContextManager
 
 from atla_insights.main import ATLA_INSTANCE
+from atla_insights.suppression import (
+    NoOpContextManager,
+    is_instrumentation_suppressed,
+)
 
 
 def instrument_openai() -> ContextManager[None]:
@@ -20,6 +24,9 @@ def instrument_openai() -> ContextManager[None]:
 
     :return (ContextManager[None]): A context manager that instruments OpenAI.
     """
+    if is_instrumentation_suppressed():
+        return NoOpContextManager()
+
     try:
         from openinference.instrumentation.openai import OpenAIInstrumentor
     except ImportError as e:
@@ -38,4 +45,7 @@ def instrument_openai() -> ContextManager[None]:
 
 def uninstrument_openai() -> None:
     """Uninstrument the OpenAI LLM provider."""
+    if is_instrumentation_suppressed():
+        return
+
     return ATLA_INSTANCE.uninstrument_service("openai")

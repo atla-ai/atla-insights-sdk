@@ -4,6 +4,7 @@ from typing import ContextManager
 
 from atla_insights.constants import SUPPORTED_LLM_FORMAT
 from atla_insights.main import ATLA_INSTANCE
+from atla_insights.suppression import NoOpContextManager, is_instrumentation_suppressed
 
 
 def instrument_baml(llm_provider: SUPPORTED_LLM_FORMAT) -> ContextManager[None]:
@@ -28,6 +29,9 @@ def instrument_baml(llm_provider: SUPPORTED_LLM_FORMAT) -> ContextManager[None]:
     :param llm_provider (SUPPORTED_LLM_PROVIDER): The LLM provider to instrument.
     :return (ContextManager[None]): A context manager that instruments BAML.
     """
+    if is_instrumentation_suppressed():
+        return NoOpContextManager()
+
     from atla_insights.frameworks.instrumentors.baml import AtlaBamlInstrumentor
 
     # Create an instrumentor for the BAML framework.
@@ -41,6 +45,9 @@ def instrument_baml(llm_provider: SUPPORTED_LLM_FORMAT) -> ContextManager[None]:
 
 def uninstrument_baml() -> None:
     """Uninstrument the BAML framework."""
+    if is_instrumentation_suppressed():
+        return
+
     from atla_insights.frameworks.instrumentors.baml import AtlaBamlInstrumentor
 
     return ATLA_INSTANCE.uninstrument_service(AtlaBamlInstrumentor.name)

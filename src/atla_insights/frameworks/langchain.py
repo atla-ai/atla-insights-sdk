@@ -3,6 +3,7 @@
 from typing import ContextManager
 
 from atla_insights.main import ATLA_INSTANCE
+from atla_insights.suppression import NoOpContextManager, is_instrumentation_suppressed
 
 
 def instrument_langchain() -> ContextManager[None]:
@@ -25,6 +26,9 @@ def instrument_langchain() -> ContextManager[None]:
 
     :return (ContextManager[None]): A context manager that instruments LangChain.
     """
+    if is_instrumentation_suppressed():
+        return NoOpContextManager()
+
     from atla_insights.frameworks.instrumentors.langchain import AtlaLangChainInstrumentor
 
     langchain_instrumentor = AtlaLangChainInstrumentor()
@@ -37,6 +41,9 @@ def instrument_langchain() -> ContextManager[None]:
 
 def uninstrument_langchain() -> None:
     """Uninstrument the LangChain framework."""
+    if is_instrumentation_suppressed():
+        return
+
     from atla_insights.frameworks.instrumentors.langchain import AtlaLangChainInstrumentor
 
     return ATLA_INSTANCE.uninstrument_service(AtlaLangChainInstrumentor.name)

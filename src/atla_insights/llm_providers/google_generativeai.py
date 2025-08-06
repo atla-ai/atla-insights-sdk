@@ -3,6 +3,7 @@
 from typing import ContextManager
 
 from atla_insights.main import ATLA_INSTANCE
+from atla_insights.suppression import NoOpContextManager, is_instrumentation_suppressed
 
 
 def instrument_google_generativeai() -> ContextManager[None]:
@@ -29,6 +30,9 @@ def instrument_google_generativeai() -> ContextManager[None]:
     :return (ContextManager[None]): A context manager that instruments
         Google Generative AI.
     """
+    if is_instrumentation_suppressed():
+        return NoOpContextManager()
+
     from atla_insights.llm_providers.instrumentors.google_generativeai import (
         GoogleGenerativeAIInstrumentor,
     )
@@ -43,6 +47,9 @@ def instrument_google_generativeai() -> ContextManager[None]:
 
 def uninstrument_google_generativeai() -> None:
     """Uninstrument the Google Generative AI LLM provider."""
+    if is_instrumentation_suppressed():
+        return
+
     from atla_insights.llm_providers.instrumentors.google_generativeai import (
         GoogleGenerativeAIInstrumentor,
     )

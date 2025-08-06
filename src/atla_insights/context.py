@@ -9,3 +9,6 @@ metadata_var: ContextVar[Optional[dict[str, str]]] = ContextVar(
     "metadata_var", default=None
 )
 root_span_var: ContextVar[Optional[Span]] = ContextVar("root_span_var", default=None)
+suppress_instrumentation_var: ContextVar[bool] = ContextVar(
+    "suppress_instrumentation", default=False
+)

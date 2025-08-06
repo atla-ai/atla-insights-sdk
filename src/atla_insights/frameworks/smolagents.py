@@ -5,6 +5,7 @@ from typing import ContextManager
 from atla_insights.constants import LLM_PROVIDER_TYPE
 from atla_insights.frameworks.utils import get_instrumentors_for_provider
 from atla_insights.main import ATLA_INSTANCE
+from atla_insights.suppression import NoOpContextManager, is_instrumentation_suppressed
 
 
 def instrument_smolagents(llm_provider: LLM_PROVIDER_TYPE) -> ContextManager[None]:
@@ -29,6 +30,9 @@ def instrument_smolagents(llm_provider: LLM_PROVIDER_TYPE) -> ContextManager[Non
     :param llm_provider (LLM_PROVIDER_TYPE): The LLM provider(s) to instrument.
     :return (ContextManager[None]): A context manager that instruments SmolAgents.
     """
+    if is_instrumentation_suppressed():
+        return NoOpContextManager()
+
     from atla_insights.frameworks.instrumentors.smolagents import (
         AtlaSmolAgentsInstrumentor,
     )
@@ -47,6 +51,9 @@ def instrument_smolagents(llm_provider: LLM_PROVIDER_TYPE) -> ContextManager[Non
 
 def uninstrument_smolagents() -> None:
     """Uninstrument the HuggingFace SmolAgents framework."""
+    if is_instrumentation_suppressed():
+        return
+
     from atla_insights.frameworks.instrumentors.smolagents import (
         AtlaSmolAgentsInstrumentor,
     )

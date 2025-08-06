@@ -5,6 +5,7 @@ from typing import ContextManager
 from atla_insights.constants import LLM_PROVIDER_TYPE
 from atla_insights.frameworks.utils import get_instrumentors_for_provider
 from atla_insights.main import ATLA_INSTANCE
+from atla_insights.suppression import NoOpContextManager, is_instrumentation_suppressed
 
 
 def instrument_openai_agents(
@@ -29,6 +30,9 @@ def instrument_openai_agents(
         to "openai".
     :return (ContextManager[None]): A context manager that instruments OpenAI Agents SDK.
     """
+    if is_instrumentation_suppressed():
+        return NoOpContextManager()
+
     from atla_insights.frameworks.instrumentors.openai_agents import (
         AtlaOpenAIAgentsInstrumentor,
     )
@@ -47,6 +51,9 @@ def instrument_openai_agents(
 
 def uninstrument_openai_agents() -> None:
     """Uninstrument the OpenAI Agents SDK."""
+    if is_instrumentation_suppressed():
+        return
+
     from atla_insights.frameworks.instrumentors.openai_agents import (
         AtlaOpenAIAgentsInstrumentor,
     )

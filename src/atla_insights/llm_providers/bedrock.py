@@ -3,6 +3,7 @@
 from typing import ContextManager
 
 from atla_insights.main import ATLA_INSTANCE
+from atla_insights.suppression import NoOpContextManager, is_instrumentation_suppressed
 
 
 def instrument_bedrock() -> ContextManager[None]:
@@ -27,6 +28,9 @@ def instrument_bedrock() -> ContextManager[None]:
 
     :return: A context manager that instruments boto3 Bedrock client creation.
     """
+    if is_instrumentation_suppressed():
+        return NoOpContextManager()
+
     try:
         from openinference.instrumentation.bedrock import BedrockInstrumentor
     except ImportError as e:
@@ -45,4 +49,7 @@ def instrument_bedrock() -> ContextManager[None]:
 
 def uninstrument_bedrock() -> None:
     """Uninstrument the Bedrock LLM provider."""
+    if is_instrumentation_suppressed():
+        return
+
     return ATLA_INSTANCE.uninstrument_service("bedrock")

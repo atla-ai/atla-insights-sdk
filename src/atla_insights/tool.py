@@ -13,6 +13,7 @@ from openinference.semconv.trace import (
 from opentelemetry import trace as trace_api
 
 from atla_insights.main import ATLA_INSTANCE
+from atla_insights.suppression import is_instrumentation_suppressed
 
 
 def _get_invocation_params(func: Callable[..., Any], *args, **kwargs) -> dict[str, Any]:
@@ -45,6 +46,9 @@ def tool(func: Callable[..., Any]) -> Callable[..., Any]:
 
     @wraps(func)
     def wrapper(*args, **kwargs) -> Any:
+        if is_instrumentation_suppressed():
+            return func(*args, **kwargs)
+
         with ATLA_INSTANCE.get_tracer().start_as_current_span(
             func.__name__,
             attributes={

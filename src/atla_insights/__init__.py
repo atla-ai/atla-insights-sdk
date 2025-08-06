@@ -33,10 +33,12 @@ from atla_insights.llm_providers import (
 from atla_insights.main import configure
 from atla_insights.marking import mark_failure, mark_success
 from atla_insights.metadata import get_metadata, set_metadata
+from atla_insights.suppression import enable_instrumentation, suppress_instrumentation
 from atla_insights.tool import tool
 
 __all__ = [
     "configure",
+    "enable_instrumentation",
     "get_custom_metrics",
     "get_metadata",
     "instrument",
@@ -56,6 +58,7 @@ __all__ = [
     "mark_success",
     "set_custom_metrics",
     "set_metadata",
+    "suppress_instrumentation",
     "tool",
     "uninstrument_agno",
     "uninstrument_anthropic",
