@@ -4,6 +4,7 @@ from typing import ContextManager
 
 from atla_insights.frameworks.utils import get_instrumentors_for_provider
 from atla_insights.main import ATLA_INSTANCE
+from atla_insights.suppression import NoOpContextManager, is_instrumentation_suppressed
 
 
 def instrument_crewai() -> ContextManager[None]:
@@ -23,6 +24,9 @@ def instrument_crewai() -> ContextManager[None]:
 
     :return (ContextManager[None]): A context manager that instruments CrewAI.
     """
+    if is_instrumentation_suppressed():
+        return NoOpContextManager()
+
     from atla_insights.frameworks.instrumentors.crewai import AtlaCrewAIInstrumentor
 
     # Create an instrumentor for the CrewAI framework.
@@ -39,6 +43,9 @@ def instrument_crewai() -> ContextManager[None]:
 
 def uninstrument_crewai() -> None:
     """Uninstrument the CrewAI framework."""
+    if is_instrumentation_suppressed():
+        return
+
     from atla_insights.frameworks.instrumentors.crewai import AtlaCrewAIInstrumentor
 
     return ATLA_INSTANCE.uninstrument_service(AtlaCrewAIInstrumentor.name)

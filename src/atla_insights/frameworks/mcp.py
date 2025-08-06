@@ -3,6 +3,7 @@
 from typing import ContextManager
 
 from atla_insights.main import ATLA_INSTANCE
+from atla_insights.suppression import NoOpContextManager, is_instrumentation_suppressed
 
 
 def instrument_mcp() -> ContextManager[None]:
@@ -27,6 +28,9 @@ def instrument_mcp() -> ContextManager[None]:
 
     :return (ContextManager[None]): A context manager that instruments MCP calls.
     """
+    if is_instrumentation_suppressed():
+        return NoOpContextManager()
+
     try:
         from openinference.instrumentation.mcp import MCPInstrumentor
     except ImportError as e:
@@ -43,4 +47,7 @@ def instrument_mcp() -> ContextManager[None]:
 
 def uninstrument_mcp() -> None:
     """Uninstrument MCP calls."""
+    if is_instrumentation_suppressed():
+        return
+
     return ATLA_INSTANCE.uninstrument_service("mcp")

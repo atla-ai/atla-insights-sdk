@@ -13,6 +13,7 @@ from atla_insights.constants import (
     OTEL_MODULE_NAME,
 )
 from atla_insights.context import metadata_var, root_span_var
+from atla_insights.suppression import is_instrumentation_suppressed
 from atla_insights.utils import truncate_value
 
 logger = logging.getLogger(OTEL_MODULE_NAME)
@@ -94,6 +95,9 @@ def set_metadata(metadata: dict[str, str]) -> None:
 
     :param metadata (dict[str, str]): The metadata to set for the current trace.
     """
+    if is_instrumentation_suppressed():
+        return
+
     metadata = _validate_metadata(metadata)
 
     metadata_var.set(metadata)

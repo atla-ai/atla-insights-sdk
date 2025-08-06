@@ -5,6 +5,7 @@ from typing import Literal
 from atla_insights.constants import SUCCESS_MARK
 from atla_insights.context import root_span_var
 from atla_insights.main import logger
+from atla_insights.suppression import is_instrumentation_suppressed
 
 
 def _mark_root_span(value: Literal[0, 1]) -> None:
@@ -29,6 +30,9 @@ def mark_success() -> None:
         return "success ✅"
     ```
     """
+    if is_instrumentation_suppressed():
+        return
+
     _mark_root_span(1)
     logger.info("Marked trace as success ✅")
 
@@ -47,5 +51,8 @@ def mark_failure() -> None:
         return "failure ❌"
     ```
     """
+    if is_instrumentation_suppressed():
+        return
+
     _mark_root_span(0)
     logger.info("Marked trace as failure ❌")

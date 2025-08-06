@@ -12,6 +12,7 @@ from atla_insights.constants import (
     OTEL_MODULE_NAME,
 )
 from atla_insights.context import root_span_var
+from atla_insights.suppression import is_instrumentation_suppressed
 from atla_insights.utils import truncate_value
 
 logger = logging.getLogger(OTEL_MODULE_NAME)
@@ -103,6 +104,9 @@ def set_custom_metrics(custom_metrics: dict[str, CustomMetric]) -> None:
 
     :param custom_metrics (dict[str, CustomMetric]): The custom metrics to set.
     """
+    if is_instrumentation_suppressed():
+        return
+
     custom_metrics = _validate_custom_metrics(custom_metrics)
     if not custom_metrics:
         return

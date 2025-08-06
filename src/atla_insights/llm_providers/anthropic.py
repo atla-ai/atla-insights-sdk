@@ -3,6 +3,7 @@
 from typing import ContextManager
 
 from atla_insights.main import ATLA_INSTANCE
+from atla_insights.suppression import NoOpContextManager, is_instrumentation_suppressed
 
 
 def instrument_anthropic() -> ContextManager[None]:
@@ -20,6 +21,9 @@ def instrument_anthropic() -> ContextManager[None]:
 
     :return (ContextManager[None]): A context manager that instruments Anthropic.
     """
+    if is_instrumentation_suppressed():
+        return NoOpContextManager()
+
     try:
         from openinference.instrumentation.anthropic import AnthropicInstrumentor
     except ImportError as e:
@@ -38,4 +42,7 @@ def instrument_anthropic() -> ContextManager[None]:
 
 def uninstrument_anthropic() -> None:
     """Uninstrument the Anthropic LLM provider."""
+    if is_instrumentation_suppressed():
+        return
+
     return ATLA_INSTANCE.uninstrument_service("anthropic")
