@@ -228,6 +228,13 @@ class GoogleGenerativeAIInstrumentor(BaseInstrumentor):
 
     name = "google-generativeai"
 
+    def __init__(self) -> None:
+        """Initialize the GoogleGenerativeAIInstrumentor."""
+        super().__init__()
+
+        self._original_generate_content = None
+        self._original_async_generate_content = None
+
     def instrumentation_dependencies(self) -> Collection[str]:
         """The instrumentation dependencies for `google-generativeai`."""
         return ("google-generativeai",)
@@ -256,14 +263,18 @@ class GoogleGenerativeAIInstrumentor(BaseInstrumentor):
                 "Please install with `pip install google-generativeai`."
             ) from err
 
-        self._original_generate_content = GenerativeModel.generate_content
+        self._original_generate_content = (
+            GenerativeModel.generate_content  # type: ignore[assignment]
+        )
         wrap_function_wrapper(
             module="google.generativeai.generative_models",
             name="GenerativeModel.generate_content",
             wrapper=_GenerateContent(tracer=self._tracer),
         )
 
-        self._original_async_generate_content = GenerativeModel.generate_content_async
+        self._original_async_generate_content = (
+            GenerativeModel.generate_content_async  # type: ignore[assignment]
+        )
         wrap_function_wrapper(
             module="google.generativeai.generative_models",
             name="GenerativeModel.generate_content_async",
