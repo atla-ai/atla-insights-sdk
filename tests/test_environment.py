@@ -33,54 +33,54 @@ class TestEnvironment(BaseLocalOtel):
 
     def test_get_environment_with_parameter(self) -> None:
         """Test get_environment with explicit parameter."""
-        from atla_insights.environment import get_environment
+        from atla_insights.environment import resolve_environment
 
-        assert get_environment("dev") == "dev"
-        assert get_environment("prod") == "prod"
+        assert resolve_environment("dev") == "dev"
+        assert resolve_environment("prod") == "prod"
 
     def test_get_environment_with_parameter_invalid(self) -> None:
         """Test get_environment with invalid parameter."""
-        from atla_insights.environment import get_environment
+        from atla_insights.environment import resolve_environment
 
         with pytest.raises(ValueError):
-            get_environment("invalid")  # type: ignore[arg-type]
+            resolve_environment("invalid")  # type: ignore[arg-type]
 
     @patch.dict(os.environ, {}, clear=True)
     def test_get_environment_no_env_var_defaults_to_prod(self) -> None:
         """Test get_environment defaults to prod when no env var is set."""
-        from atla_insights.environment import get_environment
+        from atla_insights.environment import resolve_environment
 
-        assert get_environment() == "prod"
+        assert resolve_environment() == "prod"
 
     @patch.dict(os.environ, {"ATLA_INSIGHTS_ENVIRONMENT": "dev"})
     def test_get_environment_from_env_var(self) -> None:
         """Test get_environment reads from environment variable."""
-        from atla_insights.environment import get_environment
+        from atla_insights.environment import resolve_environment
 
-        assert get_environment() == "dev"
+        assert resolve_environment() == "dev"
 
     @patch.dict(os.environ, {"ATLA_INSIGHTS_ENVIRONMENT": "prod"})
     def test_get_environment_from_env_var_prod(self) -> None:
         """Test get_environment reads prod from environment variable."""
-        from atla_insights.environment import get_environment
+        from atla_insights.environment import resolve_environment
 
-        assert get_environment() == "prod"
+        assert resolve_environment() == "prod"
 
     @patch.dict(os.environ, {"ATLA_INSIGHTS_ENVIRONMENT": "invalid"})
     def test_get_environment_invalid_env_var(self) -> None:
         """Test get_environment raises error for invalid env var."""
-        from atla_insights.environment import get_environment
+        from atla_insights.environment import resolve_environment
 
         with pytest.raises(ValueError, match="Invalid environment 'invalid'"):
-            get_environment()
+            resolve_environment()
 
     @patch.dict(os.environ, {"ATLA_INSIGHTS_ENVIRONMENT": "dev"})
     def test_get_environment_parameter_overrides_env_var(self) -> None:
         """Test that parameter takes precedence over environment variable."""
-        from atla_insights.environment import get_environment
+        from atla_insights.environment import resolve_environment
 
         # Environment variable is "dev" but parameter is "prod"
-        assert get_environment("prod") == "prod"
+        assert resolve_environment("prod") == "prod"
 
     def test_span_processor_environment_attribute(self) -> None:
         """Test that AtlaRootSpanProcessor adds environment attribute to spans."""
@@ -177,4 +177,3 @@ class TestEnvironment(BaseLocalOtel):
 
         with pytest.raises(ValueError, match="Invalid environment 'invalid'"):
             atla_instance.configure(token="dummy", environment="invalid")  # type: ignore[arg-type]
-
