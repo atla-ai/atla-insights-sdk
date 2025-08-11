@@ -13,7 +13,12 @@ from opentelemetry.sdk.trace import SpanProcessor, TracerProvider
 from opentelemetry.sdk.trace.sampling import ALWAYS_ON
 from opentelemetry.trace import Tracer, set_tracer_provider
 
-from atla_insights.constants import DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT, OTEL_MODULE_NAME
+from atla_insights.constants import (
+    DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT,
+    ENVIRONMENT_OPTIONS,
+    OTEL_MODULE_NAME,
+)
+from atla_insights.environment import get_environment
 from atla_insights.id_generator import NoSeedIdGenerator
 from atla_insights.metadata import set_global_metadata
 from atla_insights.sampling import TRACE_SAMPLING_TYPE, add_sampling_to_tracer_provider
@@ -50,6 +55,7 @@ class AtlaInsights:
         additional_span_processors: Optional[Sequence[SpanProcessor]] = None,
         verbose: bool = True,
         debug: bool = False,
+        environment: Optional[ENVIRONMENT_OPTIONS] = None,
     ) -> None:
         """Configure Atla insights.
 
@@ -83,7 +89,13 @@ class AtlaInsights:
         :param verbose (bool): Whether to print verbose output to console.
             Defaults to `True`.
         :param debug (bool): Whether to log debug outputs. Defaults to `False`.
+        :param environment (Optional[SUPPORTED_ENVIRONMENT]): The environment to use
+            ("dev" or "prod"). If not provided, will use ATLA_INSIGHTS_ENVIRONMENT
+            environment variable, or default to "prod".
         """
+        # Get and validate environment
+        validated_environment = get_environment(environment)
+
         if metadata is not None:
             set_global_metadata(metadata)
 
@@ -95,6 +107,7 @@ class AtlaInsights:
             additional_span_processors=additional_span_processors,
             verbose=verbose,
             debug=debug,
+            environment=validated_environment,
         )
         add_sampling_to_tracer_provider(
             tracer_provider=self.tracer_provider,
