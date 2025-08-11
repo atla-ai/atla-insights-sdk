@@ -31,3 +31,13 @@ repos:
       hooks:
           - id: prettier
             types_or: [json, yaml]
+
+    - repo: local
+      hooks:
+          - id: biome-check
+            name: Biome check (lint+format JS/TS)
+            language: system
+            entry: pnpm -C js exec biome check --write
+            files: "^js/.*\\.(?:cjs|mjs|jsx?|tsx?)$"
+            pass_filenames: false
+            require_serial: true

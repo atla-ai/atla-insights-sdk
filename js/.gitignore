@@ -1,0 +1,18 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependency directory
+**/node_modules/**
+_node_modules
+.pnp.cjs
+
+package-lock.json
+
+**/.next/**
+
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
