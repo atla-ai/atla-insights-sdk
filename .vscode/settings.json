@@ -24,6 +24,12 @@
             "source.organizeImports": "explicit"
         }
     },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
     "python.analysis.extraPaths": ["./package", "./pipeline"],
     "python.analysis.typeCheckingMode": "off",
     "python.defaultInterpreterPath": "./.venv/bin/python",
