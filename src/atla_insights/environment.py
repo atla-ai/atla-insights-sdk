@@ -40,4 +40,5 @@ def resolve_environment(
     """
     # Use parameter if provided, otherwise check environment variable, otherwise default
     env_value = environment or os.getenv(ENVIRONMENT_VAR_NAME, ENVIRONMENT_DEFAULT)
+    assert isinstance(env_value, str)
     return validate_environment(env_value)

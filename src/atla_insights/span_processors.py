@@ -11,7 +11,6 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcess
 from atla_insights.console_span_exporter import ConsoleSpanExporter
 from atla_insights.constants import (
     ENVIRONMENT_MARK,
-    ENVIRONMENT_OPTIONS,
     LIB_VERSIONS,
     LIB_VERSIONS_MARK,
     METADATA_MARK,
@@ -27,7 +26,7 @@ from atla_insights.metadata import get_metadata
 class AtlaRootSpanProcessor(SpanProcessor):
     """An Atla root span processor."""
 
-    def __init__(self, debug: bool, environment: ENVIRONMENT_OPTIONS) -> None:
+    def __init__(self, debug: bool, environment: str) -> None:
         """Initialize the Atla root span processor."""
         self.debug = debug
         self.environment = environment
@@ -82,7 +81,7 @@ def add_span_processors_to_tracer_provider(
     additional_span_processors: Optional[Sequence[SpanProcessor]],
     verbose: bool,
     debug: bool,
-    environment: ENVIRONMENT_OPTIONS,
+    environment: str,
 ) -> None:
     """Adds all relevant span processors to a tracer provider.
 
