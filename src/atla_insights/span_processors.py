@@ -10,6 +10,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcess
 
 from atla_insights.console_span_exporter import ConsoleSpanExporter
 from atla_insights.constants import (
+    ENVIRONMENT_MARK,
     LIB_VERSIONS,
     LIB_VERSIONS_MARK,
     METADATA_MARK,
@@ -25,13 +26,15 @@ from atla_insights.metadata import get_metadata
 class AtlaRootSpanProcessor(SpanProcessor):
     """An Atla root span processor."""
 
-    def __init__(self, debug: bool) -> None:
+    def __init__(self, debug: bool, environment: str) -> None:
         """Initialize the Atla root span processor."""
         self.debug = debug
+        self.environment = environment
 
     def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
         """On start span processing."""
         span.set_attribute(VERSION_MARK, __version__)
+        span.set_attribute(ENVIRONMENT_MARK, self.environment)
 
         if self.debug:
             span.set_attribute(LIB_VERSIONS_MARK, LIB_VERSIONS)
@@ -78,6 +81,7 @@ def add_span_processors_to_tracer_provider(
     additional_span_processors: Optional[Sequence[SpanProcessor]],
     verbose: bool,
     debug: bool,
+    environment: str,
 ) -> None:
     """Adds all relevant span processors to a tracer provider.
 
@@ -88,8 +92,12 @@ def add_span_processors_to_tracer_provider(
         span processors.
     :param verbose (bool): Whether to print verbose output to console.
     :param debug (bool): Whether to log debug outputs.
+    :param environment (SUPPORTED_ENVIRONMENT): The environment ("dev" or "prod").
     """
-    span_processors = [get_atla_span_processor(token), AtlaRootSpanProcessor(debug)]
+    span_processors = [
+        get_atla_span_processor(token),
+        AtlaRootSpanProcessor(debug, environment),
+    ]
 
     if additional_span_processors:
         span_processors.extend(additional_span_processors)

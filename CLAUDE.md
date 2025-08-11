@@ -29,6 +29,7 @@ Before you begin, you must understand these three fundamental rules:
 -   Get their authentication token from https://app.atla-ai.com
 -   Confirm framework and LLM provider choices when asked
 -   Provide the token when prompted for .env file creation
+-   Optionally specify environment ("dev" or "prod") - defaults to "prod"
 
 ## Prerequisites
 
@@ -159,15 +160,15 @@ ATLA_INSIGHTS_TOKEN=your_actual_token_here
 
 ### Entry Point Detection
 
-| File Name       | Common Usage           | What to Look For                      |
-| --------------- | ---------------------- | ------------------------------------- |
-| **main.py**     | Standard entry point   | Contains `if __name__ == "__main__":` |
-| **app.py**      | Web applications       | Flask/FastAPI app creation            |
-| **run.py**      | Script runners         | Application startup logic             |
-| **server.py**   | Server applications    | Server startup code                   |
-| **manage.py**   | Django projects        | Django management commands            |
-| ****init**.py** | Package initialization | Package-level imports                 |
-| **Custom file** | Your specific setup    | Your main application file            |
+| File Name           | Common Usage           | What to Look For                      |
+| ------------------- | ---------------------- | ------------------------------------- |
+| **main.py**         | Standard entry point   | Contains `if __name__ == "__main__":` |
+| **app.py**          | Web applications       | Flask/FastAPI app creation            |
+| **run.py**          | Script runners         | Application startup logic             |
+| **server.py**       | Server applications    | Server startup code                   |
+| **manage.py**       | Django projects        | Django management commands            |
+| \***\*init**.py\*\* | Package initialization | Package-level imports                 |
+| **Custom file**     | Your specific setup    | Your main application file            |
 
 **Claude Code searches for these patterns:**
 
@@ -259,7 +260,6 @@ You can attach metadata to provide additional context about your application:
 from atla_insights import configure
 
 metadata = {
-    "environment": "dev",
     "prompt-version": "v1.4",
     "model": "gpt-4o-2024-08-06",
     "run-id": "my-test",
@@ -268,6 +268,7 @@ metadata = {
 configure(
     token=os.getenv("ATLA_INSIGHTS_TOKEN"),
     metadata=metadata,
+    environment="dev",  # defaults to "prod"
 )
 ```
 

@@ -45,6 +45,22 @@ configure(token="<MY_ATLA_INSIGHTS_TOKEN>")
 
 You can retrieve your authentication token from the [Atla Insights platform](https://app.atla-ai.com).
 
+### Environment Configuration
+
+Separate traces between development and production environments:
+
+```python
+# Development environment
+configure(token="<TOKEN>", environment="dev")
+
+# Production environment (default)
+configure(token="<TOKEN>", environment="prod")
+
+# Via environment variable
+export ATLA_INSIGHTS_ENVIRONMENT=dev
+configure(token="<TOKEN>")  # Uses "dev" from env var
+```
+
 ### Instrumentation
 
 In order for spans/traces to become available in your Atla Insights dashboard, you will
