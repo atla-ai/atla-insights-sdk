@@ -94,8 +94,8 @@ namespace_packages = true
 implicit_optional = false
 follow_untyped_imports = true
 plugins = ["pydantic.mypy"]
-mypy_path = ["src"]
-exclude = ["examples/"]
+mypy_path = ["src/python"]
+exclude = ["src/python/examples/", "src/js/"]
 
 [tool.pydantic-mypy]
 init_forbid_extra = true
@@ -110,7 +110,10 @@ ignore_missing_imports = true
 follow_imports = "skip"
 
 [tool.ruff]
-exclude = [".venv", "examples/frameworks/instrument_baml/baml_client"]
+exclude = [
+    ".venv",
+    "src/python/examples/frameworks/instrument_baml/baml_client",
+]
 line-length = 90
 indent-width = 4
 

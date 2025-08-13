@@ -40,7 +40,7 @@
     "ruff.importStrategy": "fromEnvironment",
     "ruff.nativeServer": "on",
 
-    "biome.configurationPath": "./js/biome.json",
+    "biome.configurationPath": "./src/js/biome.json",
     "biome.requireConfiguration": true,
 
     "[toml]": {
