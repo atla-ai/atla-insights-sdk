@@ -4,7 +4,7 @@
 import { diag, DiagConsoleLogger, DiagLogLevel } from "@opentelemetry/api";
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 
-import { configure, instrument, markSuccess } from "../src/index.ts";
+import { configure, instrument, markSuccess, setMetadata } from "../src/index.ts";
 
 async function main(): Promise<void> {
     configure({
@@ -20,7 +20,17 @@ async function main(): Promise<void> {
 
     const myInstrumentedFunction = instrument("My instrumented function")(
         function (): string {
+            setMetadata({"function": "function1"});
             const message = "Hello, world!";
+            markSuccess();
+            return message;
+        },
+    );
+
+    const myInstrumentedFunction2 = instrument("My instrumented function 2")(
+        function (): string {
+            setMetadata({"function": "function2"});
+            const message = "Hello, world 2!";
             markSuccess();
             return message;
         },
@@ -29,6 +39,8 @@ async function main(): Promise<void> {
     const result = myInstrumentedFunction();
     console.log("Result:", result);
 
+    myInstrumentedFunction2();
+    console.log("Result:", result);
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
 }

@@ -29,6 +29,7 @@ import {
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { ConsoleSpanProcessor } from "./console_span_processor";
 import { AtlaRootSpanProcessor } from "./atla_root_span_processor";
+import { setGlobalMetadata } from "./metadata";
 
 export interface ConfigurationOptions {
 	token: string;
@@ -115,6 +116,11 @@ class AtlaInsights {
 		this.token = token;
 		this.serviceName = serviceName;
 		this.metadata = metadata;
+
+		// Set global metadata
+		if (metadata) {
+			setGlobalMetadata(metadata);
+		}
 
 		// Create resource
 		const resource = Resource.default().merge(

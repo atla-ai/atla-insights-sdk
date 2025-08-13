@@ -3,14 +3,12 @@
  * Works with both configure() and instrumentVercel() approaches.
  */
 import { trace, context as otelContext } from "@opentelemetry/api";
-import { METADATA_MARK } from "./internal/constants";
+import { METADATA_MARK, MAX_METADATA_FIELDS, MAX_METADATA_KEY_CHARS, MAX_METADATA_VALUE_CHARS } from "./internal/constants";
 
 const METADATA_CONTEXT_KEY = Symbol("atla.metadata");
 
-// Metadata validation limits (matching Python SDK)
-const MAX_METADATA_FIELDS = 25;
-const MAX_METADATA_KEY_CHARS = 40;
-const MAX_METADATA_VALUE_CHARS = 100;
+// Global metadata storage
+let globalMetadata: Record<string, string> = {};
 
 /**
  * Truncate a string value to the specified maximum length.
@@ -82,6 +80,13 @@ function validateMetadata(metadata: Record<string, string>): Record<string, stri
 }
 
 /**
+ * Set global metadata (called internally during configuration).
+ */
+export function setGlobalMetadata(metadata: Record<string, string>): void {
+    globalMetadata = validateMetadata(metadata || {});
+}
+
+/**
  * Set metadata that will be added to all spans in the current trace.
  * This is for runtime metadata updates within a trace.
  */
@@ -90,40 +95,25 @@ export function setMetadata(metadata: Record<string, string>): void {
     if (span) {
         const validatedMetadata = validateMetadata(metadata);
 
-        // Get existing metadata from the span if any
-        const existingMetadata = span.attributes[METADATA_MARK];
-        let currentMetadata: Record<string, string> = {};
-
-        if (existingMetadata && typeof existingMetadata === 'string') {
-            try {
-                currentMetadata = JSON.parse(existingMetadata);
-            } catch (e) {
-                // Ignore parse errors
-            }
-        }
-
-        // Merge with new metadata
+        // Merge with global metadata
+        const currentMetadata = getMetadata() || {};
         const mergedMetadata = { ...currentMetadata, ...validatedMetadata };
-        span.setAttribute(METADATA_MARK, JSON.stringify(mergedMetadata));
+
+        const context = otelContext.active();
+        const newContext = context.setValue(METADATA_CONTEXT_KEY, mergedMetadata);
+        otelContext.with(newContext, () => {
+            span.setAttribute(METADATA_MARK, JSON.stringify(mergedMetadata));
+        });
     }
 }
 
 /**
- * Get current metadata from the active span.
+ * Get current metadata using fallback pattern.
  */
 export function getMetadata(): Record<string, string> | undefined {
-    const span = trace.getActiveSpan();
-    if (span) {
-        const metadataAttr = span.attributes[METADATA_MARK];
-        if (metadataAttr && typeof metadataAttr === 'string') {
-            try {
-                return JSON.parse(metadataAttr);
-            } catch (e) {
-                // Ignore parse errors
-            }
-        }
-    }
-    return undefined;
+    const context = otelContext.active();
+    const contextMetadata = context.getValue(METADATA_CONTEXT_KEY) as Record<string, string>;
+    return contextMetadata || globalMetadata || undefined;
 }
 
 /**
@@ -135,18 +125,20 @@ export function withMetadata<T>(
 ): T | Promise<T> {
     const validatedMetadata = validateMetadata(metadata);
     const ctx = otelContext.active();
-    const currentMetadata = ctx.getValue(METADATA_CONTEXT_KEY) as Record<string, string> || {};
-    const newCtx = ctx.setValue(METADATA_CONTEXT_KEY, { ...currentMetadata, ...validatedMetadata });
-
+    const newCtx = ctx.setValue(METADATA_CONTEXT_KEY, validatedMetadata);
     return otelContext.with(newCtx, fn);
 }
 
 /**
- * Clear all metadata from the active span.
+ * Clear runtime metadata from context.
  */
 export function clearMetadata(): void {
     const span = trace.getActiveSpan();
     if (span) {
-        span.setAttribute(METADATA_MARK, "{}");
+        const ctx = otelContext.active();
+        const newCtx = ctx.setValue(METADATA_CONTEXT_KEY, undefined);
+        otelContext.with(newCtx, () => {
+            span.setAttribute(METADATA_MARK, JSON.stringify(globalMetadata || {}));
+        });
     }
 }

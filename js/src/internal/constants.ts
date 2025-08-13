@@ -6,3 +6,8 @@ export const DEFAULT_SERVICE_NAME = "atla-insights-js";
 
 export const METADATA_MARK = "atla.metadata";
 export const SUCCESS_MARK = "atla.mark.success";
+
+// Metadata validation limits
+export const MAX_METADATA_FIELDS = 25;
+export const MAX_METADATA_KEY_CHARS = 40;
+export const MAX_METADATA_VALUE_CHARS = 100;
