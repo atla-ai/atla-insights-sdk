@@ -9,7 +9,6 @@ import { configure, instrument, markSuccess, setMetadata } from "../src/index.ts
 async function main(): Promise<void> {
     configure({
         token: process.env.ATLA_INSIGHTS_TOKEN!,
-        verbose: true,
         metadata: {
             "project": "my-project",
             "environment": "development",

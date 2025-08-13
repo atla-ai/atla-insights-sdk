@@ -37,7 +37,6 @@ function markRootSpan(value: 0 | 1): void {
  */
 export function markSuccess(): void {
     markRootSpan(1);
-    console.log("[Atla] Marked trace as success ✅");
 }
 
 /**
@@ -58,5 +57,4 @@ export function markSuccess(): void {
  */
 export function markFailure(): void {
     markRootSpan(0);
-    console.log("[Atla] Marked trace as failure ❌");
 }

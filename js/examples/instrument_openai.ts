@@ -1,5 +1,5 @@
 /**
- * OpenAI example with proper instrumentation order and debug logging.
+ * OpenAI example.
  */
 import { diag, DiagConsoleLogger, DiagLogLevel } from "@opentelemetry/api";
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
@@ -9,7 +9,6 @@ import { configure, instrument, instrumentOpenAI } from "../src/index.ts";
 async function main(): Promise<void> {
     configure({
         token: process.env.ATLA_INSIGHTS_TOKEN!,
-        verbose: true,
         metadata: {
             "project": "my-project",
             "environment": "development",

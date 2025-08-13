@@ -80,8 +80,6 @@ export function instrumentOpenAI(openaiModule?: any): void {
 
     // Register it with OpenTelemetry
     ATLA_INSIGHTS.registerInstrumentations(SERVICE_NAME, [openAIInstrumentation]);
-
-    console.log("OpenAI instrumentation enabled ✅");
 }
 
 /**
@@ -106,7 +104,6 @@ export function uninstrumentOpenAI(): void {
     }
 
     ATLA_INSIGHTS.unregisterInstrumentations(SERVICE_NAME);
-    console.log("OpenAI instrumentation disabled ❌");
 }
 
 /**

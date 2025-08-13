@@ -8,14 +8,12 @@ import { trace, type Tracer } from "@opentelemetry/api";
 import {
 	SimpleSpanProcessor,
 	NodeTracerProvider,
-	ReadableSpan,
-	SpanProcessor,
+	type SpanProcessor,
 } from "@opentelemetry/sdk-trace-node";
 import {
 	type InstrumentationBase,
 	registerInstrumentations,
 } from "@opentelemetry/instrumentation";
-import { ExportResult } from "@opentelemetry/core";
 import { Resource } from "@opentelemetry/resources";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import {
@@ -23,67 +21,15 @@ import {
 	DEFAULT_SERVICE_NAME,
 	OTEL_MODULE_NAME,
 	OTEL_TRACES_ENDPOINT,
-	METADATA_MARK,
-	SUCCESS_MARK,
 } from "./internal/constants";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
-import { ConsoleSpanProcessor } from "./console_span_processor";
 import { AtlaRootSpanProcessor } from "./atla_root_span_processor";
 import { setGlobalMetadata } from "./metadata";
 
 export interface ConfigurationOptions {
 	token: string;
 	serviceName?: string;
-	verbose?: boolean;
 	metadata?: Record<string, string>;
-}
-
-class DebugOTLPTraceExporter extends OTLPTraceExporter {
-	private verbose: boolean;
-
-	constructor(config: any, verbose: boolean = false) {
-		super(config);
-		this.verbose = verbose;
-
-		console.log("🔍 [Atla Insights] DebugOTLPTraceExporter constructor");
-	}
-
-	export(
-		spans: ReadableSpan[],
-		resultCallback: (result: ExportResult) => void,
-	): void {
-		if (this.verbose) {
-			console.log(
-				`📤 [Atla Insights] Exporting ${spans.length} span(s) to Logfire:`,
-			);
-			console.log(`   Endpoint: ${this.url}`);
-
-			spans.forEach((span, index) => {
-				console.log(`   Span ${index + 1}:`);
-				console.log(`     Name: ${span.name}`);
-				console.log(`     TraceId: ${span.spanContext().traceId}`);
-				console.log(`     SpanId: ${span.spanContext().spanId}`);
-				console.log(
-					`     Duration: ${span.duration?.[0] || 0}s ${span.duration?.[1] || 0}ns`,
-				);
-				console.log(`     Attributes:`, span.attributes);
-				if (span.resource) {
-					console.log(`     Resource:`, span.resource.attributes);
-				}
-			});
-		}
-
-		// Call the original export method with a wrapped callback
-		super.export(spans, (result) => {
-			if (this.verbose) {
-				console.log(`📥 [Atla Insights] Export result:`, {
-					code: result.code,
-					error: result.error,
-				});
-			}
-			resultCallback(result);
-		});
-	}
 }
 
 class AtlaInsights {
@@ -102,12 +48,7 @@ class AtlaInsights {
 	 * @param options - The configuration options. See {@link ConfigurationOptions}.
 	 */
 	configure(options: ConfigurationOptions): void {
-		const {
-			token,
-			serviceName = DEFAULT_SERVICE_NAME,
-			verbose = false,
-			metadata,
-		} = options;
+		const { token, serviceName = DEFAULT_SERVICE_NAME, metadata } = options;
 
 		if (!token) {
 			throw new Error("Atla Insights: Token is required");
@@ -130,15 +71,12 @@ class AtlaInsights {
 		);
 
 		// Add Atla exporter
-		const atlaExporter = new DebugOTLPTraceExporter(
-			{
-				url: OTEL_TRACES_ENDPOINT,
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
+		const atlaExporter = new OTLPTraceExporter({
+			url: OTEL_TRACES_ENDPOINT,
+			headers: {
+				Authorization: `Bearer ${token}`,
 			},
-			verbose,
-		);
+		});
 
 		// Update the AtlaRootSpanProcessor instantiation to pass metadata
 		const atlaRootProcessor = new AtlaRootSpanProcessor(this.metadata);
@@ -147,10 +85,6 @@ class AtlaInsights {
 			atlaRootProcessor,
 			atlaSpanProcessor,
 		];
-
-		if (verbose) {
-			spanProcessors.push(new ConsoleSpanProcessor(verbose));
-		}
 
 		// Create the tracer provider
 		this.tracerProvider = new NodeTracerProvider({
@@ -164,12 +98,6 @@ class AtlaInsights {
 		this.tracerProvider.register();
 		this.tracer = trace.getTracer(OTEL_MODULE_NAME);
 		this.configured = true;
-
-		if (verbose) {
-			console.log(
-				"🔍 [Atla Insights] Verbose mode enabled - spans will be logged to console",
-			);
-		}
 	}
 
 	getTracer(): Tracer {

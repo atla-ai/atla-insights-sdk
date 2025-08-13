@@ -1,6 +1,5 @@
 /**
  * Metadata management for Atla Insights.
- * Works with both configure() and instrumentVercel() approaches.
  */
 import { trace, context as otelContext } from "@opentelemetry/api";
 import { METADATA_MARK, MAX_METADATA_FIELDS, MAX_METADATA_KEY_CHARS, MAX_METADATA_VALUE_CHARS } from "./internal/constants";
@@ -19,7 +18,6 @@ function truncateValue(value: string, maxLength: number): string {
 
 /**
  * Validate the user-provided metadata field.
- * Mirrors the Python SDK's _validate_metadata function.
  */
 function validateMetadata(metadata: Record<string, string>): Record<string, string> {
     if (typeof metadata !== 'object' || metadata === null || Array.isArray(metadata)) {
