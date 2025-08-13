@@ -1,0 +1,16 @@
+{
+    "pull_request": {
+        "number": 62,
+        "head": {
+            "sha": "004ab8d",
+            "ref": "feature/js-sdk"
+        },
+        "base": {
+            "sha": "67668a7",
+            "ref": "main"
+        }
+    },
+    "repository": {
+        "default_branch": "main"
+    }
+}

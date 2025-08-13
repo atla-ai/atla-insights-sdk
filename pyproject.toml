@@ -133,3 +133,6 @@ max-complexity = 18
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/python"]
