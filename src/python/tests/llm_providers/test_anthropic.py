@@ -2,7 +2,6 @@
 
 import pytest
 from anthropic import Anthropic, AnthropicBedrock, AsyncAnthropic, AsyncAnthropicBedrock
-
 from tests._otel import BaseLocalOtel
 
 

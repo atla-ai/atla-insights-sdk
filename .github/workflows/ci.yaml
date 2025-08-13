@@ -7,35 +7,103 @@ on:
     pull_request:
 
 jobs:
-    lint-test:
-        name: Lint & Test
+    python-lint-test:
+        name: Python Lint & Test
         runs-on: ubuntu-latest
 
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
 
+            - name: Check for Python file changes
+              uses: dorny/paths-filter@v3
+              id: python-changes
+              with:
+                  filters: |
+                      python:
+                        - 'src/python/**'
+                        - 'pyproject.toml'
+                        - 'uv.lock'
+
             - name: Set up Python
+              if: steps.python-changes.outputs.python == 'true'
               uses: actions/setup-python@v5
               with:
                   python-version: "3.11"
 
             - name: Install uv
+              if: steps.python-changes.outputs.python == 'true'
               run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
             - name: Set up Python environment
+              if: steps.python-changes.outputs.python == 'true'
               run: |
                   uv sync
                   uv pip install "mypy>=1.15.0"
                   uv pip install "ruff>=0.11.7"
 
-            - name: Lint with Ruff
+            - name: Lint Python with Ruff
+              if: steps.python-changes.outputs.python == 'true'
               run: |
                   uv run ruff check .
                   uv run ruff format --check .
 
-            - name: Type-check with Mypy
+            - name: Type-check Python with Mypy
+              if: steps.python-changes.outputs.python == 'true'
               run: uv run dmypy run -- .
 
-            - name: Run tests with Pytest
-              run: uv run pytest -vv
+            - name: Run Python tests with Pytest
+              if: steps.python-changes.outputs.python == 'true'
+              run: uv run pytest src/python/tests -vv
+
+    typescript-lint-test:
+        name: TypeScript Lint & Test
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Check for TypeScript file changes
+              uses: dorny/paths-filter@v3
+              id: ts-changes
+              with:
+                  filters: |
+                      typescript:
+                        - 'src/js/**'
+
+            - name: Set up Node.js
+              if: steps.ts-changes.outputs.typescript == 'true'
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Install pnpm
+              if: steps.ts-changes.outputs.typescript == 'true'
+              uses: pnpm/action-setup@v4
+              with:
+                  version: "10.14.0"
+
+            - name: Install JS dependencies
+              if: steps.ts-changes.outputs.typescript == 'true'
+              run: |
+                  cd src/js
+                  pnpm install --frozen-lockfile
+
+            - name: Lint JS/TS with Biome
+              if: steps.ts-changes.outputs.typescript == 'true'
+              run: |
+                  cd src/js
+                  pnpm exec biome check . --reporter=github
+
+            - name: Type-check TypeScript
+              if: steps.ts-changes.outputs.typescript == 'true'
+              run: |
+                  cd src/js
+                  pnpm run build
+
+            - name: Run JS tests with Jest
+              if: steps.ts-changes.outputs.typescript == 'true'
+              run: |
+                  cd src/js
+                  pnpm test

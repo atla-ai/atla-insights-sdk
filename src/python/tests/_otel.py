@@ -4,7 +4,6 @@ import time
 
 import litellm
 from opentelemetry.sdk.trace import ReadableSpan
-
 from tests.conftest import in_memory_span_exporter
 
 

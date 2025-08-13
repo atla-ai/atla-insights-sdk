@@ -5,7 +5,6 @@ from typing import Any, Iterable, Iterator, Mapping, Tuple
 import pytest
 from google.genai import Client, types
 from opentelemetry.util.types import AttributeValue
-
 from tests._otel import BaseLocalOtel
 
 

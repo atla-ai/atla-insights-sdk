@@ -16,7 +16,6 @@ from agents.run_context import RunContextWrapper
 from agents.tool import function_tool
 from openai import AsyncOpenAI
 from openai.types.responses import ResponseFunctionToolCall
-
 from tests._otel import BaseLocalOtel
 
 

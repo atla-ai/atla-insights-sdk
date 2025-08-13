@@ -2,7 +2,6 @@
 
 import pytest
 from openai import AsyncAzureOpenAI, AsyncOpenAI, AzureOpenAI, OpenAI
-
 from tests._otel import BaseLocalOtel
 
 

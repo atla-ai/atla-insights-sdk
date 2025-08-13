@@ -1,7 +1,6 @@
 """Test the suppression functionality."""
 
 from openai import OpenAI
-
 from tests._otel import BaseLocalOtel
 from tests.conftest import in_memory_span_exporter
 

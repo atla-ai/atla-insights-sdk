@@ -6,9 +6,8 @@ from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph
 from openai import OpenAI
 from pydantic import SecretStr
-from typing_extensions import TypedDict
-
 from tests._otel import BaseLocalOtel
+from typing_extensions import TypedDict
 
 
 class TestLangChainInstrumentation(BaseLocalOtel):

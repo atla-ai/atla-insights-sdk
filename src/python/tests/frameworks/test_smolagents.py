@@ -2,7 +2,6 @@
 
 from openai import OpenAI
 from smolagents import CodeAgent, LiteLLMModel, OpenAIServerModel, tool
-
 from tests._otel import BaseLocalOtel
 
 

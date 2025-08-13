@@ -4,7 +4,6 @@ import pytest
 from crewai import LLM, Agent, Crew, Task
 from crewai.tools.tool_usage import CrewStructuredTool, ToolCalling, ToolUsage
 from openai import OpenAI
-
 from tests._otel import BaseLocalOtel
 
 

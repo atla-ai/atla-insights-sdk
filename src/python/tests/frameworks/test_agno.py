@@ -9,7 +9,6 @@ from agno.tools.function import Function, FunctionCall
 from anthropic import Anthropic
 from google.genai import Client
 from openai import OpenAI
-
 from tests._otel import BaseLocalOtel
 
 

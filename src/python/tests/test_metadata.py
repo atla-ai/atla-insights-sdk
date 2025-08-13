@@ -5,7 +5,6 @@ import json
 from typing import cast
 
 import pytest
-
 from tests._otel import BaseLocalOtel
 
 

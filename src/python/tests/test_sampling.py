@@ -16,7 +16,6 @@ from opentelemetry.trace import (
     TraceState,
 )
 from opentelemetry.util.types import Attributes
-
 from tests._otel import BaseLocalOtel
 
 
@@ -68,9 +67,8 @@ class TestSampling(BaseLocalOtel):
 
     def test_always_on_sampler(self) -> None:
         """Test always on sampler."""
-        from opentelemetry.sdk.trace.sampling import ALWAYS_ON
-
         from atla_insights import instrument
+        from opentelemetry.sdk.trace.sampling import ALWAYS_ON
 
         with set_custom_sampler(ALWAYS_ON):
 
@@ -86,9 +84,8 @@ class TestSampling(BaseLocalOtel):
 
     def test_always_off_sampler(self) -> None:
         """Test always off sampler."""
-        from opentelemetry.sdk.trace.sampling import ALWAYS_OFF
-
         from atla_insights import instrument
+        from opentelemetry.sdk.trace.sampling import ALWAYS_OFF
 
         with set_custom_sampler(ALWAYS_OFF):
 

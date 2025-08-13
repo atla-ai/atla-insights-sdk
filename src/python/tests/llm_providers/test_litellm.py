@@ -7,7 +7,6 @@ import pytest
 from litellm import acompletion, completion
 from litellm.proxy._types import SpanAttributes
 from openai import OpenAI
-
 from tests._otel import BaseLocalOtel
 
 
