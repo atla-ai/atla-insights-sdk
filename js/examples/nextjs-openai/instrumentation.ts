@@ -1,12 +1,9 @@
-import { AtlaVercelExporter } from "@atla/insights-sdk";
-import { registerOTel } from "@vercel/otel";
+import { diag, DiagConsoleLogger, DiagLogLevel } from "@opentelemetry/api";
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+import { configure, instrumentVercel } from "@atla/insights-sdk";
 
 export function register() {
-	console.log("registerOTel", process.env.ATLA_API_KEY);
-	registerOTel({
-		serviceName: "nextjs-openai-simple",
-		traceExporter: new AtlaVercelExporter({
-			token: process.env.ATLA_API_KEY as string,
-		}),
-	});
+    instrumentVercel({
+        token: process.env.ATLA_API_KEY!
+    });
 }

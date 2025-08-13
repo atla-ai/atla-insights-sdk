@@ -11,8 +11,10 @@
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "allowImportingTsExtensions": true,
-        "noEmit": true
+        "noEmit": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
     },
-    "include": ["src/**/*", "test/**/*"],
-    "exclude": ["node_modules", "dist", "examples"]
+    "include": ["src/**/*", "test/**/*", "examples/**/*"],
+    "exclude": ["node_modules", "dist"]
 }

@@ -16,3 +16,10 @@ package-lock.json
 **/.env.development.local
 **/.env.test.local
 **/.env.production.local
+
+# Compiled JS files in source (should only be .ts)
+src/**/*.js
+src/**/*.js.map
+
+# Actual build output
+dist/

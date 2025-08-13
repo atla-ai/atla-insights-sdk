@@ -30,12 +30,18 @@
     "[jsonc]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
+    "[typescript]": {
+        "editor.defaultFormatter": "biomejs.biome"
+    },
     "python.analysis.extraPaths": ["./package", "./pipeline"],
     "python.analysis.typeCheckingMode": "off",
     "python.defaultInterpreterPath": "./.venv/bin/python",
 
     "ruff.importStrategy": "fromEnvironment",
     "ruff.nativeServer": "on",
+
+    "biome.configurationPath": "./js/biome.json",
+    "biome.requireConfiguration": true,
 
     "[toml]": {
         "editor.defaultFormatter": "tamasfe.even-better-toml"

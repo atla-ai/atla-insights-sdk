@@ -1,74 +1,152 @@
+import { OpenAIInstrumentation } from "@arizeai/openinference-instrumentation-openai";
+import { getAtlaContext } from "../../context";
+import { ATLA_INSIGHTS } from "../../main";
+
+const SERVICE_NAME = "openai";
+
+let openAIInstrumentation: OpenAIInstrumentation | null = null;
+
 /**
- * @file providers/openai/index.ts
- * @function instrumentOpenAI
+ * Instrument the OpenAI LLM provider.
  *
- * Overview
- * -------
- * Thin, provider-native wrapper for the official OpenAI JS client.
- * Adds gen_ai.* attributes and error status to spans around OpenAI calls.
- * Final Atla shaping (atla.*) is performed by frameworks/vercel/AtlaExporter.
+ * This function enables tracing for all OpenAI API calls made through
+ * the official OpenAI JavaScript/TypeScript client.
  *
- * Public API
- * ----------
- * instrumentOpenAI(client: OpenAI, opts?: InstrumentOpts): OpenAI
- *   - Returns a proxied client with the same surface as the original.
+ * @example
+ * ```typescript
+ * import { configure, instrumentOpenAI } from "@atla/insights-sdk";
+ * import OpenAI from "openai";
  *
- * Instrumented Endpoints
- * ----------------------
- *   - chat.completions.create (primary)
- *   - (Optional) Responses API analogs if adopted by the application.
+ * // Configure Atla Insights first
+ * configure({
+ *   token: process.env.ATLA_API_KEY!,
+ * });
  *
- * Span Lifecycle
- * --------------
- *   1) On call:
- *        - Create a span named "gen.openai.chat" (or endpoint-specific).
- *        - Parent to the current active context (respecting upstream tracing).
- *        - Attach request attributes:
- *            gen_ai.system = "openai"
- *            gen_ai.request.model = <request.model>
- *            gen_ai.request.temperature/top_p/max_tokens/penalties (when present)
- *   2) Streaming (if used):
- *        - Optionally emit throttled "token" events with partial deltas.
- *        - Do not aggregate full output here (exporter will handle final shaping).
- *   3) On success:
- *        - gen_ai.response.finish_reason from response.choices[].finish_reason (or equivalent).
- *        - gen_ai.usage.{input_tokens, completion_tokens, total_tokens} if returned.
- *        - Set span status OK.
- *   4) On error:
- *        - Set span status ERROR.
- *        - Attach provider error hints (error.type, error.code, http.status).
- *        - Avoid embedding entire payloads to reduce PII risk.
+ * // Enable OpenAI instrumentation
+ * instrumentOpenAI();
  *
- * Inputs/Outputs Handling
- * -----------------------
- * This wrapper does not emit atla.input_messages or atla.output_messages. The exporter
- * will synthesize those from Vercel AI attributes if present, or from the raw request/response
- * values exposed by this wrapper via gen_ai.* and ai.* mappings when available.
+ * // Use OpenAI as normal - it will be automatically traced
+ * const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+ * const completion = await openai.chat.completions.create({
+ *   model: "gpt-4",
+ *   messages: [{ role: "user", content: "Hello!" }],
+ * });
+ * ```
  *
- * Options
- * -------
- * InstrumentOpts:
- *   - spanName?: string
- *   - captureStreamingDeltas?: boolean (default: false)
- *   - eventThrottleMs?: number (minimum gap between token delta events)
+ * @param openaiModule - The OpenAI module to instrument. If not provided, the default OpenAI module will be instrumented.
  *
- * Concurrency & Context
- * ---------------------
- *   - Uses @opentelemetry/api to start/activate spans; no provider is created here.
- *   - Respects existing traceparent (from Vercel/Next or user’s own NodeSDK).
+ * @example
+ * ```typescript
+ * import { configure, instrumentOpenAI } from "@atla/insights-sdk";
+ * import OpenAI from "openai";
  *
- * Dependencies
- * ------------
- *   - openai (official client)
- *   - @opentelemetry/api
- *   - ../../internal/types (for shared types)
+ * // Configure Atla Insights first
+ * configure({ token: process.env.ATLA_API_KEY! });
  *
- * Testing Notes
- * -------------
- *   - Mock OpenAI client; assert that spans include:
- *       gen_ai.system="openai"
- *       gen_ai.request.model=<model>
- *       finish_reason and usage on success
- *       status=ERROR with lightweight error attributes on failure
- *   - Streaming: verify throttling and end-of-stream behavior.
+ * // Manually instrument the OpenAI module
+ * instrumentOpenAI(OpenAI);
+ *
+ * // Use OpenAI as normal - it will be automatically traced
+ * const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+ * const completion = await openai.chat.completions.create({
+ *   model: "gpt-4",
+ *   messages: [{ role: "user", content: "Hello!" }],
+ * });
+ * ```
+ *
+ * @returns void
  */
+export function instrumentOpenAI(openaiModule?: any): void {
+    const context = getAtlaContext();
+    if (context?.suppressInstrumentation) {
+        return;
+    }
+
+    if (!ATLA_INSIGHTS.configured) {
+        throw new Error(
+            "Atla Insights must be configured before instrumenting OpenAI. " +
+                "Please call configure first.",
+        );
+    }
+
+    openAIInstrumentation = new OpenAIInstrumentation({
+        tracerProvider: ATLA_INSIGHTS.getTracerProvider(),
+    });
+
+    // If a module is provided, manually instrument it
+    if (openaiModule) {
+        openAIInstrumentation.manuallyInstrument(openaiModule);
+    }
+
+    // Register it with OpenTelemetry
+    ATLA_INSIGHTS.registerInstrumentations(SERVICE_NAME, [openAIInstrumentation]);
+
+    console.log("OpenAI instrumentation enabled ✅");
+}
+
+/**
+ * Uninstrument the OpenAI LLM provider.
+ *
+ * This function disables tracing for OpenAI API calls.
+ *
+ * @example
+ * ```typescript
+ * import { uninstrumentOpenAI } from "@atla/insights-sdk";
+ *
+ * // Disable OpenAI instrumentation
+ * uninstrumentOpenAI();
+ * ```
+ *
+ * @returns void
+ */
+export function uninstrumentOpenAI(): void {
+    const context = getAtlaContext();
+    if (context?.suppressInstrumentation) {
+        return;
+    }
+
+    ATLA_INSIGHTS.unregisterInstrumentations(SERVICE_NAME);
+    console.log("OpenAI instrumentation disabled ❌");
+}
+
+/**
+ * Create a disposable OpenAI instrumentation resource.
+ *
+ * This function enables OpenAI instrumentation and returns a disposable resource
+ * that automatically disables instrumentation when disposed. This is particularly
+ * useful with TypeScript's `using` statement for automatic resource management.
+ *
+ * @example
+ * ```typescript
+ * import { withInstrumentedOpenAI } from "@atla/insights-sdk";
+ * import OpenAI from "openai";
+ *
+ * // Use with using statement (requires TypeScript 5.2+)
+ * {
+ *   using instrumented = withInstrumentedOpenAI();
+ *   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+ *   // OpenAI calls here will be traced
+ * }
+ * // OpenAI instrumentation automatically disabled here
+ *
+ * // Or manually manage lifecycle
+ * const instrumented = withInstrumentedOpenAI();
+ * try {
+ *   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+ *   // OpenAI calls here will be traced
+ * } finally {
+ *   instrumented[Symbol.dispose]();
+ * }
+ * ```
+ *
+ * @returns A disposable resource that cleans up OpenAI instrumentation when disposed
+ */
+export function withInstrumentedOpenAI(): Disposable {
+    instrumentOpenAI();
+
+    return {
+        [Symbol.dispose]() {
+            uninstrumentOpenAI();
+        },
+    };
+}
