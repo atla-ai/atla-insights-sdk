@@ -8,8 +8,7 @@ set -e  # Exit on any error
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-OPENAPI_URL="https://atla-insights-git-more-sdk-stuff-atla-fa3c125f.vercel.app/api/openapi"
-# OPENAPI_URL="https://app.atla-ai.com/api/openapi"
+OPENAPI_URL="https://app.atla-ai.com/api/openapi"
 OUTPUT_DIR="$PROJECT_ROOT/src/atla_insights/client"
 CONFIG_FILE="$SCRIPT_DIR/config.json"
 

@@ -35,17 +35,17 @@ class TestAnnotation(unittest.TestCase):
         model = Annotation()
         if include_optional:
             return Annotation(
-                id = '',
-                span_id = '',
-                failure_mode = '',
-                atla_critique = ''
-            )
-        else:
-            return Annotation(
-                id = '',
                 span_id = '',
                 failure_mode = '',
                 atla_critique = '',
+                id = ''
+            )
+        else:
+            return Annotation(
+                span_id = '',
+                failure_mode = '',
+                atla_critique = '',
+                id = '',
         )
         """
 

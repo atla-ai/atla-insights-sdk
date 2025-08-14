@@ -63,10 +63,10 @@ class TestDetailedTraceListResponse(unittest.TestCase):
                                     ], 
                                 annotations = [
                                     _generated_client.models.get_traces_by_ids_200_response_traces_inner_spans_inner_annotations_inner.getTracesByIds_200_response_traces_inner_spans_inner_annotations_inner(
-                                        id = '', 
                                         span_id = '', 
                                         failure_mode = '', 
-                                        atla_critique = '', )
+                                        atla_critique = '', 
+                                        id = '', )
                                     ], )
                             ], 
                         custom_metric_values = [
@@ -112,10 +112,10 @@ class TestDetailedTraceListResponse(unittest.TestCase):
                                     ], 
                                 annotations = [
                                     _generated_client.models.get_traces_by_ids_200_response_traces_inner_spans_inner_annotations_inner.getTracesByIds_200_response_traces_inner_spans_inner_annotations_inner(
-                                        id = '', 
                                         span_id = '', 
                                         failure_mode = '', 
-                                        atla_critique = '', )
+                                        atla_critique = '', 
+                                        id = '', )
                                     ], )
                             ], 
                         custom_metric_values = [

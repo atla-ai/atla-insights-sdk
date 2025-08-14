@@ -1,6 +1,6 @@
 # _generated_client.SDKApi
 
-All URIs are relative to *https://atla-insights-3hp10woq0-atla-fa3c125f.vercel.app*
+All URIs are relative to *https://app.atla-ai.com*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -25,10 +25,10 @@ from _generated_client.models.trace_detail_response import TraceDetailResponse
 from _generated_client.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://atla-insights-3hp10woq0-atla-fa3c125f.vercel.app
+# Defining the host is optional and defaults to https://app.atla-ai.com
 # See configuration.py for a list of all supported configuration parameters.
 configuration = _generated_client.Configuration(
-    host = "https://atla-insights-3hp10woq0-atla-fa3c125f.vercel.app"
+    host = "https://app.atla-ai.com"
 )
 
 
@@ -98,10 +98,10 @@ from _generated_client.models.detailed_trace_list_response import DetailedTraceL
 from _generated_client.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://atla-insights-3hp10woq0-atla-fa3c125f.vercel.app
+# Defining the host is optional and defaults to https://app.atla-ai.com
 # See configuration.py for a list of all supported configuration parameters.
 configuration = _generated_client.Configuration(
-    host = "https://atla-insights-3hp10woq0-atla-fa3c125f.vercel.app"
+    host = "https://app.atla-ai.com"
 )
 
 
@@ -170,10 +170,10 @@ from _generated_client.models.trace_list_response import TraceListResponse
 from _generated_client.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://atla-insights-3hp10woq0-atla-fa3c125f.vercel.app
+# Defining the host is optional and defaults to https://app.atla-ai.com
 # See configuration.py for a list of all supported configuration parameters.
 configuration = _generated_client.Configuration(
-    host = "https://atla-insights-3hp10woq0-atla-fa3c125f.vercel.app"
+    host = "https://app.atla-ai.com"
 )
 
 

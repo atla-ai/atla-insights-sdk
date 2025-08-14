@@ -26,11 +26,11 @@ class Annotation(BaseModel):
     """
     Annotation
     """ # noqa: E501
-    id: StrictStr
     span_id: StrictStr = Field(alias="spanId")
     failure_mode: StrictStr = Field(alias="failureMode")
     atla_critique: StrictStr = Field(alias="atlaCritique")
-    __properties: ClassVar[List[str]] = ["id", "spanId", "failureMode", "atlaCritique"]
+    id: StrictStr
+    __properties: ClassVar[List[str]] = ["spanId", "failureMode", "atlaCritique", "id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -83,10 +83,10 @@ class Annotation(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "id": obj.get("id"),
             "spanId": obj.get("spanId"),
             "failureMode": obj.get("failureMode"),
-            "atlaCritique": obj.get("atlaCritique")
+            "atlaCritique": obj.get("atlaCritique"),
+            "id": obj.get("id")
         })
         return _obj
 

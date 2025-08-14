@@ -5,10 +5,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **str** |  | 
 **span_id** | **str** |  | 
 **failure_mode** | **str** |  | 
 **atla_critique** | **str** |  | 
+**id** | **str** |  | 
 
 ## Example
 

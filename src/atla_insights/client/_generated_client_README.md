@@ -34,10 +34,10 @@ import _generated_client
 from _generated_client.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://atla-insights-3hp10woq0-atla-fa3c125f.vercel.app
+# Defining the host is optional and defaults to https://app.atla-ai.com
 # See configuration.py for a list of all supported configuration parameters.
 configuration = _generated_client.Configuration(
-    host = "https://atla-insights-3hp10woq0-atla-fa3c125f.vercel.app"
+    host = "https://app.atla-ai.com"
 )
 
 
@@ -61,7 +61,7 @@ with _generated_client.ApiClient(configuration) as api_client:
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *https://atla-insights-3hp10woq0-atla-fa3c125f.vercel.app*
+All URIs are relative to *https://app.atla-ai.com*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------

@@ -188,7 +188,7 @@ class Configuration:
     ) -> None:
         """Constructor
         """
-        self._base_path = "https://atla-insights-3hp10woq0-atla-fa3c125f.vercel.app" if host is None else host
+        self._base_path = "https://app.atla-ai.com" if host is None else host
         """Default Base url
         """
         self.server_index = 0 if server_index is None and host is None else server_index
@@ -511,7 +511,7 @@ class Configuration:
         """
         return [
             {
-                'url': "https://atla-insights-3hp10woq0-atla-fa3c125f.vercel.app",
+                'url': "https://app.atla-ai.com",
                 'description': "API server",
             }
         ]
