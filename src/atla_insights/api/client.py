@@ -3,7 +3,7 @@
 import logging
 import os
 from datetime import datetime
-from typing import Iterator, List, Optional
+from typing import Any, Iterator, List, Optional
 from urllib.parse import urlparse
 
 import httpx
@@ -43,7 +43,7 @@ class AtlaInsightsClient:
 
         Args:
             base_url: API base URL (defaults to ATLA_BASE_URL env var or Atla base URL)
-            api_key: API key for authentication (defaults to ATLA_API_KEY env var)
+            api_key: API key for authentication (defaults to ATLA_INSIGHTS_TOKEN env var)
             timeout: Request timeout in seconds
 
         Raises:
@@ -109,13 +109,13 @@ class AtlaInsightsClient:
             return api_key
 
         # Try environment variable
-        env_key = os.getenv("ATLA_API_KEY")
+        env_key = os.getenv("ATLA_INSIGHTS_TOKEN")
         if env_key:
             return env_key
 
         raise ValueError(
             "API key is required. Provide it as a parameter or set the "
-            "ATLA_API_KEY environment variable."
+            "ATLA_INSIGHTS_TOKEN environment variable."
         )
 
     def auth_check(self) -> bool:
@@ -156,7 +156,7 @@ class AtlaInsightsClient:
             httpx.HTTPError: If the API request fails
             ValidationError: If the response doesn't match expected schema
         """
-        params = {
+        params: dict[str, Any] = {
             "page": str(page),
             "pageSize": str(min(page_size, 100)),
         }
