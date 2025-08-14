@@ -218,6 +218,7 @@ name = "atla-insights"
 version = "0.0.16"
 source = { editable = "." }
 dependencies = [
+    { name = "httpx" },
     { name = "openai" },
     { name = "openinference-instrumentation" },
     { name = "openinference-semantic-conventions" },
@@ -334,6 +335,7 @@ requires-dist = [
     { name = "crewai", marker = "extra == 'crewai'", specifier = ">=0.130.0" },
     { name = "google-genai", marker = "extra == 'google-genai'", specifier = ">=1.19.0" },
     { name = "google-generativeai", marker = "extra == 'google-generativeai'", specifier = ">=0.7.0" },
+    { name = "httpx", specifier = ">=0.24.0" },
     { name = "langchain", marker = "extra == 'langchain'", specifier = ">=0.3.18" },
     { name = "langchain-openai", marker = "extra == 'langchain'", specifier = ">=0.3.4" },
     { name = "langgraph", marker = "extra == 'langchain'", specifier = ">=0.3.20" },
