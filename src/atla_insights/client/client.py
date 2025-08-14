@@ -84,26 +84,25 @@ class Client:
             page_size=page_size,
         )
 
-    def get_trace(
-        self, trace_id: str, include: Optional[List[str]] = None
-    ) -> TraceDetailResponse:
+    def get_trace(self, trace_id: str) -> TraceDetailResponse:
         """Get a single trace by ID.
 
         Args:
             trace_id: Unique identifier for the trace
-            include: Additional data to include in response. Options are: "spans",
-                "annotations", and "custom_metrics". If "annotations" is included,
-                "spans" will be included automatically.
-
         Returns:
-            Complete trace data including spans, annotations, and metrics as specified
-            in the `include` parameter.
+            Response containing complete trace data
         """
-        return self._sdk.get_trace_by_id(trace_id, include=include)
+        return self._sdk.get_trace_by_id(
+            trace_id,
+            # Automatically include all data.
+            include=[
+                "spans",
+                "annotations",
+                "customMetrics",
+            ],
+        )
 
-    def get_traces(
-        self, trace_ids: List[str], include: Optional[List[str]] = None
-    ) -> DetailedTraceListResponse:
+    def get_traces(self, trace_ids: List[str]) -> DetailedTraceListResponse:
         """Get multiple traces by their IDs.
 
         Args:
@@ -113,7 +112,14 @@ class Client:
                 "spans" will be included automatically.
 
         Returns:
-            Response containing all found traces including spans, annotations, and
-            metrics as specified in the `include` parameter.
+            Response containing complete trace data
         """
-        return self._sdk.get_traces_by_ids(ids=trace_ids, include=include)
+        return self._sdk.get_traces_by_ids(
+            ids=trace_ids,
+            # Automatically include all data.
+            include=[
+                "spans",
+                "annotations",
+                "customMetrics",
+            ],
+        )
