@@ -3,6 +3,8 @@
     "library": "urllib3",
     "generateSourceCodeOnly": true,
     "hideGenerationTimestamp": true,
+    "datetimeFormat": "%Y-%m-%dT%H:%M:%SZ",
+    "dateFormat": "%Y-%m-%d",
     "modelNameMappings": {
         "listTraces_200_response": "TraceListResponse",
         "listTraces_200_response_traces_inner": "Trace",

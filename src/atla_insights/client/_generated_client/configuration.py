@@ -188,7 +188,7 @@ class Configuration:
     ) -> None:
         """Constructor
         """
-        self._base_path = "https://app.atla-ai.com" if host is None else host
+        self._base_path = "https://atla-insights-9ku2trsmw-atla-fa3c125f.vercel.app" if host is None else host
         """Default Base url
         """
         self.server_index = 0 if server_index is None and host is None else server_index
@@ -305,7 +305,7 @@ class Configuration:
         """Options to pass down to the underlying urllib3 socket
         """
 
-        self.datetime_format = "%Y-%m-%dT%H:%M:%S.%f%z"
+        self.datetime_format = "%Y-%m-%dT%H:%M:%SZ"
         """datetime format
         """
 

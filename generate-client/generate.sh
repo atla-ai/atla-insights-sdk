@@ -8,7 +8,8 @@ set -e  # Exit on any error
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-OPENAPI_URL="https://app.atla-ai.com/api/openapi"
+OPENAPI_URL="https://atla-insights-git-more-sdk-stuff-atla-fa3c125f.vercel.app/api/openapi"
+# OPENAPI_URL="https://app.atla-ai.com/api/openapi"
 OUTPUT_DIR="$PROJECT_ROOT/src/atla_insights/client"
 CONFIG_FILE="$SCRIPT_DIR/config.json"
 
@@ -47,18 +48,10 @@ else
     echo "✅ Schema downloaded successfully"
 fi
 
-# Backup existing __init__.py if it exists
-INIT_FILE_BACKUP=""
-if [ -f "$OUTPUT_DIR/__init__.py" ]; then
-    echo "💾 Backing up existing __init__.py..."
-    INIT_FILE_BACKUP="/tmp/client_init_backup_$$.py"
-    cp "$OUTPUT_DIR/__init__.py" "$INIT_FILE_BACKUP"
-fi
-
-# Remove old generated client but preserve the backed up __init__.py
-if [ -d "$OUTPUT_DIR" ]; then
+# Remove only the generated client directory, preserving custom wrapper files
+if [ -d "$OUTPUT_DIR/_generated_client" ]; then
     echo "🗑️  Removing existing generated client..."
-    rm -rf "$OUTPUT_DIR"
+    rm -rf "$OUTPUT_DIR/_generated_client"
 fi
 
 # Create output directory
@@ -87,13 +80,6 @@ if [ $? -eq 0 ]; then
     find "$OUTPUT_DIR/_generated_client" -name "*.py" -type f -exec sed -i '' 's/^from _generated_client import/from atla_insights.client._generated_client import/g' {} +
     find "$OUTPUT_DIR/_generated_client" -name "*.py" -type f -exec sed -i '' 's/getattr(_generated_client\.models/getattr(atla_insights.client._generated_client.models/g' {} +
     echo "✅ Import fixes applied"
-    
-    # Restore backed up __init__.py if it exists
-    if [ -n "$INIT_FILE_BACKUP" ] && [ -f "$INIT_FILE_BACKUP" ]; then
-        echo "🔄 Restoring custom __init__.py..."
-        cp "$INIT_FILE_BACKUP" "$OUTPUT_DIR/__init__.py"
-        rm "$INIT_FILE_BACKUP"
-    fi
     
     echo ""
     echo "✅ Client generation completed successfully!"

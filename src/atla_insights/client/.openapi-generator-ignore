@@ -1,2 +1,4 @@
-# Don't overwrite our custom __init__.py file
+# Don't overwrite our custom wrapper files
 __init__.py
+client.py
+types.py

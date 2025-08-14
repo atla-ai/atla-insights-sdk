@@ -1,6 +1,6 @@
 # _generated_client.SDKApi
 
-All URIs are relative to *https://atla-insights-f734egalo-atla-fa3c125f.vercel.app*
+All URIs are relative to *https://atla-insights-9ku2trsmw-atla-fa3c125f.vercel.app*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -25,10 +25,10 @@ from _generated_client.models.trace_detail_response import TraceDetailResponse
 from _generated_client.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://atla-insights-f734egalo-atla-fa3c125f.vercel.app
+# Defining the host is optional and defaults to https://atla-insights-9ku2trsmw-atla-fa3c125f.vercel.app
 # See configuration.py for a list of all supported configuration parameters.
 configuration = _generated_client.Configuration(
-    host = "https://atla-insights-f734egalo-atla-fa3c125f.vercel.app"
+    host = "https://atla-insights-9ku2trsmw-atla-fa3c125f.vercel.app"
 )
 
 
@@ -98,10 +98,10 @@ from _generated_client.models.detailed_trace_list_response import DetailedTraceL
 from _generated_client.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://atla-insights-f734egalo-atla-fa3c125f.vercel.app
+# Defining the host is optional and defaults to https://atla-insights-9ku2trsmw-atla-fa3c125f.vercel.app
 # See configuration.py for a list of all supported configuration parameters.
 configuration = _generated_client.Configuration(
-    host = "https://atla-insights-f734egalo-atla-fa3c125f.vercel.app"
+    host = "https://atla-insights-9ku2trsmw-atla-fa3c125f.vercel.app"
 )
 
 
@@ -171,10 +171,10 @@ from _generated_client.models.trace_list_response import TraceListResponse
 from _generated_client.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://atla-insights-f734egalo-atla-fa3c125f.vercel.app
+# Defining the host is optional and defaults to https://atla-insights-9ku2trsmw-atla-fa3c125f.vercel.app
 # See configuration.py for a list of all supported configuration parameters.
 configuration = _generated_client.Configuration(
-    host = "https://atla-insights-f734egalo-atla-fa3c125f.vercel.app"
+    host = "https://atla-insights-9ku2trsmw-atla-fa3c125f.vercel.app"
 )
 
 
@@ -185,7 +185,7 @@ with _generated_client.ApiClient(configuration) as api_client:
     start_timestamp = '2013-10-20T19:20:30+01:00' # datetime |  (optional)
     end_timestamp = '2013-10-20T19:20:30+01:00' # datetime |  (optional)
     metadata_filter = [_generated_client.MetadataFilter()] # List[MetadataFilter] |  (optional)
-    page = 0 # int |  (optional) (default to 0)
+    page = 1 # int |  (optional) (default to 1)
     page_size = 50 # int |  (optional) (default to 50)
 
     try:
@@ -207,7 +207,7 @@ Name | Type | Description  | Notes
  **start_timestamp** | **datetime**|  | [optional] 
  **end_timestamp** | **datetime**|  | [optional] 
  **metadata_filter** | [**List[MetadataFilter]**](MetadataFilter.md)|  | [optional] 
- **page** | **int**|  | [optional] [default to 0]
+ **page** | **int**|  | [optional] [default to 1]
  **page_size** | **int**|  | [optional] [default to 50]
 
 ### Return type
