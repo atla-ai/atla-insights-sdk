@@ -623,7 +623,7 @@ class SDKApi:
         start_timestamp: Optional[datetime] = None,
         end_timestamp: Optional[datetime] = None,
         metadata_filter: Optional[List[MetadataFilter]] = None,
-        page: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
+        page: Optional[Annotated[int, Field(strict=True, ge=1)]] = None,
         page_size: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = None,
         _request_timeout: Union[
             None,
@@ -708,7 +708,7 @@ class SDKApi:
         start_timestamp: Optional[datetime] = None,
         end_timestamp: Optional[datetime] = None,
         metadata_filter: Optional[List[MetadataFilter]] = None,
-        page: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
+        page: Optional[Annotated[int, Field(strict=True, ge=1)]] = None,
         page_size: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = None,
         _request_timeout: Union[
             None,
@@ -793,7 +793,7 @@ class SDKApi:
         start_timestamp: Optional[datetime] = None,
         end_timestamp: Optional[datetime] = None,
         metadata_filter: Optional[List[MetadataFilter]] = None,
-        page: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
+        page: Optional[Annotated[int, Field(strict=True, ge=1)]] = None,
         page_size: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = None,
         _request_timeout: Union[
             None,
