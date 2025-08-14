@@ -4,6 +4,7 @@ import os
 from datetime import datetime, timezone
 
 from atla_insights import Client
+from atla_insights.client import TraceDetailResponse, TraceListResponse
 
 
 def main() -> None:
@@ -12,6 +13,7 @@ def main() -> None:
     # Note: For this example we use Atla's Narcissus AI Agent data.
     # Check out https://app.atla-ai.com/app/narcissus to see more!
     client = Client(api_key=os.environ["ATLA_INSIGHTS_TOKEN"])
+    response: TraceListResponse | TraceDetailResponse
 
     # List all traces
     response = client.list_traces()
@@ -45,8 +47,8 @@ def main() -> None:
     # Get a trace by id and look at its data.
     response = client.get_trace(trace_id="a278287f58ea99c2d585ad73b0913fd5")
     print(f"Found trace {response.trace.id}.")
-    print(f"Found {len(response.trace.spans)} spans in trace.")
-    for span in response.trace.spans:
+    print(f"Found {len(response.trace.spans)} spans in trace.")  # type: ignore[arg-type]
+    for span in response.trace.spans:  # type: ignore[union-attr]
         if span.annotations:
             print(
                 f"Span {span.id} has an annotation: "
