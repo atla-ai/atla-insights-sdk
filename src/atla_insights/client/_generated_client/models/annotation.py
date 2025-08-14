@@ -17,18 +17,20 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-class ListTracesMetadataFilterParameterInner(BaseModel):
+class Annotation(BaseModel):
     """
-    ListTracesMetadataFilterParameterInner
+    Annotation
     """ # noqa: E501
-    key: StrictStr
-    value: StrictStr
-    __properties: ClassVar[List[str]] = ["key", "value"]
+    id: StrictStr
+    span_id: StrictStr = Field(alias="spanId")
+    failure_mode: StrictStr = Field(alias="failureMode")
+    atla_critique: StrictStr = Field(alias="atlaCritique")
+    __properties: ClassVar[List[str]] = ["id", "spanId", "failureMode", "atlaCritique"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -48,7 +50,7 @@ class ListTracesMetadataFilterParameterInner(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ListTracesMetadataFilterParameterInner from a JSON string"""
+        """Create an instance of Annotation from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -73,7 +75,7 @@ class ListTracesMetadataFilterParameterInner(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ListTracesMetadataFilterParameterInner from a dict"""
+        """Create an instance of Annotation from a dict"""
         if obj is None:
             return None
 
@@ -81,8 +83,10 @@ class ListTracesMetadataFilterParameterInner(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "key": obj.get("key"),
-            "value": obj.get("value")
+            "id": obj.get("id"),
+            "spanId": obj.get("spanId"),
+            "failureMode": obj.get("failureMode"),
+            "atlaCritique": obj.get("atlaCritique")
         })
         return _obj
 

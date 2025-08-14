@@ -19,15 +19,15 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List
-from atla_insights.client._generated_client.models.get_traces_by_ids200_response_traces_inner import GetTracesByIds200ResponseTracesInner
+from atla_insights.client._generated_client.models.trace_with_details import TraceWithDetails
 from typing import Optional, Set
 from typing_extensions import Self
 
-class GetTracesByIds200Response(BaseModel):
+class DetailedTraceListResponse(BaseModel):
     """
-    GetTracesByIds200Response
+    DetailedTraceListResponse
     """ # noqa: E501
-    traces: List[GetTracesByIds200ResponseTracesInner]
+    traces: List[TraceWithDetails]
     __properties: ClassVar[List[str]] = ["traces"]
 
     model_config = ConfigDict(
@@ -48,7 +48,7 @@ class GetTracesByIds200Response(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of GetTracesByIds200Response from a JSON string"""
+        """Create an instance of DetailedTraceListResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -80,7 +80,7 @@ class GetTracesByIds200Response(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of GetTracesByIds200Response from a dict"""
+        """Create an instance of DetailedTraceListResponse from a dict"""
         if obj is None:
             return None
 
@@ -88,7 +88,7 @@ class GetTracesByIds200Response(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "traces": [GetTracesByIds200ResponseTracesInner.from_dict(_item) for _item in obj["traces"]] if obj.get("traces") is not None else None
+            "traces": [TraceWithDetails.from_dict(_item) for _item in obj["traces"]] if obj.get("traces") is not None else None
         })
         return _obj
 

@@ -76,6 +76,7 @@ openapi-generator generate \
     -o "$OUTPUT_DIR" \
     -c "$CONFIG_FILE" \
     --openapi-normalizer FILTER="tag:SDK" \
+    --model-name-mappings listTraces_200_response=TraceListResponse,listTraces_200_response_traces_inner=Trace,getTracesByIds_200_response=DetailedTraceListResponse,getTracesByIds_200_response_traces_inner=TraceWithDetails,getTraceById_200_response=TraceDetailResponse,getTracesByIds_200_response_traces_inner_spans_inner=Span,getTracesByIds_200_response_traces_inner_spans_inner_annotations_inner=Annotation,getTracesByIds_200_response_traces_inner_customMetricValues_inner=CustomMetricValue,getTracesByIds_200_response_traces_inner_customMetricValues_inner_customMetric=CustomMetric,listTraces_metadataFilter_parameter_inner=MetadataFilter \
     --skip-validate-spec
 
 # Check if generation was successful

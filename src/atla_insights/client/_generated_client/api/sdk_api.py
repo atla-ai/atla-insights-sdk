@@ -20,10 +20,10 @@ from datetime import datetime
 from pydantic import Field, StrictStr, field_validator
 from typing import List, Optional
 from typing_extensions import Annotated
-from atla_insights.client._generated_client.models.get_trace_by_id200_response import GetTraceById200Response
-from atla_insights.client._generated_client.models.get_traces_by_ids200_response import GetTracesByIds200Response
-from atla_insights.client._generated_client.models.list_traces200_response import ListTraces200Response
-from atla_insights.client._generated_client.models.list_traces_metadata_filter_parameter_inner import ListTracesMetadataFilterParameterInner
+from atla_insights.client._generated_client.models.detailed_trace_list_response import DetailedTraceListResponse
+from atla_insights.client._generated_client.models.metadata_filter import MetadataFilter
+from atla_insights.client._generated_client.models.trace_detail_response import TraceDetailResponse
+from atla_insights.client._generated_client.models.trace_list_response import TraceListResponse
 
 from atla_insights.client._generated_client.api_client import ApiClient, RequestSerialized
 from atla_insights.client._generated_client.api_response import ApiResponse
@@ -60,7 +60,7 @@ class SDKApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> GetTraceById200Response:
+    ) -> TraceDetailResponse:
         """Get a single trace by ID
 
         Retrieve a specific trace by its unique identifier. Returns complete trace data including all spans, annotations, trace summary, and custom metric values.
@@ -101,7 +101,7 @@ class SDKApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "GetTraceById200Response",
+            '200': "TraceDetailResponse",
             '401': None,
             '404': None,
             '500': None,
@@ -134,7 +134,7 @@ class SDKApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[GetTraceById200Response]:
+    ) -> ApiResponse[TraceDetailResponse]:
         """Get a single trace by ID
 
         Retrieve a specific trace by its unique identifier. Returns complete trace data including all spans, annotations, trace summary, and custom metric values.
@@ -175,7 +175,7 @@ class SDKApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "GetTraceById200Response",
+            '200': "TraceDetailResponse",
             '401': None,
             '404': None,
             '500': None,
@@ -249,7 +249,7 @@ class SDKApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "GetTraceById200Response",
+            '200': "TraceDetailResponse",
             '401': None,
             '404': None,
             '500': None,
@@ -347,7 +347,7 @@ class SDKApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> GetTracesByIds200Response:
+    ) -> DetailedTraceListResponse:
         """Get multiple traces by IDs
 
         Retrieve specific traces by providing an array of trace IDs. Returns complete trace data including spans, summaries, and custom metrics for all found traces.
@@ -388,7 +388,7 @@ class SDKApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "GetTracesByIds200Response",
+            '200': "DetailedTraceListResponse",
             '401': None,
             '500': None,
         }
@@ -420,7 +420,7 @@ class SDKApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[GetTracesByIds200Response]:
+    ) -> ApiResponse[DetailedTraceListResponse]:
         """Get multiple traces by IDs
 
         Retrieve specific traces by providing an array of trace IDs. Returns complete trace data including spans, summaries, and custom metrics for all found traces.
@@ -461,7 +461,7 @@ class SDKApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "GetTracesByIds200Response",
+            '200': "DetailedTraceListResponse",
             '401': None,
             '500': None,
         }
@@ -534,7 +534,7 @@ class SDKApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "GetTracesByIds200Response",
+            '200': "DetailedTraceListResponse",
             '401': None,
             '500': None,
         }
@@ -622,7 +622,7 @@ class SDKApi:
         self,
         start_timestamp: Optional[datetime] = None,
         end_timestamp: Optional[datetime] = None,
-        metadata_filter: Optional[List[ListTracesMetadataFilterParameterInner]] = None,
+        metadata_filter: Optional[List[MetadataFilter]] = None,
         page: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
         page_size: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = None,
         _request_timeout: Union[
@@ -637,7 +637,7 @@ class SDKApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ListTraces200Response:
+    ) -> TraceListResponse:
         """List traces with pagination and filtering
 
         Retrieve a paginated list of traces for the authenticated organization.
@@ -647,7 +647,7 @@ class SDKApi:
         :param end_timestamp:
         :type end_timestamp: datetime
         :param metadata_filter:
-        :type metadata_filter: List[ListTracesMetadataFilterParameterInner]
+        :type metadata_filter: List[MetadataFilter]
         :param page:
         :type page: int
         :param page_size:
@@ -687,7 +687,7 @@ class SDKApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ListTraces200Response",
+            '200': "TraceListResponse",
             '401': None,
             '500': None,
         }
@@ -707,7 +707,7 @@ class SDKApi:
         self,
         start_timestamp: Optional[datetime] = None,
         end_timestamp: Optional[datetime] = None,
-        metadata_filter: Optional[List[ListTracesMetadataFilterParameterInner]] = None,
+        metadata_filter: Optional[List[MetadataFilter]] = None,
         page: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
         page_size: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = None,
         _request_timeout: Union[
@@ -722,7 +722,7 @@ class SDKApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[ListTraces200Response]:
+    ) -> ApiResponse[TraceListResponse]:
         """List traces with pagination and filtering
 
         Retrieve a paginated list of traces for the authenticated organization.
@@ -732,7 +732,7 @@ class SDKApi:
         :param end_timestamp:
         :type end_timestamp: datetime
         :param metadata_filter:
-        :type metadata_filter: List[ListTracesMetadataFilterParameterInner]
+        :type metadata_filter: List[MetadataFilter]
         :param page:
         :type page: int
         :param page_size:
@@ -772,7 +772,7 @@ class SDKApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ListTraces200Response",
+            '200': "TraceListResponse",
             '401': None,
             '500': None,
         }
@@ -792,7 +792,7 @@ class SDKApi:
         self,
         start_timestamp: Optional[datetime] = None,
         end_timestamp: Optional[datetime] = None,
-        metadata_filter: Optional[List[ListTracesMetadataFilterParameterInner]] = None,
+        metadata_filter: Optional[List[MetadataFilter]] = None,
         page: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
         page_size: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = None,
         _request_timeout: Union[
@@ -817,7 +817,7 @@ class SDKApi:
         :param end_timestamp:
         :type end_timestamp: datetime
         :param metadata_filter:
-        :type metadata_filter: List[ListTracesMetadataFilterParameterInner]
+        :type metadata_filter: List[MetadataFilter]
         :param page:
         :type page: int
         :param page_size:
@@ -857,7 +857,7 @@ class SDKApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ListTraces200Response",
+            '200': "TraceListResponse",
             '401': None,
             '500': None,
         }

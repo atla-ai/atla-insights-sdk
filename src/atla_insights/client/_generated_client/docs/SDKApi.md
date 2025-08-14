@@ -1,6 +1,6 @@
 # _generated_client.SDKApi
 
-All URIs are relative to *https://app.atla-ai.com*
+All URIs are relative to *https://atla-insights-f734egalo-atla-fa3c125f.vercel.app*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 
 # **get_trace_by_id**
-> GetTraceById200Response get_trace_by_id(trace_id, include=include)
+> TraceDetailResponse get_trace_by_id(trace_id, include=include)
 
 Get a single trace by ID
 
@@ -21,14 +21,14 @@ Retrieve a specific trace by its unique identifier. Returns complete trace data 
 
 ```python
 import _generated_client
-from _generated_client.models.get_trace_by_id200_response import GetTraceById200Response
+from _generated_client.models.trace_detail_response import TraceDetailResponse
 from _generated_client.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://app.atla-ai.com
+# Defining the host is optional and defaults to https://atla-insights-f734egalo-atla-fa3c125f.vercel.app
 # See configuration.py for a list of all supported configuration parameters.
 configuration = _generated_client.Configuration(
-    host = "https://app.atla-ai.com"
+    host = "https://atla-insights-f734egalo-atla-fa3c125f.vercel.app"
 )
 
 
@@ -60,7 +60,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**GetTraceById200Response**](GetTraceById200Response.md)
+[**TraceDetailResponse**](TraceDetailResponse.md)
 
 ### Authorization
 
@@ -83,7 +83,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_traces_by_ids**
-> GetTracesByIds200Response get_traces_by_ids(ids, include=include)
+> DetailedTraceListResponse get_traces_by_ids(ids, include=include)
 
 Get multiple traces by IDs
 
@@ -94,14 +94,14 @@ Retrieve specific traces by providing an array of trace IDs. Returns complete tr
 
 ```python
 import _generated_client
-from _generated_client.models.get_traces_by_ids200_response import GetTracesByIds200Response
+from _generated_client.models.detailed_trace_list_response import DetailedTraceListResponse
 from _generated_client.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://app.atla-ai.com
+# Defining the host is optional and defaults to https://atla-insights-f734egalo-atla-fa3c125f.vercel.app
 # See configuration.py for a list of all supported configuration parameters.
 configuration = _generated_client.Configuration(
-    host = "https://app.atla-ai.com"
+    host = "https://atla-insights-f734egalo-atla-fa3c125f.vercel.app"
 )
 
 
@@ -133,7 +133,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**GetTracesByIds200Response**](GetTracesByIds200Response.md)
+[**DetailedTraceListResponse**](DetailedTraceListResponse.md)
 
 ### Authorization
 
@@ -155,7 +155,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_traces**
-> ListTraces200Response list_traces(start_timestamp=start_timestamp, end_timestamp=end_timestamp, metadata_filter=metadata_filter, page=page, page_size=page_size)
+> TraceListResponse list_traces(start_timestamp=start_timestamp, end_timestamp=end_timestamp, metadata_filter=metadata_filter, page=page, page_size=page_size)
 
 List traces with pagination and filtering
 
@@ -166,15 +166,15 @@ Retrieve a paginated list of traces for the authenticated organization.
 
 ```python
 import _generated_client
-from _generated_client.models.list_traces200_response import ListTraces200Response
-from _generated_client.models.list_traces_metadata_filter_parameter_inner import ListTracesMetadataFilterParameterInner
+from _generated_client.models.metadata_filter import MetadataFilter
+from _generated_client.models.trace_list_response import TraceListResponse
 from _generated_client.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://app.atla-ai.com
+# Defining the host is optional and defaults to https://atla-insights-f734egalo-atla-fa3c125f.vercel.app
 # See configuration.py for a list of all supported configuration parameters.
 configuration = _generated_client.Configuration(
-    host = "https://app.atla-ai.com"
+    host = "https://atla-insights-f734egalo-atla-fa3c125f.vercel.app"
 )
 
 
@@ -184,7 +184,7 @@ with _generated_client.ApiClient(configuration) as api_client:
     api_instance = _generated_client.SDKApi(api_client)
     start_timestamp = '2013-10-20T19:20:30+01:00' # datetime |  (optional)
     end_timestamp = '2013-10-20T19:20:30+01:00' # datetime |  (optional)
-    metadata_filter = [_generated_client.ListTracesMetadataFilterParameterInner()] # List[ListTracesMetadataFilterParameterInner] |  (optional)
+    metadata_filter = [_generated_client.MetadataFilter()] # List[MetadataFilter] |  (optional)
     page = 0 # int |  (optional) (default to 0)
     page_size = 50 # int |  (optional) (default to 50)
 
@@ -206,13 +206,13 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **start_timestamp** | **datetime**|  | [optional] 
  **end_timestamp** | **datetime**|  | [optional] 
- **metadata_filter** | [**List[ListTracesMetadataFilterParameterInner]**](ListTracesMetadataFilterParameterInner.md)|  | [optional] 
+ **metadata_filter** | [**List[MetadataFilter]**](MetadataFilter.md)|  | [optional] 
  **page** | **int**|  | [optional] [default to 0]
  **page_size** | **int**|  | [optional] [default to 50]
 
 ### Return type
 
-[**ListTraces200Response**](ListTraces200Response.md)
+[**TraceListResponse**](TraceListResponse.md)
 
 ### Authorization
 

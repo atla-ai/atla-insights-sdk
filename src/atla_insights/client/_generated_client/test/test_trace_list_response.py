@@ -14,10 +14,10 @@
 
 import unittest
 
-from atla_insights.client._generated_client.models.list_traces200_response import ListTraces200Response
+from atla_insights.client._generated_client.models.trace_list_response import TraceListResponse
 
-class TestListTraces200Response(unittest.TestCase):
-    """ListTraces200Response unit test stubs"""
+class TestTraceListResponse(unittest.TestCase):
+    """TraceListResponse unit test stubs"""
 
     def setUp(self):
         pass
@@ -25,16 +25,16 @@ class TestListTraces200Response(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> ListTraces200Response:
-        """Test ListTraces200Response
+    def make_instance(self, include_optional) -> TraceListResponse:
+        """Test TraceListResponse
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `ListTraces200Response`
+        # uncomment below to create an instance of `TraceListResponse`
         """
-        model = ListTraces200Response()
+        model = TraceListResponse()
         if include_optional:
-            return ListTraces200Response(
+            return TraceListResponse(
                 traces = [
                     _generated_client.models.list_traces_200_response_traces_inner.listTraces_200_response_traces_inner(
                         id = '', 
@@ -52,7 +52,7 @@ class TestListTraces200Response(unittest.TestCase):
                 page_size = 56
             )
         else:
-            return ListTraces200Response(
+            return TraceListResponse(
                 traces = [
                     _generated_client.models.list_traces_200_response_traces_inner.listTraces_200_response_traces_inner(
                         id = '', 
@@ -71,8 +71,8 @@ class TestListTraces200Response(unittest.TestCase):
         )
         """
 
-    def testListTraces200Response(self):
-        """Test ListTraces200Response"""
+    def testTraceListResponse(self):
+        """Test TraceListResponse"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

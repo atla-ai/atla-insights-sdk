@@ -14,10 +14,10 @@
 
 import unittest
 
-from atla_insights.client._generated_client.models.get_traces_by_ids200_response_traces_inner_custom_metric_values_inner import GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner
+from atla_insights.client._generated_client.models.custom_metric_value import CustomMetricValue
 
-class TestGetTracesByIds200ResponseTracesInnerCustomMetricValuesInner(unittest.TestCase):
-    """GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner unit test stubs"""
+class TestCustomMetricValue(unittest.TestCase):
+    """CustomMetricValue unit test stubs"""
 
     def setUp(self):
         pass
@@ -25,16 +25,16 @@ class TestGetTracesByIds200ResponseTracesInnerCustomMetricValuesInner(unittest.T
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner:
-        """Test GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner
+    def make_instance(self, include_optional) -> CustomMetricValue:
+        """Test CustomMetricValue
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner`
+        # uncomment below to create an instance of `CustomMetricValue`
         """
-        model = GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner()
+        model = CustomMetricValue()
         if include_optional:
-            return GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner(
+            return CustomMetricValue(
                 id = '',
                 trace_id = '',
                 custom_metric_id = '',
@@ -45,7 +45,7 @@ class TestGetTracesByIds200ResponseTracesInnerCustomMetricValuesInner(unittest.T
                     data_type = 'BOOLEAN', )
             )
         else:
-            return GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner(
+            return CustomMetricValue(
                 id = '',
                 trace_id = '',
                 custom_metric_id = '',
@@ -53,8 +53,8 @@ class TestGetTracesByIds200ResponseTracesInnerCustomMetricValuesInner(unittest.T
         )
         """
 
-    def testGetTracesByIds200ResponseTracesInnerCustomMetricValuesInner(self):
-        """Test GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner"""
+    def testCustomMetricValue(self):
+        """Test CustomMetricValue"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

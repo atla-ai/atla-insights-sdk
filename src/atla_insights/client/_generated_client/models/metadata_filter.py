@@ -17,22 +17,18 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
-from atla_insights.client._generated_client.models.get_traces_by_ids200_response_traces_inner_custom_metric_values_inner_custom_metric import GetTracesByIds200ResponseTracesInnerCustomMetricValuesInnerCustomMetric
+from pydantic import BaseModel, ConfigDict, StrictStr
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-class GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner(BaseModel):
+class MetadataFilter(BaseModel):
     """
-    GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner
+    MetadataFilter
     """ # noqa: E501
-    id: StrictStr
-    trace_id: StrictStr = Field(alias="traceId")
-    custom_metric_id: StrictStr = Field(alias="customMetricId")
+    key: StrictStr
     value: StrictStr
-    custom_metric: Optional[GetTracesByIds200ResponseTracesInnerCustomMetricValuesInnerCustomMetric] = Field(default=None, alias="customMetric")
-    __properties: ClassVar[List[str]] = ["id", "traceId", "customMetricId", "value", "customMetric"]
+    __properties: ClassVar[List[str]] = ["key", "value"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -52,7 +48,7 @@ class GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner from a JSON string"""
+        """Create an instance of MetadataFilter from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -73,14 +69,11 @@ class GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of custom_metric
-        if self.custom_metric:
-            _dict['customMetric'] = self.custom_metric.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner from a dict"""
+        """Create an instance of MetadataFilter from a dict"""
         if obj is None:
             return None
 
@@ -88,11 +81,8 @@ class GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "traceId": obj.get("traceId"),
-            "customMetricId": obj.get("customMetricId"),
-            "value": obj.get("value"),
-            "customMetric": GetTracesByIds200ResponseTracesInnerCustomMetricValuesInnerCustomMetric.from_dict(obj["customMetric"]) if obj.get("customMetric") is not None else None
+            "key": obj.get("key"),
+            "value": obj.get("value")
         })
         return _obj
 

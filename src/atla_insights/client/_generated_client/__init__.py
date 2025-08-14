@@ -28,16 +28,16 @@ __all__ = [
     "ApiKeyError",
     "ApiAttributeError",
     "ApiException",
-    "GetTraceById200Response",
-    "GetTracesByIds200Response",
-    "GetTracesByIds200ResponseTracesInner",
-    "GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner",
-    "GetTracesByIds200ResponseTracesInnerCustomMetricValuesInnerCustomMetric",
-    "GetTracesByIds200ResponseTracesInnerSpansInner",
-    "GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner",
-    "ListTraces200Response",
-    "ListTraces200ResponseTracesInner",
-    "ListTracesMetadataFilterParameterInner",
+    "Annotation",
+    "CustomMetric",
+    "CustomMetricValue",
+    "DetailedTraceListResponse",
+    "MetadataFilter",
+    "Span",
+    "Trace",
+    "TraceDetailResponse",
+    "TraceListResponse",
+    "TraceWithDetails",
 ]
 
 # import apis into sdk package
@@ -55,13 +55,13 @@ from atla_insights.client._generated_client.exceptions import ApiAttributeError 
 from atla_insights.client._generated_client.exceptions import ApiException as ApiException
 
 # import models into sdk package
-from atla_insights.client._generated_client.models.get_trace_by_id200_response import GetTraceById200Response as GetTraceById200Response
-from atla_insights.client._generated_client.models.get_traces_by_ids200_response import GetTracesByIds200Response as GetTracesByIds200Response
-from atla_insights.client._generated_client.models.get_traces_by_ids200_response_traces_inner import GetTracesByIds200ResponseTracesInner as GetTracesByIds200ResponseTracesInner
-from atla_insights.client._generated_client.models.get_traces_by_ids200_response_traces_inner_custom_metric_values_inner import GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner as GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner
-from atla_insights.client._generated_client.models.get_traces_by_ids200_response_traces_inner_custom_metric_values_inner_custom_metric import GetTracesByIds200ResponseTracesInnerCustomMetricValuesInnerCustomMetric as GetTracesByIds200ResponseTracesInnerCustomMetricValuesInnerCustomMetric
-from atla_insights.client._generated_client.models.get_traces_by_ids200_response_traces_inner_spans_inner import GetTracesByIds200ResponseTracesInnerSpansInner as GetTracesByIds200ResponseTracesInnerSpansInner
-from atla_insights.client._generated_client.models.get_traces_by_ids200_response_traces_inner_spans_inner_annotations_inner import GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner as GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner
-from atla_insights.client._generated_client.models.list_traces200_response import ListTraces200Response as ListTraces200Response
-from atla_insights.client._generated_client.models.list_traces200_response_traces_inner import ListTraces200ResponseTracesInner as ListTraces200ResponseTracesInner
-from atla_insights.client._generated_client.models.list_traces_metadata_filter_parameter_inner import ListTracesMetadataFilterParameterInner as ListTracesMetadataFilterParameterInner
+from atla_insights.client._generated_client.models.annotation import Annotation as Annotation
+from atla_insights.client._generated_client.models.custom_metric import CustomMetric as CustomMetric
+from atla_insights.client._generated_client.models.custom_metric_value import CustomMetricValue as CustomMetricValue
+from atla_insights.client._generated_client.models.detailed_trace_list_response import DetailedTraceListResponse as DetailedTraceListResponse
+from atla_insights.client._generated_client.models.metadata_filter import MetadataFilter as MetadataFilter
+from atla_insights.client._generated_client.models.span import Span as Span
+from atla_insights.client._generated_client.models.trace import Trace as Trace
+from atla_insights.client._generated_client.models.trace_detail_response import TraceDetailResponse as TraceDetailResponse
+from atla_insights.client._generated_client.models.trace_list_response import TraceListResponse as TraceListResponse
+from atla_insights.client._generated_client.models.trace_with_details import TraceWithDetails as TraceWithDetails

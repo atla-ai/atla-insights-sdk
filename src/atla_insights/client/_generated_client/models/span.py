@@ -19,13 +19,13 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from atla_insights.client._generated_client.models.get_traces_by_ids200_response_traces_inner_spans_inner_annotations_inner import GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner
+from atla_insights.client._generated_client.models.annotation import Annotation
 from typing import Optional, Set
 from typing_extensions import Self
 
-class GetTracesByIds200ResponseTracesInnerSpansInner(BaseModel):
+class Span(BaseModel):
     """
-    GetTracesByIds200ResponseTracesInnerSpansInner
+    Span
     """ # noqa: E501
     id: StrictStr
     trace_id: StrictStr = Field(alias="traceId")
@@ -35,7 +35,7 @@ class GetTracesByIds200ResponseTracesInnerSpansInner(BaseModel):
     end_timestamp: StrictStr = Field(alias="endTimestamp")
     is_exception: Optional[StrictBool] = Field(alias="isException")
     otel_events: List[Any] = Field(alias="otelEvents")
-    annotations: Optional[List[GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner]] = None
+    annotations: Optional[List[Annotation]] = None
     __properties: ClassVar[List[str]] = ["id", "traceId", "parentSpanId", "spanName", "startTimestamp", "endTimestamp", "isException", "otelEvents", "annotations"]
 
     model_config = ConfigDict(
@@ -56,7 +56,7 @@ class GetTracesByIds200ResponseTracesInnerSpansInner(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of GetTracesByIds200ResponseTracesInnerSpansInner from a JSON string"""
+        """Create an instance of Span from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -103,7 +103,7 @@ class GetTracesByIds200ResponseTracesInnerSpansInner(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of GetTracesByIds200ResponseTracesInnerSpansInner from a dict"""
+        """Create an instance of Span from a dict"""
         if obj is None:
             return None
 
@@ -119,7 +119,7 @@ class GetTracesByIds200ResponseTracesInnerSpansInner(BaseModel):
             "endTimestamp": obj.get("endTimestamp"),
             "isException": obj.get("isException"),
             "otelEvents": obj.get("otelEvents"),
-            "annotations": [GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner.from_dict(_item) for _item in obj["annotations"]] if obj.get("annotations") is not None else None
+            "annotations": [Annotation.from_dict(_item) for _item in obj["annotations"]] if obj.get("annotations") is not None else None
         })
         return _obj
 

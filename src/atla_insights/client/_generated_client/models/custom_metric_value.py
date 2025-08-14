@@ -18,19 +18,21 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
+from atla_insights.client._generated_client.models.custom_metric import CustomMetric
 from typing import Optional, Set
 from typing_extensions import Self
 
-class GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner(BaseModel):
+class CustomMetricValue(BaseModel):
     """
-    GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner
+    CustomMetricValue
     """ # noqa: E501
     id: StrictStr
-    span_id: StrictStr = Field(alias="spanId")
-    failure_mode: StrictStr = Field(alias="failureMode")
-    atla_critique: StrictStr = Field(alias="atlaCritique")
-    __properties: ClassVar[List[str]] = ["id", "spanId", "failureMode", "atlaCritique"]
+    trace_id: StrictStr = Field(alias="traceId")
+    custom_metric_id: StrictStr = Field(alias="customMetricId")
+    value: StrictStr
+    custom_metric: Optional[CustomMetric] = Field(default=None, alias="customMetric")
+    __properties: ClassVar[List[str]] = ["id", "traceId", "customMetricId", "value", "customMetric"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -50,7 +52,7 @@ class GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner from a JSON string"""
+        """Create an instance of CustomMetricValue from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -71,11 +73,14 @@ class GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of custom_metric
+        if self.custom_metric:
+            _dict['customMetric'] = self.custom_metric.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner from a dict"""
+        """Create an instance of CustomMetricValue from a dict"""
         if obj is None:
             return None
 
@@ -84,9 +89,10 @@ class GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner(BaseModel):
 
         _obj = cls.model_validate({
             "id": obj.get("id"),
-            "spanId": obj.get("spanId"),
-            "failureMode": obj.get("failureMode"),
-            "atlaCritique": obj.get("atlaCritique")
+            "traceId": obj.get("traceId"),
+            "customMetricId": obj.get("customMetricId"),
+            "value": obj.get("value"),
+            "customMetric": CustomMetric.from_dict(obj["customMetric"]) if obj.get("customMetric") is not None else None
         })
         return _obj
 

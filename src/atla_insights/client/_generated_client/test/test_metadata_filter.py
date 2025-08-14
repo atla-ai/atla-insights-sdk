@@ -14,10 +14,10 @@
 
 import unittest
 
-from atla_insights.client._generated_client.models.list_traces_metadata_filter_parameter_inner import ListTracesMetadataFilterParameterInner
+from atla_insights.client._generated_client.models.metadata_filter import MetadataFilter
 
-class TestListTracesMetadataFilterParameterInner(unittest.TestCase):
-    """ListTracesMetadataFilterParameterInner unit test stubs"""
+class TestMetadataFilter(unittest.TestCase):
+    """MetadataFilter unit test stubs"""
 
     def setUp(self):
         pass
@@ -25,28 +25,28 @@ class TestListTracesMetadataFilterParameterInner(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> ListTracesMetadataFilterParameterInner:
-        """Test ListTracesMetadataFilterParameterInner
+    def make_instance(self, include_optional) -> MetadataFilter:
+        """Test MetadataFilter
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `ListTracesMetadataFilterParameterInner`
+        # uncomment below to create an instance of `MetadataFilter`
         """
-        model = ListTracesMetadataFilterParameterInner()
+        model = MetadataFilter()
         if include_optional:
-            return ListTracesMetadataFilterParameterInner(
+            return MetadataFilter(
                 key = '',
                 value = ''
             )
         else:
-            return ListTracesMetadataFilterParameterInner(
+            return MetadataFilter(
                 key = '',
                 value = '',
         )
         """
 
-    def testListTracesMetadataFilterParameterInner(self):
-        """Test ListTracesMetadataFilterParameterInner"""
+    def testMetadataFilter(self):
+        """Test MetadataFilter"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

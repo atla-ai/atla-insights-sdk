@@ -14,10 +14,10 @@
 
 import unittest
 
-from atla_insights.client._generated_client.models.list_traces200_response_traces_inner import ListTraces200ResponseTracesInner
+from atla_insights.client._generated_client.models.trace import Trace
 
-class TestListTraces200ResponseTracesInner(unittest.TestCase):
-    """ListTraces200ResponseTracesInner unit test stubs"""
+class TestTrace(unittest.TestCase):
+    """Trace unit test stubs"""
 
     def setUp(self):
         pass
@@ -25,16 +25,16 @@ class TestListTraces200ResponseTracesInner(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> ListTraces200ResponseTracesInner:
-        """Test ListTraces200ResponseTracesInner
+    def make_instance(self, include_optional) -> Trace:
+        """Test Trace
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `ListTraces200ResponseTracesInner`
+        # uncomment below to create an instance of `Trace`
         """
-        model = ListTraces200ResponseTracesInner()
+        model = Trace()
         if include_optional:
-            return ListTraces200ResponseTracesInner(
+            return Trace(
                 id = '',
                 environment = 'PROD',
                 is_success = True,
@@ -46,7 +46,7 @@ class TestListTraces200ResponseTracesInner(unittest.TestCase):
                 ended_at = ''
             )
         else:
-            return ListTraces200ResponseTracesInner(
+            return Trace(
                 id = '',
                 environment = 'PROD',
                 is_success = True,
@@ -56,8 +56,8 @@ class TestListTraces200ResponseTracesInner(unittest.TestCase):
         )
         """
 
-    def testListTraces200ResponseTracesInner(self):
-        """Test ListTraces200ResponseTracesInner"""
+    def testTrace(self):
+        """Test Trace"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

@@ -17,30 +17,23 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List, Optional, Union
-from atla_insights.client._generated_client.models.get_traces_by_ids200_response_traces_inner_custom_metric_values_inner import GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner
-from atla_insights.client._generated_client.models.get_traces_by_ids200_response_traces_inner_spans_inner import GetTracesByIds200ResponseTracesInnerSpansInner
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_validator
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class GetTracesByIds200ResponseTracesInner(BaseModel):
+class Trace(BaseModel):
     """
-    GetTracesByIds200ResponseTracesInner
+    Trace
     """ # noqa: E501
     id: StrictStr
     environment: StrictStr
     is_success: Optional[StrictBool] = Field(alias="isSuccess")
     is_completed: StrictBool = Field(alias="isCompleted")
     metadata: Optional[Dict[str, StrictStr]] = None
-    step_count: StrictInt = Field(alias="stepCount")
     started_at: StrictStr = Field(alias="startedAt")
     ended_at: StrictStr = Field(alias="endedAt")
-    duration_seconds: Union[StrictFloat, StrictInt] = Field(alias="durationSeconds")
-    ingested_at: StrictStr = Field(alias="ingestedAt")
-    spans: Optional[List[GetTracesByIds200ResponseTracesInnerSpansInner]] = None
-    custom_metric_values: Optional[List[GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner]] = Field(default=None, alias="customMetricValues")
-    __properties: ClassVar[List[str]] = ["id", "environment", "isSuccess", "isCompleted", "metadata", "stepCount", "startedAt", "endedAt", "durationSeconds", "ingestedAt", "spans", "customMetricValues"]
+    __properties: ClassVar[List[str]] = ["id", "environment", "isSuccess", "isCompleted", "metadata", "startedAt", "endedAt"]
 
     @field_validator('environment')
     def environment_validate_enum(cls, value):
@@ -67,7 +60,7 @@ class GetTracesByIds200ResponseTracesInner(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of GetTracesByIds200ResponseTracesInner from a JSON string"""
+        """Create an instance of Trace from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -88,20 +81,6 @@ class GetTracesByIds200ResponseTracesInner(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in spans (list)
-        _items = []
-        if self.spans:
-            for _item_spans in self.spans:
-                if _item_spans:
-                    _items.append(_item_spans.to_dict())
-            _dict['spans'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in custom_metric_values (list)
-        _items = []
-        if self.custom_metric_values:
-            for _item_custom_metric_values in self.custom_metric_values:
-                if _item_custom_metric_values:
-                    _items.append(_item_custom_metric_values.to_dict())
-            _dict['customMetricValues'] = _items
         # set to None if is_success (nullable) is None
         # and model_fields_set contains the field
         if self.is_success is None and "is_success" in self.model_fields_set:
@@ -111,7 +90,7 @@ class GetTracesByIds200ResponseTracesInner(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of GetTracesByIds200ResponseTracesInner from a dict"""
+        """Create an instance of Trace from a dict"""
         if obj is None:
             return None
 
@@ -124,13 +103,8 @@ class GetTracesByIds200ResponseTracesInner(BaseModel):
             "isSuccess": obj.get("isSuccess"),
             "isCompleted": obj.get("isCompleted"),
             "metadata": obj.get("metadata"),
-            "stepCount": obj.get("stepCount"),
             "startedAt": obj.get("startedAt"),
-            "endedAt": obj.get("endedAt"),
-            "durationSeconds": obj.get("durationSeconds"),
-            "ingestedAt": obj.get("ingestedAt"),
-            "spans": [GetTracesByIds200ResponseTracesInnerSpansInner.from_dict(_item) for _item in obj["spans"]] if obj.get("spans") is not None else None,
-            "customMetricValues": [GetTracesByIds200ResponseTracesInnerCustomMetricValuesInner.from_dict(_item) for _item in obj["customMetricValues"]] if obj.get("customMetricValues") is not None else None
+            "endedAt": obj.get("endedAt")
         })
         return _obj
 

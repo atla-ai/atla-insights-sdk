@@ -14,10 +14,10 @@
 
 import unittest
 
-from atla_insights.client._generated_client.models.get_traces_by_ids200_response_traces_inner_spans_inner import GetTracesByIds200ResponseTracesInnerSpansInner
+from atla_insights.client._generated_client.models.span import Span
 
-class TestGetTracesByIds200ResponseTracesInnerSpansInner(unittest.TestCase):
-    """GetTracesByIds200ResponseTracesInnerSpansInner unit test stubs"""
+class TestSpan(unittest.TestCase):
+    """Span unit test stubs"""
 
     def setUp(self):
         pass
@@ -25,16 +25,16 @@ class TestGetTracesByIds200ResponseTracesInnerSpansInner(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> GetTracesByIds200ResponseTracesInnerSpansInner:
-        """Test GetTracesByIds200ResponseTracesInnerSpansInner
+    def make_instance(self, include_optional) -> Span:
+        """Test Span
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `GetTracesByIds200ResponseTracesInnerSpansInner`
+        # uncomment below to create an instance of `Span`
         """
-        model = GetTracesByIds200ResponseTracesInnerSpansInner()
+        model = Span()
         if include_optional:
-            return GetTracesByIds200ResponseTracesInnerSpansInner(
+            return Span(
                 id = '',
                 trace_id = '',
                 parent_span_id = '',
@@ -54,7 +54,7 @@ class TestGetTracesByIds200ResponseTracesInnerSpansInner(unittest.TestCase):
                     ]
             )
         else:
-            return GetTracesByIds200ResponseTracesInnerSpansInner(
+            return Span(
                 id = '',
                 trace_id = '',
                 parent_span_id = '',
@@ -68,8 +68,8 @@ class TestGetTracesByIds200ResponseTracesInnerSpansInner(unittest.TestCase):
         )
         """
 
-    def testGetTracesByIds200ResponseTracesInnerSpansInner(self):
-        """Test GetTracesByIds200ResponseTracesInnerSpansInner"""
+    def testSpan(self):
+        """Test Span"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

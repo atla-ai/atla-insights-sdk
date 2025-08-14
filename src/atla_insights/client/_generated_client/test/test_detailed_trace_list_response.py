@@ -14,10 +14,10 @@
 
 import unittest
 
-from atla_insights.client._generated_client.models.get_traces_by_ids200_response import GetTracesByIds200Response
+from atla_insights.client._generated_client.models.detailed_trace_list_response import DetailedTraceListResponse
 
-class TestGetTracesByIds200Response(unittest.TestCase):
-    """GetTracesByIds200Response unit test stubs"""
+class TestDetailedTraceListResponse(unittest.TestCase):
+    """DetailedTraceListResponse unit test stubs"""
 
     def setUp(self):
         pass
@@ -25,16 +25,16 @@ class TestGetTracesByIds200Response(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> GetTracesByIds200Response:
-        """Test GetTracesByIds200Response
+    def make_instance(self, include_optional) -> DetailedTraceListResponse:
+        """Test DetailedTraceListResponse
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `GetTracesByIds200Response`
+        # uncomment below to create an instance of `DetailedTraceListResponse`
         """
-        model = GetTracesByIds200Response()
+        model = DetailedTraceListResponse()
         if include_optional:
-            return GetTracesByIds200Response(
+            return DetailedTraceListResponse(
                 traces = [
                     _generated_client.models.get_traces_by_ids_200_response_traces_inner.getTracesByIds_200_response_traces_inner(
                         id = '', 
@@ -83,7 +83,7 @@ class TestGetTracesByIds200Response(unittest.TestCase):
                     ]
             )
         else:
-            return GetTracesByIds200Response(
+            return DetailedTraceListResponse(
                 traces = [
                     _generated_client.models.get_traces_by_ids_200_response_traces_inner.getTracesByIds_200_response_traces_inner(
                         id = '', 
@@ -133,8 +133,8 @@ class TestGetTracesByIds200Response(unittest.TestCase):
         )
         """
 
-    def testGetTracesByIds200Response(self):
-        """Test GetTracesByIds200Response"""
+    def testDetailedTraceListResponse(self):
+        """Test DetailedTraceListResponse"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

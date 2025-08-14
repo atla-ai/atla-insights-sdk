@@ -17,18 +17,21 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict
-from typing import Any, ClassVar, Dict, List
-from atla_insights.client._generated_client.models.get_traces_by_ids200_response_traces_inner import GetTracesByIds200ResponseTracesInner
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
+from typing import Any, ClassVar, Dict, List, Union
+from atla_insights.client._generated_client.models.trace import Trace
 from typing import Optional, Set
 from typing_extensions import Self
 
-class GetTraceById200Response(BaseModel):
+class TraceListResponse(BaseModel):
     """
-    GetTraceById200Response
+    TraceListResponse
     """ # noqa: E501
-    trace: GetTracesByIds200ResponseTracesInner
-    __properties: ClassVar[List[str]] = ["trace"]
+    traces: List[Trace]
+    total: Union[StrictFloat, StrictInt]
+    page: StrictInt
+    page_size: StrictInt = Field(alias="pageSize")
+    __properties: ClassVar[List[str]] = ["traces", "total", "page", "pageSize"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -48,7 +51,7 @@ class GetTraceById200Response(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of GetTraceById200Response from a JSON string"""
+        """Create an instance of TraceListResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -69,14 +72,18 @@ class GetTraceById200Response(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of trace
-        if self.trace:
-            _dict['trace'] = self.trace.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of each item in traces (list)
+        _items = []
+        if self.traces:
+            for _item_traces in self.traces:
+                if _item_traces:
+                    _items.append(_item_traces.to_dict())
+            _dict['traces'] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of GetTraceById200Response from a dict"""
+        """Create an instance of TraceListResponse from a dict"""
         if obj is None:
             return None
 
@@ -84,7 +91,10 @@ class GetTraceById200Response(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "trace": GetTracesByIds200ResponseTracesInner.from_dict(obj["trace"]) if obj.get("trace") is not None else None
+            "traces": [Trace.from_dict(_item) for _item in obj["traces"]] if obj.get("traces") is not None else None,
+            "total": obj.get("total"),
+            "page": obj.get("page"),
+            "pageSize": obj.get("pageSize")
         })
         return _obj
 
