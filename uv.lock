@@ -240,6 +240,7 @@ all = [
     { name = "anthropic", extra = ["bedrock"] },
     { name = "baml-py" },
     { name = "boto3" },
+    { name = "claude-code-sdk" },
     { name = "crewai" },
     { name = "google-genai" },
     { name = "google-generativeai" },
@@ -278,6 +279,9 @@ ci = [
     { name = "pytest-asyncio" },
     { name = "pytest-httpserver" },
     { name = "ruff" },
+]
+claude-code-sdk = [
+    { name = "claude-code-sdk" },
 ]
 crewai = [
     { name = "crewai" },
@@ -326,11 +330,11 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "agno", marker = "extra == 'agno'", specifier = ">=1.5.0" },
-    { name = "anthropic", marker = "extra == 'anthropic'", specifier = ">=0.52.1" },
     { name = "anthropic", extras = ["bedrock"], marker = "extra == 'anthropic'", specifier = ">=0.52.1" },
-    { name = "atla-insights", extras = ["agno", "anthropic", "baml", "bedrock", "crewai", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "smolagents"], marker = "extra == 'all'" },
+    { name = "atla-insights", extras = ["agno", "anthropic", "baml", "bedrock", "claude-code-sdk", "crewai", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "smolagents"], marker = "extra == 'all'" },
     { name = "baml-py", marker = "extra == 'baml'", specifier = ">=0.201.0" },
     { name = "boto3", marker = "extra == 'bedrock'", specifier = ">=1.38.17" },
+    { name = "claude-code-sdk", marker = "extra == 'claude-code-sdk'", specifier = ">=0.0.19" },
     { name = "crewai", marker = "extra == 'crewai'", specifier = ">=0.130.0" },
     { name = "google-genai", marker = "extra == 'google-genai'", specifier = ">=1.19.0" },
     { name = "google-generativeai", marker = "extra == 'google-generativeai'", specifier = ">=0.7.0" },
@@ -370,7 +374,7 @@ requires-dist = [
     { name = "smolagents", marker = "extra == 'smolagents'", specifier = ">=1.17.0" },
     { name = "wrapt", specifier = ">=1.17.2" },
 ]
-provides-extras = ["all", "agno", "anthropic", "baml", "bedrock", "ci", "crewai", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "smolagents"]
+provides-extras = ["all", "agno", "anthropic", "baml", "bedrock", "ci", "claude-code-sdk", "crewai", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "smolagents"]
 
 [package.metadata.requires-dev]
 dev = [{ name = "atla-insights", extras = ["all", "ci"] }]
@@ -696,6 +700,19 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/31/49/74e34cc5aeeb25aff2c0ede6790b3671e14c1b91574dd8f98d266a4c5aad/chromadb-1.0.15-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:3b73cd6fb32fcdd91c577cca16ea6112b691d72b441bb3f2140426d1e79e453a", size = 18595284, upload-time = "2025-07-02T17:06:59.102Z" },
     { url = "https://files.pythonhosted.org/packages/cb/33/190df917a057067e37f8b48d082d769bed8b3c0c507edefc7b6c6bb577d0/chromadb-1.0.15-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:479f1b401af9e7c20f50642ffb3376abbfd78e2b5b170429f7c79eff52e367db", size = 19526626, upload-time = "2025-07-02T17:07:02.163Z" },
     { url = "https://files.pythonhosted.org/packages/a1/30/6890da607358993f87a01e80bcce916b4d91515ce865f07dc06845cb472f/chromadb-1.0.15-cp39-abi3-win_amd64.whl", hash = "sha256:e0cb3b93fdc42b1786f151d413ef36299f30f783a30ce08bf0bfb12e552b4190", size = 19520490, upload-time = "2025-07-02T17:07:11.559Z" },
+]
+
+[[package]]
+name = "claude-code-sdk"
+version = "0.0.19"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f3/e9/0443cd7ada6a01730481b71956bd6bfea6cc348503e59a1dd7cbc05e3331/claude_code_sdk-0.0.19.tar.gz", hash = "sha256:9e23441a35928572a66c59d17fcd02d07478844d30611307b0b4460f2df6ef72", size = 23144, upload-time = "2025-08-01T05:35:48.914Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a1/2d/e4826ae5d361b772218491e21a5dc6b8b98e66737e255bf2891c76b0305d/claude_code_sdk-0.0.19-py3-none-any.whl", hash = "sha256:b451a6ba0199e52de7d0253d7ca074f0aa0e3bde7866a4f7174d49e721bd6a58", size = 17247, upload-time = "2025-08-01T05:35:47.683Z" },
 ]
 
 [[package]]

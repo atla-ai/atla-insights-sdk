@@ -33,11 +33,10 @@ dev = ["atla-insights[all,ci]"]
 
 [project.optional-dependencies]
 all = [
-    "atla-insights[agno,anthropic,baml,bedrock,crewai,google-genai,google-generativeai,langchain,litellm,mcp,openai,openai-agents,smolagents]",
+    "atla-insights[agno,anthropic,baml,bedrock,claude-code-sdk,crewai,google-genai,google-generativeai,langchain,litellm,mcp,openai,openai-agents,smolagents]",
 ]
 agno = ["agno>=1.5.0", "openinference-instrumentation-agno>=0.1.4"]
 anthropic = [
-    "anthropic>=0.52.1",
     "anthropic[bedrock]>=0.52.1",
     "openinference-instrumentation-anthropic>=0.1.18",
 ]
@@ -50,6 +49,7 @@ ci = [
     "pytest-asyncio>=0.26.0",
     "pytest-httpserver>=1.1.3",
 ]
+claude-code-sdk = ["claude-code-sdk>=0.0.19"]
 crewai = [
     "crewai>=0.130.0",
     "litellm>=1.72.0,<1.74.0",
