@@ -30,7 +30,7 @@ class ListTraces200ResponseTracesInner(BaseModel):
     environment: StrictStr
     is_success: Optional[StrictBool] = Field(alias="isSuccess")
     is_completed: StrictBool = Field(alias="isCompleted")
-    metadata: Dict[str, Any]
+    metadata: Optional[Dict[str, StrictStr]] = None
     started_at: StrictStr = Field(alias="startedAt")
     ended_at: StrictStr = Field(alias="endedAt")
     __properties: ClassVar[List[str]] = ["id", "environment", "isSuccess", "isCompleted", "metadata", "startedAt", "endedAt"]

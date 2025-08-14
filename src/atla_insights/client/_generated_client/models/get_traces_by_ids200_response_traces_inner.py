@@ -32,7 +32,7 @@ class GetTracesByIds200ResponseTracesInner(BaseModel):
     environment: StrictStr
     is_success: Optional[StrictBool] = Field(alias="isSuccess")
     is_completed: StrictBool = Field(alias="isCompleted")
-    metadata: Dict[str, Any]
+    metadata: Optional[Dict[str, StrictStr]] = None
     step_count: StrictInt = Field(alias="stepCount")
     started_at: StrictStr = Field(alias="startedAt")
     ended_at: StrictStr = Field(alias="endedAt")

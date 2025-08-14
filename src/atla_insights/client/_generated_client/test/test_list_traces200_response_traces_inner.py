@@ -40,7 +40,7 @@ class TestListTraces200ResponseTracesInner(unittest.TestCase):
                 is_success = True,
                 is_completed = True,
                 metadata = {
-                    'key' : null
+                    'key' : ''
                     },
                 started_at = '',
                 ended_at = ''
@@ -51,9 +51,6 @@ class TestListTraces200ResponseTracesInner(unittest.TestCase):
                 environment = 'PROD',
                 is_success = True,
                 is_completed = True,
-                metadata = {
-                    'key' : null
-                    },
                 started_at = '',
                 ended_at = '',
         )

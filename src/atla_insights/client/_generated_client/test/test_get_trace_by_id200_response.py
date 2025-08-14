@@ -41,7 +41,7 @@ class TestGetTraceById200Response(unittest.TestCase):
                     is_success = True, 
                     is_completed = True, 
                     metadata = {
-                        'key' : null
+                        'key' : ''
                         }, 
                     step_count = 56, 
                     started_at = '', 
@@ -88,7 +88,7 @@ class TestGetTraceById200Response(unittest.TestCase):
                     is_success = True, 
                     is_completed = True, 
                     metadata = {
-                        'key' : null
+                        'key' : ''
                         }, 
                     step_count = 56, 
                     started_at = '', 

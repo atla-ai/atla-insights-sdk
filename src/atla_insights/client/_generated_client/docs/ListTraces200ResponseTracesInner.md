@@ -9,7 +9,7 @@ Name | Type | Description | Notes
 **environment** | **str** |  | 
 **is_success** | **bool** |  | 
 **is_completed** | **bool** |  | 
-**metadata** | **Dict[str, object]** |  | 
+**metadata** | **Dict[str, str]** |  | [optional] 
 **started_at** | **str** |  | 
 **ended_at** | **str** |  | 
 

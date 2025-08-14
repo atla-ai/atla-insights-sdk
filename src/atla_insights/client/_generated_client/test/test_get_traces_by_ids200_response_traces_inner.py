@@ -40,7 +40,7 @@ class TestGetTracesByIds200ResponseTracesInner(unittest.TestCase):
                 is_success = True,
                 is_completed = True,
                 metadata = {
-                    'key' : null
+                    'key' : ''
                     },
                 step_count = 56,
                 started_at = '',
@@ -85,9 +85,6 @@ class TestGetTracesByIds200ResponseTracesInner(unittest.TestCase):
                 environment = 'PROD',
                 is_success = True,
                 is_completed = True,
-                metadata = {
-                    'key' : null
-                    },
                 step_count = 56,
                 started_at = '',
                 ended_at = '',

@@ -42,7 +42,7 @@ class TestListTraces200Response(unittest.TestCase):
                         is_success = True, 
                         is_completed = True, 
                         metadata = {
-                            'key' : null
+                            'key' : ''
                             }, 
                         started_at = '', 
                         ended_at = '', )
@@ -60,7 +60,7 @@ class TestListTraces200Response(unittest.TestCase):
                         is_success = True, 
                         is_completed = True, 
                         metadata = {
-                            'key' : null
+                            'key' : ''
                             }, 
                         started_at = '', 
                         ended_at = '', )
