@@ -45,13 +45,17 @@ configuration = _generated_client.Configuration(
 # Enter a context with an instance of the API client
 with _generated_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = _generated_client.HealthApi(api_client)
+    api_instance = _generated_client.SDKApi(api_client)
+    trace_id = 'trace_id_example' # str | 
+    include = ['include_example'] # List[str] |  (optional)
 
     try:
-        # Health check
-        api_instance.get_api_health()
+        # Get a single trace by ID
+        api_response = api_instance.get_trace_by_id(trace_id, include=include)
+        print("The response of SDKApi->get_trace_by_id:\n")
+        pprint(api_response)
     except ApiException as e:
-        print("Exception when calling HealthApi->get_api_health: %s\n" % e)
+        print("Exception when calling SDKApi->get_trace_by_id: %s\n" % e)
 
 ```
 
@@ -61,7 +65,6 @@ All URIs are relative to *https://app.atla-ai.com*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*HealthApi* | [**get_api_health**](_generated_client/docs/HealthApi.md#get_api_health) | **GET** /api/health | Health check
 *SDKApi* | [**get_trace_by_id**](_generated_client/docs/SDKApi.md#get_trace_by_id) | **GET** /api/sdk/v1/traces/{traceId} | Get a single trace by ID
 *SDKApi* | [**get_traces_by_ids**](_generated_client/docs/SDKApi.md#get_traces_by_ids) | **GET** /api/sdk/v1/traces/ids | Get multiple traces by IDs
 *SDKApi* | [**list_traces**](_generated_client/docs/SDKApi.md#list_traces) | **GET** /api/sdk/v1/traces | List traces with pagination and filtering
@@ -78,6 +81,7 @@ Class | Method | HTTP request | Description
  - [GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner](_generated_client/docs/GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner.md)
  - [ListTraces200Response](_generated_client/docs/ListTraces200Response.md)
  - [ListTraces200ResponseTracesInner](_generated_client/docs/ListTraces200ResponseTracesInner.md)
+ - [ListTracesMetadataFilterParameterInner](_generated_client/docs/ListTracesMetadataFilterParameterInner.md)
 
 
 <a id="documentation-for-authorization"></a>

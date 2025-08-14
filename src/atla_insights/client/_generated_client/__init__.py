@@ -18,7 +18,6 @@ __version__ = "1.0.0"
 
 # Define package exports
 __all__ = [
-    "HealthApi",
     "SDKApi",
     "ApiResponse",
     "ApiClient",
@@ -38,10 +37,10 @@ __all__ = [
     "GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner",
     "ListTraces200Response",
     "ListTraces200ResponseTracesInner",
+    "ListTracesMetadataFilterParameterInner",
 ]
 
 # import apis into sdk package
-from atla_insights.client._generated_client.api.health_api import HealthApi as HealthApi
 from atla_insights.client._generated_client.api.sdk_api import SDKApi as SDKApi
 
 # import ApiClient
@@ -65,3 +64,4 @@ from atla_insights.client._generated_client.models.get_traces_by_ids200_response
 from atla_insights.client._generated_client.models.get_traces_by_ids200_response_traces_inner_spans_inner_annotations_inner import GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner as GetTracesByIds200ResponseTracesInnerSpansInnerAnnotationsInner
 from atla_insights.client._generated_client.models.list_traces200_response import ListTraces200Response as ListTraces200Response
 from atla_insights.client._generated_client.models.list_traces200_response_traces_inner import ListTraces200ResponseTracesInner as ListTraces200ResponseTracesInner
+from atla_insights.client._generated_client.models.list_traces_metadata_filter_parameter_inner import ListTracesMetadataFilterParameterInner as ListTracesMetadataFilterParameterInner

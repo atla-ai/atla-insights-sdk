@@ -155,7 +155,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_traces**
-> ListTraces200Response list_traces(start_timestamp=start_timestamp, end_timestamp=end_timestamp, page=page, page_size=page_size)
+> ListTraces200Response list_traces(start_timestamp=start_timestamp, end_timestamp=end_timestamp, metadata_filter=metadata_filter, page=page, page_size=page_size)
 
 List traces with pagination and filtering
 
@@ -167,6 +167,7 @@ Retrieve a paginated list of traces for the authenticated organization.
 ```python
 import _generated_client
 from _generated_client.models.list_traces200_response import ListTraces200Response
+from _generated_client.models.list_traces_metadata_filter_parameter_inner import ListTracesMetadataFilterParameterInner
 from _generated_client.rest import ApiException
 from pprint import pprint
 
@@ -183,12 +184,13 @@ with _generated_client.ApiClient(configuration) as api_client:
     api_instance = _generated_client.SDKApi(api_client)
     start_timestamp = '2013-10-20T19:20:30+01:00' # datetime |  (optional)
     end_timestamp = '2013-10-20T19:20:30+01:00' # datetime |  (optional)
-    page = 'page_example' # str |  (optional)
-    page_size = 'page_size_example' # str |  (optional)
+    metadata_filter = [_generated_client.ListTracesMetadataFilterParameterInner()] # List[ListTracesMetadataFilterParameterInner] |  (optional)
+    page = 0 # int |  (optional) (default to 0)
+    page_size = 50 # int |  (optional) (default to 50)
 
     try:
         # List traces with pagination and filtering
-        api_response = api_instance.list_traces(start_timestamp=start_timestamp, end_timestamp=end_timestamp, page=page, page_size=page_size)
+        api_response = api_instance.list_traces(start_timestamp=start_timestamp, end_timestamp=end_timestamp, metadata_filter=metadata_filter, page=page, page_size=page_size)
         print("The response of SDKApi->list_traces:\n")
         pprint(api_response)
     except Exception as e:
@@ -204,8 +206,9 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **start_timestamp** | **datetime**|  | [optional] 
  **end_timestamp** | **datetime**|  | [optional] 
- **page** | **str**|  | [optional] 
- **page_size** | **str**|  | [optional] 
+ **metadata_filter** | [**List[ListTracesMetadataFilterParameterInner]**](ListTracesMetadataFilterParameterInner.md)|  | [optional] 
+ **page** | **int**|  | [optional] [default to 0]
+ **page_size** | **int**|  | [optional] [default to 50]
 
 ### Return type
 

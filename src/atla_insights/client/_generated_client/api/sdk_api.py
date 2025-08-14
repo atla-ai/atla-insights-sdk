@@ -17,11 +17,13 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from datetime import datetime
-from pydantic import StrictStr, field_validator
+from pydantic import Field, StrictStr, field_validator
 from typing import List, Optional
+from typing_extensions import Annotated
 from atla_insights.client._generated_client.models.get_trace_by_id200_response import GetTraceById200Response
 from atla_insights.client._generated_client.models.get_traces_by_ids200_response import GetTracesByIds200Response
 from atla_insights.client._generated_client.models.list_traces200_response import ListTraces200Response
+from atla_insights.client._generated_client.models.list_traces_metadata_filter_parameter_inner import ListTracesMetadataFilterParameterInner
 
 from atla_insights.client._generated_client.api_client import ApiClient, RequestSerialized
 from atla_insights.client._generated_client.api_response import ApiResponse
@@ -620,8 +622,9 @@ class SDKApi:
         self,
         start_timestamp: Optional[datetime] = None,
         end_timestamp: Optional[datetime] = None,
-        page: Optional[StrictStr] = None,
-        page_size: Optional[StrictStr] = None,
+        metadata_filter: Optional[List[ListTracesMetadataFilterParameterInner]] = None,
+        page: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
+        page_size: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -643,10 +646,12 @@ class SDKApi:
         :type start_timestamp: datetime
         :param end_timestamp:
         :type end_timestamp: datetime
+        :param metadata_filter:
+        :type metadata_filter: List[ListTracesMetadataFilterParameterInner]
         :param page:
-        :type page: str
+        :type page: int
         :param page_size:
-        :type page_size: str
+        :type page_size: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -672,6 +677,7 @@ class SDKApi:
         _param = self._list_traces_serialize(
             start_timestamp=start_timestamp,
             end_timestamp=end_timestamp,
+            metadata_filter=metadata_filter,
             page=page,
             page_size=page_size,
             _request_auth=_request_auth,
@@ -701,8 +707,9 @@ class SDKApi:
         self,
         start_timestamp: Optional[datetime] = None,
         end_timestamp: Optional[datetime] = None,
-        page: Optional[StrictStr] = None,
-        page_size: Optional[StrictStr] = None,
+        metadata_filter: Optional[List[ListTracesMetadataFilterParameterInner]] = None,
+        page: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
+        page_size: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -724,10 +731,12 @@ class SDKApi:
         :type start_timestamp: datetime
         :param end_timestamp:
         :type end_timestamp: datetime
+        :param metadata_filter:
+        :type metadata_filter: List[ListTracesMetadataFilterParameterInner]
         :param page:
-        :type page: str
+        :type page: int
         :param page_size:
-        :type page_size: str
+        :type page_size: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -753,6 +762,7 @@ class SDKApi:
         _param = self._list_traces_serialize(
             start_timestamp=start_timestamp,
             end_timestamp=end_timestamp,
+            metadata_filter=metadata_filter,
             page=page,
             page_size=page_size,
             _request_auth=_request_auth,
@@ -782,8 +792,9 @@ class SDKApi:
         self,
         start_timestamp: Optional[datetime] = None,
         end_timestamp: Optional[datetime] = None,
-        page: Optional[StrictStr] = None,
-        page_size: Optional[StrictStr] = None,
+        metadata_filter: Optional[List[ListTracesMetadataFilterParameterInner]] = None,
+        page: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
+        page_size: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -805,10 +816,12 @@ class SDKApi:
         :type start_timestamp: datetime
         :param end_timestamp:
         :type end_timestamp: datetime
+        :param metadata_filter:
+        :type metadata_filter: List[ListTracesMetadataFilterParameterInner]
         :param page:
-        :type page: str
+        :type page: int
         :param page_size:
-        :type page_size: str
+        :type page_size: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -834,6 +847,7 @@ class SDKApi:
         _param = self._list_traces_serialize(
             start_timestamp=start_timestamp,
             end_timestamp=end_timestamp,
+            metadata_filter=metadata_filter,
             page=page,
             page_size=page_size,
             _request_auth=_request_auth,
@@ -858,6 +872,7 @@ class SDKApi:
         self,
         start_timestamp,
         end_timestamp,
+        metadata_filter,
         page,
         page_size,
         _request_auth,
@@ -869,6 +884,7 @@ class SDKApi:
         _host = None
 
         _collection_formats: Dict[str, str] = {
+            'metadataFilter': 'multi',
         }
 
         _path_params: Dict[str, str] = {}
@@ -907,6 +923,10 @@ class SDKApi:
                 )
             else:
                 _query_params.append(('endTimestamp', end_timestamp))
+            
+        if metadata_filter is not None:
+            
+            _query_params.append(('metadataFilter', metadata_filter))
             
         if page is not None:
             

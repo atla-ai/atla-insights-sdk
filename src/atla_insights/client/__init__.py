@@ -53,8 +53,8 @@ class Client:
         self,
         start_timestamp: Optional[datetime] = None,
         end_timestamp: Optional[datetime] = None,
-        page: Optional[str] = None,
-        page_size: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
     ) -> ListTraces200Response:
         """List traces with pagination and filtering.
 

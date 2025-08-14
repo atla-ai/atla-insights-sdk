@@ -48,8 +48,8 @@ class TestListTraces200Response(unittest.TestCase):
                         ended_at = '', )
                     ],
                 total = 1.337,
-                page = 1.337,
-                page_size = 1.337
+                page = 56,
+                page_size = 56
             )
         else:
             return ListTraces200Response(
@@ -66,8 +66,8 @@ class TestListTraces200Response(unittest.TestCase):
                         ended_at = '', )
                     ],
                 total = 1.337,
-                page = 1.337,
-                page_size = 1.337,
+                page = 56,
+                page_size = 56,
         )
         """
 

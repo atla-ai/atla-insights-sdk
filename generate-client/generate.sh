@@ -75,6 +75,7 @@ openapi-generator generate \
     -g python \
     -o "$OUTPUT_DIR" \
     -c "$CONFIG_FILE" \
+    --openapi-normalizer FILTER="tag:SDK" \
     --skip-validate-spec
 
 # Check if generation was successful

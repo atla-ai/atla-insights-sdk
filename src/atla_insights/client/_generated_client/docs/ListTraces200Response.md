@@ -7,8 +7,8 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **traces** | [**List[ListTraces200ResponseTracesInner]**](ListTraces200ResponseTracesInner.md) |  | 
 **total** | **float** |  | 
-**page** | **float** |  | 
-**page_size** | **float** |  | 
+**page** | **int** |  | 
+**page_size** | **int** |  | 
 
 ## Example
 
