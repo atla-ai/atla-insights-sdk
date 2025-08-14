@@ -250,5 +250,17 @@ def mock_claude_code_cli() -> Generator[None, None, None]:
             "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport.receive_messages",
             return_value=mock_recv(),
         ),
+        patch(
+            "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport._find_cli",
+            return_value="foobar",
+        ),
+        patch(
+            "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport.connect",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport.is_connected",
+            return_value=True,
+        ),
     ):
         yield
