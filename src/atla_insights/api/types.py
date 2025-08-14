@@ -1,8 +1,16 @@
 """Type definitions for Atla Insights API responses."""
 
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
+
+
+class Environment(str, Enum):
+    """Trace environment enumeration."""
+
+    PROD = "PROD"
+    DEV = "DEV"
 
 
 class SpanAnnotation(BaseModel):
@@ -63,7 +71,7 @@ class TraceView(BaseModel):
 
     id: str
     organization_id: str = Field(alias="organizationId")
-    environment: str  # "PROD" or "DEV"
+    environment: Environment
     is_success: Optional[bool] = Field(None, alias="isSuccess")
     is_completed: bool = Field(alias="isCompleted")
     metadata: Optional[Dict[str, Any]] = None
