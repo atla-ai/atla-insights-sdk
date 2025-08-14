@@ -511,7 +511,7 @@ class Configuration:
         """
         return [
             {
-                'url': "https://app.atla-ai.com",
+                'url': "https://atla-insights-9ku2trsmw-atla-fa3c125f.vercel.app",
                 'description': "API server",
             }
         ]
