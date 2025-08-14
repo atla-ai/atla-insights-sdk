@@ -32,7 +32,6 @@ __all__ = [
     "CustomMetric",
     "CustomMetricValue",
     "DetailedTraceListResponse",
-    "MetadataFilter",
     "Span",
     "Trace",
     "TraceDetailResponse",
@@ -59,7 +58,6 @@ from atla_insights.client._generated_client.models.annotation import Annotation 
 from atla_insights.client._generated_client.models.custom_metric import CustomMetric as CustomMetric
 from atla_insights.client._generated_client.models.custom_metric_value import CustomMetricValue as CustomMetricValue
 from atla_insights.client._generated_client.models.detailed_trace_list_response import DetailedTraceListResponse as DetailedTraceListResponse
-from atla_insights.client._generated_client.models.metadata_filter import MetadataFilter as MetadataFilter
 from atla_insights.client._generated_client.models.span import Span as Span
 from atla_insights.client._generated_client.models.trace import Trace as Trace
 from atla_insights.client._generated_client.models.trace_detail_response import TraceDetailResponse as TraceDetailResponse

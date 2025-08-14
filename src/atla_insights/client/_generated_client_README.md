@@ -34,10 +34,10 @@ import _generated_client
 from _generated_client.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to https://atla-insights-9ku2trsmw-atla-fa3c125f.vercel.app
+# Defining the host is optional and defaults to https://atla-insights-3hp10woq0-atla-fa3c125f.vercel.app
 # See configuration.py for a list of all supported configuration parameters.
 configuration = _generated_client.Configuration(
-    host = "https://atla-insights-9ku2trsmw-atla-fa3c125f.vercel.app"
+    host = "https://atla-insights-3hp10woq0-atla-fa3c125f.vercel.app"
 )
 
 
@@ -61,7 +61,7 @@ with _generated_client.ApiClient(configuration) as api_client:
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *https://atla-insights-9ku2trsmw-atla-fa3c125f.vercel.app*
+All URIs are relative to *https://atla-insights-3hp10woq0-atla-fa3c125f.vercel.app*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
@@ -76,7 +76,6 @@ Class | Method | HTTP request | Description
  - [CustomMetric](_generated_client/docs/CustomMetric.md)
  - [CustomMetricValue](_generated_client/docs/CustomMetricValue.md)
  - [DetailedTraceListResponse](_generated_client/docs/DetailedTraceListResponse.md)
- - [MetadataFilter](_generated_client/docs/MetadataFilter.md)
  - [Span](_generated_client/docs/Span.md)
  - [Trace](_generated_client/docs/Trace.md)
  - [TraceDetailResponse](_generated_client/docs/TraceDetailResponse.md)

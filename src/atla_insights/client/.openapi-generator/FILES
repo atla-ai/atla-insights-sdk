@@ -8,7 +8,6 @@ _generated_client/docs/Annotation.md
 _generated_client/docs/CustomMetric.md
 _generated_client/docs/CustomMetricValue.md
 _generated_client/docs/DetailedTraceListResponse.md
-_generated_client/docs/MetadataFilter.md
 _generated_client/docs/SDKApi.md
 _generated_client/docs/Span.md
 _generated_client/docs/Trace.md
@@ -21,7 +20,6 @@ _generated_client/models/annotation.py
 _generated_client/models/custom_metric.py
 _generated_client/models/custom_metric_value.py
 _generated_client/models/detailed_trace_list_response.py
-_generated_client/models/metadata_filter.py
 _generated_client/models/span.py
 _generated_client/models/trace.py
 _generated_client/models/trace_detail_response.py
@@ -33,7 +31,6 @@ _generated_client/test/test_annotation.py
 _generated_client/test/test_custom_metric.py
 _generated_client/test/test_custom_metric_value.py
 _generated_client/test/test_detailed_trace_list_response.py
-_generated_client/test/test_metadata_filter.py
 _generated_client/test/test_sdk_api.py
 _generated_client/test/test_span.py
 _generated_client/test/test_trace.py

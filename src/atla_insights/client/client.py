@@ -1,7 +1,8 @@
 """Client for the Atla Insights data API."""
 
+import json
 from datetime import datetime
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from atla_insights.client._generated_client import (
     ApiClient,
@@ -10,7 +11,6 @@ from atla_insights.client._generated_client import (
 )
 from atla_insights.client.types import (
     DetailedTraceListResponse,
-    MetadataFilter,
     TraceDetailResponse,
     TraceListResponse,
 )
@@ -56,7 +56,7 @@ class Client:
         self,
         start_timestamp: Optional[datetime] = None,
         end_timestamp: Optional[datetime] = None,
-        metadata_filter: Optional[List[MetadataFilter]] = None,
+        metadata_filter: Optional[List[Dict[str, str]]] = None,
         page: Optional[int] = None,
         page_size: Optional[int] = None,
     ) -> TraceListResponse:
@@ -72,6 +72,10 @@ class Client:
         Returns:
             Response with traces, total count, and pagination info
         """
+        # Pre-serialize metadata filter to bracket notation.
+        if metadata_filter is not None:
+            metadata_filter = json.dumps(metadata_filter)
+
         return self._sdk.list_traces(
             start_timestamp=start_timestamp,
             end_timestamp=end_timestamp,

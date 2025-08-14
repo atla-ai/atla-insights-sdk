@@ -18,7 +18,6 @@ from atla_insights.client._generated_client.models.annotation import Annotation
 from atla_insights.client._generated_client.models.custom_metric import CustomMetric
 from atla_insights.client._generated_client.models.custom_metric_value import CustomMetricValue
 from atla_insights.client._generated_client.models.detailed_trace_list_response import DetailedTraceListResponse
-from atla_insights.client._generated_client.models.metadata_filter import MetadataFilter
 from atla_insights.client._generated_client.models.span import Span
 from atla_insights.client._generated_client.models.trace import Trace
 from atla_insights.client._generated_client.models.trace_detail_response import TraceDetailResponse

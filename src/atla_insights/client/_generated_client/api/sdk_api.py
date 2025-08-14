@@ -21,7 +21,6 @@ from pydantic import Field, StrictStr, field_validator
 from typing import List, Optional
 from typing_extensions import Annotated
 from atla_insights.client._generated_client.models.detailed_trace_list_response import DetailedTraceListResponse
-from atla_insights.client._generated_client.models.metadata_filter import MetadataFilter
 from atla_insights.client._generated_client.models.trace_detail_response import TraceDetailResponse
 from atla_insights.client._generated_client.models.trace_list_response import TraceListResponse
 
@@ -622,7 +621,7 @@ class SDKApi:
         self,
         start_timestamp: Optional[datetime] = None,
         end_timestamp: Optional[datetime] = None,
-        metadata_filter: Optional[List[MetadataFilter]] = None,
+        metadata_filter: Annotated[Optional[StrictStr], Field(description="URL-encoded JSON array of metadata key-value pairs: [{\"key\":\"version\",\"value\":\"1\"}]")] = None,
         page: Optional[Annotated[int, Field(strict=True, ge=1)]] = None,
         page_size: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = None,
         _request_timeout: Union[
@@ -646,8 +645,8 @@ class SDKApi:
         :type start_timestamp: datetime
         :param end_timestamp:
         :type end_timestamp: datetime
-        :param metadata_filter:
-        :type metadata_filter: List[MetadataFilter]
+        :param metadata_filter: URL-encoded JSON array of metadata key-value pairs: [{\"key\":\"version\",\"value\":\"1\"}]
+        :type metadata_filter: str
         :param page:
         :type page: int
         :param page_size:
@@ -707,7 +706,7 @@ class SDKApi:
         self,
         start_timestamp: Optional[datetime] = None,
         end_timestamp: Optional[datetime] = None,
-        metadata_filter: Optional[List[MetadataFilter]] = None,
+        metadata_filter: Annotated[Optional[StrictStr], Field(description="URL-encoded JSON array of metadata key-value pairs: [{\"key\":\"version\",\"value\":\"1\"}]")] = None,
         page: Optional[Annotated[int, Field(strict=True, ge=1)]] = None,
         page_size: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = None,
         _request_timeout: Union[
@@ -731,8 +730,8 @@ class SDKApi:
         :type start_timestamp: datetime
         :param end_timestamp:
         :type end_timestamp: datetime
-        :param metadata_filter:
-        :type metadata_filter: List[MetadataFilter]
+        :param metadata_filter: URL-encoded JSON array of metadata key-value pairs: [{\"key\":\"version\",\"value\":\"1\"}]
+        :type metadata_filter: str
         :param page:
         :type page: int
         :param page_size:
@@ -792,7 +791,7 @@ class SDKApi:
         self,
         start_timestamp: Optional[datetime] = None,
         end_timestamp: Optional[datetime] = None,
-        metadata_filter: Optional[List[MetadataFilter]] = None,
+        metadata_filter: Annotated[Optional[StrictStr], Field(description="URL-encoded JSON array of metadata key-value pairs: [{\"key\":\"version\",\"value\":\"1\"}]")] = None,
         page: Optional[Annotated[int, Field(strict=True, ge=1)]] = None,
         page_size: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = None,
         _request_timeout: Union[
@@ -816,8 +815,8 @@ class SDKApi:
         :type start_timestamp: datetime
         :param end_timestamp:
         :type end_timestamp: datetime
-        :param metadata_filter:
-        :type metadata_filter: List[MetadataFilter]
+        :param metadata_filter: URL-encoded JSON array of metadata key-value pairs: [{\"key\":\"version\",\"value\":\"1\"}]
+        :type metadata_filter: str
         :param page:
         :type page: int
         :param page_size:
@@ -884,7 +883,6 @@ class SDKApi:
         _host = None
 
         _collection_formats: Dict[str, str] = {
-            'metadataFilter': 'multi',
         }
 
         _path_params: Dict[str, str] = {}
