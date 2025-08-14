@@ -1,6 +1,7 @@
 """Atla package for PyPI distribution."""
 
 from atla_insights.api import AtlaInsightsClient
+from atla_insights.client import Client
 from atla_insights.custom_metrics import get_custom_metrics, set_custom_metrics
 from atla_insights.frameworks import (
     instrument_agno,
@@ -39,6 +40,7 @@ from atla_insights.tool import tool
 
 __all__ = [
     "AtlaInsightsClient",
+    "Client",
     "configure",
     "enable_instrumentation",
     "get_custom_metrics",

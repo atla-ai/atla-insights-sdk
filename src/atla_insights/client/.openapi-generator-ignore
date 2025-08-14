@@ -1,0 +1,2 @@
+# Don't overwrite our custom __init__.py file
+__init__.py

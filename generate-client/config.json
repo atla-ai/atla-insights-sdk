@@ -1,0 +1,6 @@
+{
+    "packageName": "_generated_client",
+    "library": "urllib3",
+    "generateSourceCodeOnly": true,
+    "hideGenerationTimestamp": true
+}

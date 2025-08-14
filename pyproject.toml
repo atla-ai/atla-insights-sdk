@@ -111,7 +111,11 @@ ignore_missing_imports = true
 follow_imports = "skip"
 
 [tool.ruff]
-exclude = [".venv", "examples/frameworks/instrument_baml/baml_client"]
+exclude = [
+    ".venv",
+    "examples/frameworks/instrument_baml/baml_client",
+    "src/atla_insights/client/_generated_client",
+]
 line-length = 90
 indent-width = 4
 
