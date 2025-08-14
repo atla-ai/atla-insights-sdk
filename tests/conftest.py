@@ -3,8 +3,8 @@
 import io
 import json
 from pathlib import Path
-from typing import Callable, Generator, Tuple
-from unittest.mock import patch
+from typing import AsyncGenerator, Callable, Generator, Tuple
+from unittest.mock import AsyncMock, patch
 
 import boto3
 import pytest
@@ -229,3 +229,26 @@ def bedrock_client_factory() -> Generator[
     for _, stubber in clients_and_stubbers:
         stubber.deactivate()
         stubber.assert_no_pending_responses()
+
+
+@pytest.fixture(autouse=True)
+def mock_claude_code_cli() -> Generator[None, None, None]:
+    """Mock the Claude Code CLI."""
+
+    async def mock_recv() -> AsyncGenerator[dict, None]:
+        yield {
+            "type": "assistant",
+            "message": {"role": "assistant", "content": [{"type": "text", "text": "hi"}]},
+        }
+
+    with (
+        patch(
+            "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport.send_request",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport.receive_messages",
+            return_value=mock_recv(),
+        ),
+    ):
+        yield
