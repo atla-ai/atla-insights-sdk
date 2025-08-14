@@ -73,13 +73,14 @@ class Client:
             Response with traces, total count, and pagination info
         """
         # Pre-serialize metadata filter to bracket notation.
+        metadata_filter_str = None
         if metadata_filter is not None:
-            metadata_filter = json.dumps(metadata_filter)
+            metadata_filter_str = json.dumps(metadata_filter)
 
         return self._sdk.list_traces(
             start_timestamp=start_timestamp,
             end_timestamp=end_timestamp,
-            metadata_filter=metadata_filter,
+            metadata_filter=metadata_filter_str,
             page=page,
             page_size=page_size,
         )
