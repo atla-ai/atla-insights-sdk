@@ -1,0 +1,20 @@
+{
+    "packageName": "_generated_client",
+    "library": "urllib3",
+    "generateSourceCodeOnly": true,
+    "hideGenerationTimestamp": true,
+    "datetimeFormat": "%Y-%m-%dT%H:%M:%SZ",
+    "dateFormat": "%Y-%m-%d",
+    "modelNameMappings": {
+        "listTraces_200_response": "TraceListResponse",
+        "listTraces_200_response_traces_inner": "Trace",
+        "getTracesByIds_200_response": "DetailedTraceListResponse",
+        "getTracesByIds_200_response_traces_inner": "TraceWithDetails",
+        "getTraceById_200_response": "TraceDetailResponse",
+        "getTracesByIds_200_response_traces_inner_spans_inner": "Span",
+        "getTracesByIds_200_response_traces_inner_spans_inner_annotations_inner": "Annotation",
+        "getTracesByIds_200_response_traces_inner_customMetricValues_inner": "CustomMetricValue",
+        "getTracesByIds_200_response_traces_inner_customMetricValues_inner_customMetric": "CustomMetric",
+        "listTraces_metadataFilter_parameter_inner": "MetadataFilter"
+    }
+}

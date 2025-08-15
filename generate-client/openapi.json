@@ -1,0 +1,519 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Atla Insights API",
+        "description": "Development documentation",
+        "version": "1.0.0"
+    },
+    "servers": [{ "url": "https://app.atla-ai.com", "description": "API server" }],
+    "paths": {
+        "/api/sdk/v1/traces": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved paginated list of traces",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "traces": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": { "type": "string" },
+                                                    "environment": {
+                                                        "type": "string",
+                                                        "enum": ["PROD", "DEV"]
+                                                    },
+                                                    "isSuccess": {
+                                                        "type": ["boolean", "null"]
+                                                    },
+                                                    "isCompleted": { "type": "boolean" },
+                                                    "metadata": {
+                                                        "type": ["object", "null"],
+                                                        "additionalProperties": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "startedAt": { "type": "string" },
+                                                    "endedAt": { "type": "string" }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "environment",
+                                                    "isSuccess",
+                                                    "isCompleted",
+                                                    "startedAt",
+                                                    "endedAt"
+                                                ]
+                                            }
+                                        },
+                                        "total": { "type": "number" },
+                                        "page": { "type": "integer" },
+                                        "pageSize": { "type": "integer" }
+                                    },
+                                    "required": ["traces", "total", "page", "pageSize"]
+                                }
+                            }
+                        }
+                    },
+                    "401": { "description": "Unauthorized - Invalid or missing API key" },
+                    "500": { "description": "Internal server error" }
+                },
+                "operationId": "listTraces",
+                "tags": ["SDK"],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "startTimestamp",
+                        "schema": { "type": "string", "format": "date-time" }
+                    },
+                    {
+                        "in": "query",
+                        "name": "endTimestamp",
+                        "schema": { "type": "string", "format": "date-time" }
+                    },
+                    {
+                        "name": "metadataFilter",
+                        "in": "query",
+                        "required": false,
+                        "description": "URL-encoded JSON array of metadata key-value pairs: [{\"key\":\"version\",\"value\":\"1\"}]",
+                        "schema": { "type": "string" }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": { "type": "integer", "minimum": 1, "default": 1 }
+                    },
+                    {
+                        "in": "query",
+                        "name": "pageSize",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 1000,
+                            "default": 50
+                        }
+                    }
+                ],
+                "summary": "List traces with pagination and filtering",
+                "description": "Retrieve a paginated list of traces for the authenticated organization.",
+                "security": [{ "bearerAuth": [] }]
+            }
+        },
+        "/api/sdk/v1/traces/ids": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved traces matching the provided IDs",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "traces": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": { "type": "string" },
+                                                    "environment": {
+                                                        "type": "string",
+                                                        "enum": ["PROD", "DEV"]
+                                                    },
+                                                    "isSuccess": {
+                                                        "type": ["boolean", "null"]
+                                                    },
+                                                    "isCompleted": { "type": "boolean" },
+                                                    "metadata": {
+                                                        "type": ["object", "null"],
+                                                        "additionalProperties": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "stepCount": { "type": "integer" },
+                                                    "startedAt": { "type": "string" },
+                                                    "endedAt": { "type": "string" },
+                                                    "durationSeconds": {
+                                                        "type": "number"
+                                                    },
+                                                    "ingestedAt": { "type": "string" },
+                                                    "spans": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "traceId": {
+                                                                    "type": "string"
+                                                                },
+                                                                "parentSpanId": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "spanName": {
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "startTimestamp": {
+                                                                    "type": "string"
+                                                                },
+                                                                "endTimestamp": {
+                                                                    "type": "string"
+                                                                },
+                                                                "isException": {
+                                                                    "type": [
+                                                                        "boolean",
+                                                                        "null"
+                                                                    ]
+                                                                },
+                                                                "otelEvents": {
+                                                                    "type": "array",
+                                                                    "items": {}
+                                                                },
+                                                                "annotations": {
+                                                                    "type": "array",
+                                                                    "items": {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                            "spanId": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "failureMode": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "atlaCritique": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "id": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "spanId",
+                                                                            "failureMode",
+                                                                            "atlaCritique",
+                                                                            "id"
+                                                                        ]
+                                                                    }
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "id",
+                                                                "traceId",
+                                                                "parentSpanId",
+                                                                "spanName",
+                                                                "startTimestamp",
+                                                                "endTimestamp",
+                                                                "isException",
+                                                                "otelEvents"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "customMetricValues": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "traceId": {
+                                                                    "type": "string"
+                                                                },
+                                                                "customMetricId": {
+                                                                    "type": "string"
+                                                                },
+                                                                "value": {
+                                                                    "type": "string"
+                                                                },
+                                                                "customMetric": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "name": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "dataType": {
+                                                                            "type": "string",
+                                                                            "enum": [
+                                                                                "BOOLEAN",
+                                                                                "LIKERT_1_TO_5"
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "id",
+                                                                        "name",
+                                                                        "dataType"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "id",
+                                                                "traceId",
+                                                                "customMetricId",
+                                                                "value"
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "environment",
+                                                    "isSuccess",
+                                                    "isCompleted",
+                                                    "stepCount",
+                                                    "startedAt",
+                                                    "endedAt",
+                                                    "durationSeconds",
+                                                    "ingestedAt"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": ["traces"]
+                                }
+                            }
+                        }
+                    },
+                    "401": { "description": "Unauthorized - Invalid or missing API key" },
+                    "500": { "description": "Internal server error" }
+                },
+                "operationId": "getTracesByIds",
+                "tags": ["SDK"],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "ids",
+                        "schema": { "type": "array", "items": { "type": "string" } },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "include",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": ["spans", "annotations", "customMetrics"]
+                            }
+                        },
+                        "required": false
+                    }
+                ],
+                "summary": "Get multiple traces by IDs",
+                "description": "Retrieve specific traces by providing an array of trace IDs. Returns complete trace data including spans, summaries, and custom metrics for all found traces.",
+                "security": [{ "bearerAuth": [] }]
+            }
+        },
+        "/api/sdk/v1/traces/{traceId}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved trace with complete data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "trace": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": { "type": "string" },
+                                                "environment": {
+                                                    "type": "string",
+                                                    "enum": ["PROD", "DEV"]
+                                                },
+                                                "isSuccess": {
+                                                    "type": ["boolean", "null"]
+                                                },
+                                                "isCompleted": { "type": "boolean" },
+                                                "metadata": {
+                                                    "type": ["object", "null"],
+                                                    "additionalProperties": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "stepCount": { "type": "integer" },
+                                                "startedAt": { "type": "string" },
+                                                "endedAt": { "type": "string" },
+                                                "durationSeconds": { "type": "number" },
+                                                "ingestedAt": { "type": "string" },
+                                                "spans": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": { "type": "string" },
+                                                            "traceId": {
+                                                                "type": "string"
+                                                            },
+                                                            "parentSpanId": {
+                                                                "type": ["string", "null"]
+                                                            },
+                                                            "spanName": {
+                                                                "type": ["string", "null"]
+                                                            },
+                                                            "startTimestamp": {
+                                                                "type": "string"
+                                                            },
+                                                            "endTimestamp": {
+                                                                "type": "string"
+                                                            },
+                                                            "isException": {
+                                                                "type": [
+                                                                    "boolean",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "otelEvents": {
+                                                                "type": "array",
+                                                                "items": {}
+                                                            },
+                                                            "annotations": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "object",
+                                                                    "properties": {
+                                                                        "spanId": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "failureMode": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "atlaCritique": {
+                                                                            "type": "string"
+                                                                        },
+                                                                        "id": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "spanId",
+                                                                        "failureMode",
+                                                                        "atlaCritique",
+                                                                        "id"
+                                                                    ]
+                                                                }
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "traceId",
+                                                            "parentSpanId",
+                                                            "spanName",
+                                                            "startTimestamp",
+                                                            "endTimestamp",
+                                                            "isException",
+                                                            "otelEvents"
+                                                        ]
+                                                    }
+                                                },
+                                                "customMetricValues": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": { "type": "string" },
+                                                            "traceId": {
+                                                                "type": "string"
+                                                            },
+                                                            "customMetricId": {
+                                                                "type": "string"
+                                                            },
+                                                            "value": { "type": "string" },
+                                                            "customMetric": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "name": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "dataType": {
+                                                                        "type": "string",
+                                                                        "enum": [
+                                                                            "BOOLEAN",
+                                                                            "LIKERT_1_TO_5"
+                                                                        ]
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "id",
+                                                                    "name",
+                                                                    "dataType"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "traceId",
+                                                            "customMetricId",
+                                                            "value"
+                                                        ]
+                                                    }
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "environment",
+                                                "isSuccess",
+                                                "isCompleted",
+                                                "stepCount",
+                                                "startedAt",
+                                                "endedAt",
+                                                "durationSeconds",
+                                                "ingestedAt"
+                                            ]
+                                        }
+                                    },
+                                    "required": ["trace"]
+                                }
+                            }
+                        }
+                    },
+                    "401": { "description": "Unauthorized - Invalid or missing API key" },
+                    "404": { "description": "Trace not found or access denied" },
+                    "500": { "description": "Internal server error" }
+                },
+                "operationId": "getTraceById",
+                "tags": ["SDK"],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "include",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": ["spans", "annotations", "customMetrics"]
+                            }
+                        }
+                    },
+                    {
+                        "schema": { "type": "string" },
+                        "in": "path",
+                        "name": "traceId",
+                        "required": true
+                    }
+                ],
+                "summary": "Get a single trace by ID",
+                "description": "Retrieve a specific trace by its unique identifier. Returns complete trace data including all spans, annotations, trace summary, and custom metric values.",
+                "security": [{ "bearerAuth": [] }]
+            }
+        }
+    },
+    "components": { "schemas": {} }
+}

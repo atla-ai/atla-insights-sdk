@@ -429,3 +429,38 @@ configure(
 ### More examples
 
 More specific examples can be found in the `examples/` folder.
+
+## Data API
+
+The Atla Insights SDK includes a data API client for programmatically accessing your traces and analytics data.
+
+### Usage
+
+```python
+from atla_insights.client import Client
+
+# Initialize the client with your API key
+client = Client(api_key="your_api_key_here")
+
+# List traces with optional filters
+traces = client.list_traces(
+    page_size=50,
+    metadata_filter=[{"key": "environment", "value": "prod"}]
+)
+
+# Get detailed trace information
+trace_details = client.get_trace("trace_id_123")
+
+# Bulk retrieve multiple traces
+traces = client.get_traces(["trace_1", "trace_2", "trace_3"])
+```
+
+### Available Methods
+
+- `list_traces()` - Retrieve paginated list of traces with optional filtering
+- `get_trace(trace_id)` - Get detailed information for a specific trace
+- `get_traces(trace_ids)` - Bulk retrieve multiple traces by ID
+
+The client returns structured data objects with full type hints for easy integration into your workflows.
+
+See the `examples/` directory for additional usage examples and integration patterns.
