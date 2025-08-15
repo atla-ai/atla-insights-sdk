@@ -4,7 +4,17 @@ import json
 import logging
 from contextvars import ContextVar
 from dataclasses import asdict
-from typing import Any, Callable, Collection, Generator, Mapping, Optional, Sequence, cast
+from typing import (
+    Any,
+    AsyncIterable,
+    Callable,
+    Collection,
+    Generator,
+    Mapping,
+    Optional,
+    Sequence,
+    cast,
+)
 
 from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
     BaseInstrumentor,
@@ -13,9 +23,11 @@ from opentelemetry.trace import Status, StatusCode, Tracer
 from wrapt import wrap_function_wrapper
 
 try:
+    from claude_code_sdk._internal.client import InternalClient
     from claude_code_sdk._internal.transport.subprocess_cli import (
         SubprocessCLITransport,
     )
+    from claude_code_sdk.types import ClaudeCodeOptions
 except ImportError as e:
     raise ImportError(
         "Claude Code SDK instrumentation needs to be installed. "
@@ -114,6 +126,11 @@ def _get_output_message(
                                 f"{prefix}.{message_idx}.{MessageAttributes.MESSAGE_CONTENT}",
                                 block["content"],
                             )
+                        elif block.get("type") == "thinking":
+                            yield (
+                                f"{prefix}.{message_idx}.{MessageAttributes.MESSAGE_CONTENT}",
+                                block["thinking"],
+                            )
                     block_idx += 1
 
 
@@ -192,12 +209,56 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
             "options", default=None
         )
 
+        self._original_process_query = None
         self._original_send_request = None
         self._original_receive_messages = None
 
     def instrumentation_dependencies(self) -> Collection[str]:
         """Return the instrumentation dependencies."""
         return ("claude_code_sdk",)
+
+    async def _wrap_process_query(
+        self,
+        wrapped: Callable[..., Any],
+        instance: Any,
+        args: tuple[Any, ...],
+        kwargs: Mapping[str, Any],
+    ) -> Any:
+        """Wrap process_query to start a span."""
+        prompt: Optional[str | AsyncIterable[dict[str, Any]]] = kwargs.get("prompt")
+        options: Optional[ClaudeCodeOptions] = kwargs.get("options")
+
+        parsed_messages: list[dict[str, Any]] = []
+        if prompt is not None:
+            if isinstance(prompt, str):
+                parsed_messages.append({"role": "user", "content": prompt})
+            else:
+                async for message in prompt:
+                    parsed_messages.append(message)
+
+        if options is not None:
+            self._options.set(asdict(options))
+
+        num_inputs = len(parsed_messages)
+        if options is not None and options.system_prompt is not None:
+            num_inputs += 1
+        self._num_inputs.set(num_inputs)
+
+        self._input_attributes.set(
+            {
+                SpanAttributes.LLM_PROVIDER: "anthropic",
+                SpanAttributes.INPUT_MIME_TYPE: OpenInferenceMimeTypeValues.JSON.value,
+                SpanAttributes.INPUT_VALUE: json.dumps(
+                    [*parsed_messages, self._options.get() or {}]
+                ),
+                SpanAttributes.OPENINFERENCE_SPAN_KIND: (
+                    OpenInferenceSpanKindValues.LLM.value
+                ),
+                **dict(_get_input_messages(parsed_messages, self._options.get() or {})),
+            }
+        )
+        async for message in wrapped(*args, **kwargs):
+            yield message
 
     async def _wrap_send_request(
         self,
@@ -289,6 +350,13 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
 
     def _instrument(self, **kwargs) -> None:
         """Instrument Claude Code SDK transport methods."""
+        self._original_process_query = InternalClient.process_query  # type: ignore[assignment]
+        wrap_function_wrapper(
+            "claude_code_sdk._internal.client",
+            "InternalClient.process_query",
+            self._wrap_process_query,
+        )
+
         self._original_send_request = SubprocessCLITransport.send_request  # type: ignore[assignment]
         wrap_function_wrapper(
             "claude_code_sdk._internal.transport.subprocess_cli",
@@ -305,6 +373,10 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
 
     def _uninstrument(self, **kwargs) -> None:
         """Uninstrument Claude Code SDK."""
+        if self._original_process_query is not None:
+            InternalClient.process_query = self._original_process_query
+            self._original_process_query = None
+
         if self._original_send_request is not None:
             SubprocessCLITransport.send_request = self._original_send_request
             self._original_send_request = None
