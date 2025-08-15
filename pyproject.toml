@@ -79,8 +79,8 @@ openai-agents = [
     "openinference-instrumentation-openai-agents>=0.1.12",
 ]
 smolagents = [
-    "openinference-instrumentation-smolagents>=0.1.12",
-    "smolagents>=1.17.0",
+    "openinference-instrumentation-smolagents>=0.1.14",
+    "smolagents<1.21.0,>=1.19.0",
 ]
 
 [project.urls]

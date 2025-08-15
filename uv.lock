@@ -362,7 +362,7 @@ requires-dist = [
     { name = "openinference-instrumentation-openai", marker = "extra == 'openai'", specifier = ">=0.1.30" },
     { name = "openinference-instrumentation-openai", marker = "extra == 'openai-agents'", specifier = ">=0.1.30" },
     { name = "openinference-instrumentation-openai-agents", marker = "extra == 'openai-agents'", specifier = ">=0.1.12" },
-    { name = "openinference-instrumentation-smolagents", marker = "extra == 'smolagents'", specifier = ">=0.1.12" },
+    { name = "openinference-instrumentation-smolagents", marker = "extra == 'smolagents'", specifier = ">=0.1.14" },
     { name = "openinference-semantic-conventions", specifier = ">=0.1.17" },
     { name = "opentelemetry-api", specifier = ">=1.32.1" },
     { name = "opentelemetry-exporter-otlp-proto-grpc", specifier = ">=1.32.1" },
@@ -374,7 +374,7 @@ requires-dist = [
     { name = "pytest-httpserver", marker = "extra == 'ci'", specifier = ">=1.1.3" },
     { name = "rich", specifier = ">=13.9.4" },
     { name = "ruff", marker = "extra == 'ci'", specifier = ">=0.11.7" },
-    { name = "smolagents", marker = "extra == 'smolagents'", specifier = ">=1.17.0" },
+    { name = "smolagents", marker = "extra == 'smolagents'", specifier = ">=1.19.0,<1.21.0" },
     { name = "wrapt", specifier = ">=1.17.2" },
 ]
 provides-extras = ["all", "agno", "anthropic", "baml", "bedrock", "ci", "claude-code-sdk", "crewai", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "smolagents"]
@@ -914,7 +914,7 @@ name = "exceptiongroup"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/0b/9f/a65090624ecf468cdca03533906e7c69ed7588582240cfe7cc9e770b50eb/exceptiongroup-1.3.0.tar.gz", hash = "sha256:b241f5885f560bc56a59ee63ca4c6a8bfa46ae4ad651af316d4e81817bb9fd88", size = 29749, upload-time = "2025-05-10T17:42:51.123Z" }
 wheels = [
@@ -4297,7 +4297,7 @@ wheels = [
 
 [[package]]
 name = "smolagents"
-version = "1.21.1"
+version = "1.20.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "huggingface-hub" },
@@ -4307,9 +4307,9 @@ dependencies = [
     { name = "requests" },
     { name = "rich" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/31/a9/f50c7e921675c7295fb4e80795b3cfd4baa8f3ebd0d3c5d7e9d4221f6e30/smolagents-1.21.1.tar.gz", hash = "sha256:bd8a26868cb294949aa8ced954f90f1f1ece96f417fc60c6be1ac6d2f762f130", size = 202388, upload-time = "2025-08-11T10:49:05.942Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/35/ee/1733f20e8d181afc8acadb52ee8457e9c142735456d715ff47b25320341c/smolagents-1.20.0.tar.gz", hash = "sha256:b59950b7f6d4e51930bb651793046d9aea6856f8680651680c51a9202bec35ff", size = 196149, upload-time = "2025-07-10T16:20:42.295Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/12/ec/ad3f2e88aac2b143bb1c7c301a8d248d42f710a5d8113ad73ded146f6be5/smolagents-1.21.1-py3-none-any.whl", hash = "sha256:9490bc16a1efd326132daef4add6c09099aa5d652777332239f62d3b75f55761", size = 145419, upload-time = "2025-08-11T10:49:03.915Z" },
+    { url = "https://files.pythonhosted.org/packages/04/f2/ea0dd074db7ef6e437e0ae8785529ce816d3b331c40d21cbe76a6f548816/smolagents-1.20.0-py3-none-any.whl", hash = "sha256:a838fcee1c06bae8f6c907992d2f08385f4a3a33938bb578e3c4f42111f9bd21", size = 145354, upload-time = "2025-07-10T16:20:40.264Z" },
 ]
 
 [[package]]

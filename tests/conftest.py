@@ -256,6 +256,7 @@ def mock_claude_code_cli() -> Generator[None, None, None]:
                 "type": "assistant",
                 "message": {
                     "role": "assistant",
+                    "model": "some-model",
                     "content": [{"type": "text", "text": "bar"}],
                 },
             },
