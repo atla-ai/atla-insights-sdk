@@ -16,6 +16,7 @@ async def my_app() -> None:
             system_prompt="You are a performance engineer",
             allowed_tools=["Bash", "Read", "WebSearch"],
             max_turns=3,
+            mcp_tools=["mcp__file_system", "mcp__text_editor"],
         )
     ) as client:
         await client.query("Analyze system performance")

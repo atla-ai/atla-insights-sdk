@@ -155,10 +155,8 @@ def _get_llm_tools(
                 ]
             )
 
-        if allowed_tools := options.get("allowed_tools"):
-            tools = [tool for tool in tools if tool in allowed_tools]
-        if disallowed_tools := options.get("disallowed_tools"):
-            tools = [tool for tool in tools if tool not in disallowed_tools]
+        # TODO(mathias): Filter tools based on allowed_tools and disallowed_tools, while
+        # accounting for Claude Code SDK's tool filtering logic (e.g. `Bash(rm*)`).
 
         for idx, tool in enumerate(tools):
             tool_json = {"type": "function", "function": {"name": tool}}
