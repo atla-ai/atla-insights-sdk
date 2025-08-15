@@ -4,7 +4,7 @@ import json
 import logging
 from contextvars import ContextVar
 from dataclasses import asdict
-from typing import Any, Callable, Collection, Generator, Mapping, Optional, Sequence
+from typing import Any, Callable, Collection, Generator, Mapping, Optional, Sequence, cast
 
 from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
     BaseInstrumentor,
@@ -145,9 +145,9 @@ def _get_llm_tools(
 ) -> Generator[tuple[str, Any], None, None]:
     """Get the LLM tools."""
     if tools := message.get("tools"):
-        if not isinstance(tools, list):
-            return
+        tools = cast(list[str], tools)
         if mcp_tools := options.get("mcp_tools"):
+            mcp_tools = cast(list[str], mcp_tools)
             tools.extend(
                 [
                     mcp_tool if mcp_tool.startswith("mcp__") else f"mcp__{mcp_tool}"
