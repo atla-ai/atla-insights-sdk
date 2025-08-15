@@ -3,6 +3,7 @@
 import json
 import logging
 from contextvars import ContextVar
+from dataclasses import asdict
 from typing import Any, Callable, Collection, Generator, Mapping, Optional, Sequence
 
 from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
@@ -36,10 +37,25 @@ logger = logging.getLogger(OTEL_MODULE_NAME)
 
 
 def _get_input_messages(
-    messages: list[dict[str, Any]],
+    messages: list[dict[str, Any]], options: dict[str, Any]
 ) -> Generator[tuple[str, Any], None, None]:
     """Get the input messages."""
-    for idx, message in enumerate(messages):
+    start_idx = 0
+    if system_prompt := options.get("system_prompt"):
+        start_idx = 1
+        if append_system_prompt := options.get("append_system_prompt"):
+            system_prompt = f"{system_prompt}\n{append_system_prompt}"
+
+        yield (
+            f"{SpanAttributes.LLM_INPUT_MESSAGES}.{0}.{MessageAttributes.MESSAGE_ROLE}",
+            "system",
+        )
+        yield (
+            f"{SpanAttributes.LLM_INPUT_MESSAGES}.{0}.{MessageAttributes.MESSAGE_CONTENT}",
+            system_prompt,
+        )
+
+    for idx, message in enumerate(messages, start=start_idx):
         if not isinstance(message, dict):
             continue
 
@@ -55,14 +71,19 @@ def _get_input_messages(
             )
 
 
-def _get_output_messages(
-    message: dict[str, Any], message_idx: int
+def _get_output_message(
+    message: dict[str, Any], message_idx: int, as_input: bool
 ) -> Generator[tuple[str, Any], None, None]:
-    """Get the output messages."""
+    """Get the output message."""
+    prefix = (
+        SpanAttributes.LLM_INPUT_MESSAGES
+        if as_input
+        else SpanAttributes.LLM_OUTPUT_MESSAGES
+    )
     if output_message := message.get("message"):
         if role := output_message.get("role"):
             yield (
-                f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.{message_idx}.{MessageAttributes.MESSAGE_ROLE}",
+                f"{prefix}.{message_idx}.{MessageAttributes.MESSAGE_ROLE}",
                 role,
             )
         if content := output_message.get("content"):
@@ -72,35 +93,68 @@ def _get_output_messages(
                     if isinstance(block, dict):
                         if block.get("type") == "text":
                             yield (
-                                f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.{message_idx}.{MessageAttributes.MESSAGE_CONTENT}",
+                                f"{prefix}.{message_idx}.{MessageAttributes.MESSAGE_CONTENT}",
                                 block["text"],
                             )
                         elif block.get("type") == "tool_use":
                             yield (
-                                f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.{message_idx}.{MessageAttributes.MESSAGE_TOOL_CALLS}.{block_idx}.{ToolCallAttributes.TOOL_CALL_ID}",
+                                f"{prefix}.{message_idx}.{MessageAttributes.MESSAGE_TOOL_CALLS}.{block_idx}.{ToolCallAttributes.TOOL_CALL_ID}",
                                 block["id"],
                             )
                             yield (
-                                f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.{message_idx}.{MessageAttributes.MESSAGE_TOOL_CALLS}.{block_idx}.{ToolCallAttributes.TOOL_CALL_FUNCTION_NAME}",
+                                f"{prefix}.{message_idx}.{MessageAttributes.MESSAGE_TOOL_CALLS}.{block_idx}.{ToolCallAttributes.TOOL_CALL_FUNCTION_NAME}",
                                 block["name"],
                             )
                             yield (
-                                f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.{message_idx}.{MessageAttributes.MESSAGE_TOOL_CALLS}.{block_idx}.{ToolCallAttributes.TOOL_CALL_FUNCTION_ARGUMENTS_JSON}",
+                                f"{prefix}.{message_idx}.{MessageAttributes.MESSAGE_TOOL_CALLS}.{block_idx}.{ToolCallAttributes.TOOL_CALL_FUNCTION_ARGUMENTS_JSON}",
                                 json.dumps(block["input"]),
                             )
                         elif block.get("type") == "tool_result":
                             yield (
-                                f"{SpanAttributes.LLM_OUTPUT_MESSAGES}.{message_idx}.{MessageAttributes.MESSAGE_CONTENT}",
+                                f"{prefix}.{message_idx}.{MessageAttributes.MESSAGE_CONTENT}",
                                 block["content"],
                             )
                     block_idx += 1
 
 
-def _get_llm_tools(
-    message: dict[str, Any],
+def _get_output_messages(
+    messages: list[dict[str, Any]], num_inputs: int
 ) -> Generator[tuple[str, Any], None, None]:
     """Get the output messages."""
+    if not messages:
+        return
+
+    last_assistant_idx = None
+    for i, msg in enumerate(messages):
+        if msg.get("type") == "assistant":
+            last_assistant_idx = i
+
+    if last_assistant_idx is not None:
+        yield from _get_output_message(messages[last_assistant_idx], 0, as_input=False)
+        messages = messages[:last_assistant_idx]
+
+    if messages[0].get("type") == "system":
+        num_inputs -= 1
+
+    for message_idx, message in enumerate(messages, start=num_inputs):
+        yield from _get_output_message(message, message_idx, as_input=True)
+
+
+def _get_llm_tools(
+    message: dict[str, Any], options: dict[str, Any]
+) -> Generator[tuple[str, Any], None, None]:
+    """Get the LLM tools."""
     if tools := message.get("tools"):
+        if not isinstance(tools, list):
+            return
+        if mcp_tools := options.get("mcp_tools"):
+            tools.extend(mcp_tools)
+
+        if allowed_tools := options.get("allowed_tools"):
+            tools = [tool for tool in tools if tool in allowed_tools]
+        if disallowed_tools := options.get("disallowed_tools"):
+            tools = [tool for tool in tools if tool not in disallowed_tools]
+
         for idx, tool in enumerate(tools):
             tool_json = {"type": "function", "function": {"name": tool}}
             yield (
@@ -130,6 +184,10 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
         self._input_attributes: ContextVar[Optional[Mapping[str, Any]]] = ContextVar(
             "input_attributes", default=None
         )
+        self._num_inputs: ContextVar[int] = ContextVar("num_inputs", default=0)
+        self._options: ContextVar[Optional[dict[str, Any]]] = ContextVar(
+            "options", default=None
+        )
 
         self._original_send_request = None
         self._original_receive_messages = None
@@ -158,6 +216,14 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
                 )
                 parsed_messages.append(parsed_message)
 
+        if options := getattr(instance, "_options", None):
+            self._options.set(asdict(options))
+
+        num_inputs = len(parsed_messages)
+        if self._options.get() and self._options.get().get("system_prompt"):
+            num_inputs += 1
+        self._num_inputs.set(num_inputs)
+
         self._input_attributes.set(
             {
                 SpanAttributes.LLM_PROVIDER: "anthropic",
@@ -166,7 +232,7 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
                 SpanAttributes.OPENINFERENCE_SPAN_KIND: (
                     OpenInferenceSpanKindValues.LLM.value
                 ),
-                **dict(_get_input_messages(parsed_messages)),
+                **dict(_get_input_messages(parsed_messages, self._options.get() or {})),
             }
         )
         return await wrapped(*args, **kwargs)
@@ -183,32 +249,33 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
             name="Claude Code SDK Response",
             attributes=self._input_attributes.get(),
             record_exception=False,
-            set_status_on_exception=False,
         )
-        self._input_attributes.set(None)
+        options = self._options.get() or {}
 
         try:
-            message_idx = 0
+            llm_tools: Optional[dict] = None
+            llm_attributes: Optional[dict] = None
+
+            messages = []
             async for message in wrapped(*args, **kwargs):
-                message_attributes = {}
-                if message_idx == 0:
-                    message_attributes.update(
-                        {
-                            **dict(_get_llm_tools(message)),
-                            **dict(_get_llm_attributes(message)),
-                        }
+                messages.append(message)
+
+                if llm_tools is None:
+                    llm_tools = dict(_get_llm_tools(message, options))
+                    span.set_attributes(llm_tools)
+                if llm_attributes is None:
+                    llm_attributes = dict(_get_llm_attributes(message))
+                    span.set_attributes(llm_attributes)
+
+                if isinstance(message, Mapping) and message.get("type") == "result":
+                    output_message_attributes = dict(
+                        _get_output_messages(messages, self._num_inputs.get())
                     )
-                message_attributes.update(
-                    {
-                        **dict(_get_output_messages(message, message_idx)),
-                    }
-                )
-                span.set_attributes(message_attributes)
+                    span.set_attributes(output_message_attributes)
+                    span.set_status(Status(StatusCode.OK))
 
                 yield message
 
-                message_idx += 1
-                span.set_status(Status(StatusCode.OK))
         except Exception as e:
             span.record_exception(e)
             span.set_status(Status(StatusCode.ERROR))

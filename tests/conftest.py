@@ -236,10 +236,43 @@ def mock_claude_code_cli() -> Generator[None, None, None]:
     """Mock the Claude Code CLI."""
 
     async def mock_recv() -> AsyncGenerator[dict, None]:
-        yield {
-            "type": "assistant",
-            "message": {"role": "assistant", "content": [{"type": "text", "text": "hi"}]},
-        }
+        for msg in [
+            {
+                "type": "system",
+                "subtype": "system",
+                "message": {
+                    "role": "system",
+                    "content": [{"type": "text", "text": "You are a helpful assistant."}],
+                },
+            },
+            {
+                "type": "user",
+                "message": {
+                    "role": "user",
+                    "content": [{"type": "text", "text": "foo"}],
+                },
+            },
+            {
+                "type": "assistant",
+                "message": {
+                    "role": "assistant",
+                    "content": [{"type": "text", "text": "bar"}],
+                },
+            },
+            {
+                "type": "result",
+                "subtype": "result",
+                "duration_ms": 100,
+                "duration_api_ms": 100,
+                "is_error": False,
+                "num_turns": 1,
+                "session_id": "default",
+                "total_cost_usd": 0.0001,
+                "usage": {"prompt_tokens": 100, "completion_tokens": 100},
+                "result": "bar",
+            },
+        ]:
+            yield msg
 
     with (
         patch(

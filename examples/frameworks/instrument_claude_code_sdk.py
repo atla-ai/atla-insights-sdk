@@ -15,6 +15,7 @@ async def my_app() -> None:
         options=ClaudeCodeOptions(
             system_prompt="You are a performance engineer",
             allowed_tools=["Bash", "Read", "WebSearch"],
+            max_turns=3,
         )
     ) as client:
         await client.query("Analyze system performance")
@@ -23,8 +24,7 @@ async def my_app() -> None:
             if hasattr(message, "content"):
                 for block in message.content:
                     if hasattr(block, "text"):
-                        print(block.text, end="", flush=True)
-        await client.query("Analyze system performance again")
+                        print(block.text)
 
 
 async def main() -> None:
