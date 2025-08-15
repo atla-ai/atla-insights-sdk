@@ -3,8 +3,8 @@
 import io
 import json
 from pathlib import Path
-from typing import Callable, Generator, Tuple
-from unittest.mock import patch
+from typing import Any, AsyncGenerator, Callable, Generator, Tuple
+from unittest.mock import AsyncMock, patch
 
 import boto3
 import pytest
@@ -229,3 +229,73 @@ def bedrock_client_factory() -> Generator[
     for _, stubber in clients_and_stubbers:
         stubber.deactivate()
         stubber.assert_no_pending_responses()
+
+
+@pytest.fixture(autouse=True)
+def mock_claude_code_cli() -> Generator[None, None, None]:
+    """Mock the Claude Code CLI."""
+
+    async def mock_recv() -> AsyncGenerator[dict[str, Any], None]:
+        responses: list[dict[str, Any]] = [
+            {
+                "type": "system",
+                "subtype": "system",
+                "message": {
+                    "role": "system",
+                    "content": [{"type": "text", "text": "You are a helpful assistant."}],
+                },
+            },
+            {
+                "type": "user",
+                "message": {
+                    "role": "user",
+                    "content": [{"type": "text", "text": "foo"}],
+                },
+            },
+            {
+                "type": "assistant",
+                "message": {
+                    "role": "assistant",
+                    "model": "some-model",
+                    "content": [{"type": "text", "text": "bar"}],
+                },
+            },
+            {
+                "type": "result",
+                "subtype": "result",
+                "duration_ms": 100,
+                "duration_api_ms": 100,
+                "is_error": False,
+                "num_turns": 1,
+                "session_id": "default",
+                "total_cost_usd": 0.0001,
+                "usage": {"prompt_tokens": 100, "completion_tokens": 100},
+                "result": "bar",
+            },
+        ]
+        for msg in responses:
+            yield msg
+
+    with (
+        patch(
+            "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport.send_request",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport.receive_messages",
+            return_value=mock_recv(),
+        ),
+        patch(
+            "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport._find_cli",
+            return_value="foobar",
+        ),
+        patch(
+            "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport.connect",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport.is_connected",
+            return_value=True,
+        ),
+    ):
+        yield

@@ -143,15 +143,16 @@ def run_my_agent() -> None:
 
 We currently support the following frameworks:
 
-| Framework         | Instrumentation Function   | Notes                                                                                                       |
-| ----------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **Agno**          | `instrument_agno`          | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
-| **BAML**          | `instrument_baml`          | Supported with `openai`, `anthropic` or `bedrock` models\*                                                  |
-| **CrewAI**        | `instrument_crewai`        |                                                                                                             |
-| **LangChain**     | `instrument_langchain`     | This includes e.g., LangGraph as well                                                                       |
-| **MCP**           | `instrument_mcp`           | Only includes context propagation. You will need to instrument the model calling the MCP server separately. |
-| **OpenAI Agents** | `instrument_openai_agents` | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
-| **Smolagents**    | `instrument_smolagents`    | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
+| Framework           | Instrumentation Function     | Notes                                                                                                       |
+| ------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Agno**            | `instrument_agno`            | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
+| **BAML**            | `instrument_baml`            | Supported with `openai`, `anthropic` or `bedrock` models\*                                                  |
+| **Claude Code SDK** | `instrument_claude_code_sdk` |                                                                                                             |
+| **CrewAI**          | `instrument_crewai`          |                                                                                                             |
+| **LangChain**       | `instrument_langchain`       | This includes e.g., LangGraph as well                                                                       |
+| **MCP**             | `instrument_mcp`             | Only includes context propagation. You will need to instrument the model calling the MCP server separately. |
+| **OpenAI Agents**   | `instrument_openai_agents`   | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
+| **Smolagents**      | `instrument_smolagents`      | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
 
 ⚠️ \*Note that some frameworks do not provide their own LLM interface. In these cases, you will
 need to instrument both the framework _and_ the underlying LLM provider(s) as follows:
@@ -317,8 +318,9 @@ def my_function():
 ```
 
 The permitted `data_type` fields are:
-- `likert_1_to_5`: a numeric 1-5 scale. In this case, `value` is expected to be an `int` between 1 and 5.
-- `boolean`: a boolean scale. In this case, `value` is expected to be a `bool`.
+
+-   `likert_1_to_5`: a numeric 1-5 scale. In this case, `value` is expected to be an `int` between 1 and 5.
+-   `boolean`: a boolean scale. In this case, `value` is expected to be a `bool`.
 
 The primary intended use case is logging custom code evals that benefit from being in the
 active runtime environment. You can, however, log any arbitrary metric - including custom
@@ -456,7 +458,7 @@ traces = client.get_traces(["trace_1", "trace_2", "trace_3"])
 ### Available Methods
 
 - `list_traces()` - Retrieve paginated list of traces with optional filtering
-- `get_trace(trace_id)` - Get detailed information for a specific trace  
+- `get_trace(trace_id)` - Get detailed information for a specific trace
 - `get_traces(trace_ids)` - Bulk retrieve multiple traces by ID
 
 The client returns structured data objects with full type hints for easy integration into your workflows.

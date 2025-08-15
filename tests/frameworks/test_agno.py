@@ -235,16 +235,13 @@ class TestAgnoInstrumentation(BaseLocalOtel):
         from atla_insights import instrument_agno
 
         with instrument_agno("openai"):
-            fn = Function(
-                name="test_function",
-                description="Test function.",
-                parameters={
-                    "type": "object",
-                    "properties": {"some-arg": {"type": "string"}},
-                },
-            )
+
+            def test_function(some_arg: str) -> str:
+                """Test function."""
+                return "some-result"
+
             function_call = FunctionCall(
-                function=fn,
+                function=Function.from_callable(test_function),
                 arguments={"some_arg": "some-value"},
                 result="some-result",
                 call_id="abc123",
