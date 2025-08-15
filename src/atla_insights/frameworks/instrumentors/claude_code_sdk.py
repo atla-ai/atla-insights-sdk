@@ -148,7 +148,12 @@ def _get_llm_tools(
         if not isinstance(tools, list):
             return
         if mcp_tools := options.get("mcp_tools"):
-            tools.extend(mcp_tools)
+            tools.extend(
+                [
+                    mcp_tool if mcp_tool.startswith("mcp__") else f"mcp__{mcp_tool}"
+                    for mcp_tool in mcp_tools
+                ]
+            )
 
         if allowed_tools := options.get("allowed_tools"):
             tools = [tool for tool in tools if tool in allowed_tools]
