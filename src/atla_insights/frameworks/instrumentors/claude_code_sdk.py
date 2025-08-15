@@ -220,8 +220,9 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
             self._options.set(asdict(options))
 
         num_inputs = len(parsed_messages)
-        if self._options.get() and self._options.get().get("system_prompt"):
-            num_inputs += 1
+        if options := self._options.get():
+            if options.get("system_prompt"):
+                num_inputs += 1
         self._num_inputs.set(num_inputs)
 
         self._input_attributes.set(

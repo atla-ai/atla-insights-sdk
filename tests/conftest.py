@@ -3,7 +3,7 @@
 import io
 import json
 from pathlib import Path
-from typing import AsyncGenerator, Callable, Generator, Tuple
+from typing import Any, AsyncGenerator, Callable, Generator, Tuple
 from unittest.mock import AsyncMock, patch
 
 import boto3
@@ -235,8 +235,8 @@ def bedrock_client_factory() -> Generator[
 def mock_claude_code_cli() -> Generator[None, None, None]:
     """Mock the Claude Code CLI."""
 
-    async def mock_recv() -> AsyncGenerator[dict, None]:
-        for msg in [
+    async def mock_recv() -> AsyncGenerator[dict[str, Any], None]:
+        responses: list[dict[str, Any]] = [
             {
                 "type": "system",
                 "subtype": "system",
@@ -271,7 +271,8 @@ def mock_claude_code_cli() -> Generator[None, None, None]:
                 "usage": {"prompt_tokens": 100, "completion_tokens": 100},
                 "result": "bar",
             },
-        ]:
+        ]
+        for msg in responses:
             yield msg
 
     with (
