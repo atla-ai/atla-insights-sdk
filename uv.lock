@@ -216,7 +216,7 @@ wheels = [
 
 [[package]]
 name = "atla-insights"
-version = "0.0.19"
+version = "0.0.20"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
@@ -228,6 +228,7 @@ dependencies = [
     { name = "opentelemetry-exporter-otlp-proto-http" },
     { name = "opentelemetry-instrumentation" },
     { name = "pydantic" },
+    { name = "python-dateutil" },
     { name = "rich" },
     { name = "wrapt" },
 ]
@@ -372,6 +373,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'ci'", specifier = ">=8.3.4" },
     { name = "pytest-asyncio", marker = "extra == 'ci'", specifier = ">=0.26.0" },
     { name = "pytest-httpserver", marker = "extra == 'ci'", specifier = ">=1.1.3" },
+    { name = "python-dateutil", specifier = ">=2.8.0" },
     { name = "rich", specifier = ">=13.9.4" },
     { name = "ruff", marker = "extra == 'ci'", specifier = ">=0.11.7" },
     { name = "smolagents", marker = "extra == 'smolagents'", specifier = ">=1.19.0,<1.21.0" },
