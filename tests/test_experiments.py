@@ -221,3 +221,64 @@ class TestExperiments(BaseLocalOtel):
         for i, result in enumerate(results):
             assert result["experiment_id"] == f"experiment-{i}"
             assert result["description"] == f"Description {i}"
+
+    def test_run_experiment_environment_warning_when_not_dev(self) -> None:
+        """Test that warning is raised when environment is not 'dev' during experiment."""
+        import warnings
+
+        from atla_insights import instrument, run_experiment
+
+        # Test that warning is issued when environment is 'unit-testing' (not 'dev')
+        with warnings.catch_warnings(record=True) as warning_list:
+            warnings.simplefilter("always")
+
+            with run_experiment("test-experiment") as exp_run:
+                assert exp_run is not None
+
+                # Create a span within the experiment context to trigger warning
+                @instrument("test_span")
+                def test_function():
+                    return "test"
+
+                test_function()
+
+            # Check that a warning was issued (since unit-testing != dev)
+            assert len(warning_list) >= 1
+            warning_msgs = [str(w.message) for w in warning_list]
+            assert any(
+                "Setting environment to 'dev' during experiment run" in msg
+                for msg in warning_msgs
+            )
+
+    def test_run_experiment_span_attributes_set(self) -> None:
+        """Test that experiment run attributes are set on spans."""
+        from atla_insights import instrument, run_experiment
+        from atla_insights.constants import EXPERIMENT_RUN_NAMESPACE
+
+        with run_experiment("test-experiment", "Test description") as exp_run:
+            assert exp_run is not None
+
+            # Create a span within the experiment context
+            @instrument("test_span")
+            def test_function():
+                return "test"
+
+            test_function()
+
+        # Check the span attributes
+        spans = self.get_finished_spans()
+        assert len(spans) == 1
+        span = spans[0]
+
+        assert span.attributes is not None
+
+        # Check experiment run attributes were set
+        assert span.attributes.get(f"{EXPERIMENT_RUN_NAMESPACE}.id") == exp_run["id"]
+        assert (
+            span.attributes.get(f"{EXPERIMENT_RUN_NAMESPACE}.experiment_id")
+            == "test-experiment"
+        )
+        assert (
+            span.attributes.get(f"{EXPERIMENT_RUN_NAMESPACE}.description")
+            == "Test description"
+        )
