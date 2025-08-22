@@ -2,6 +2,7 @@
 
 from atla_insights.client import Client
 from atla_insights.custom_metrics import get_custom_metrics, set_custom_metrics
+from atla_insights.experiments import run_experiment
 from atla_insights.frameworks import (
     instrument_agno,
     instrument_baml,
@@ -62,6 +63,7 @@ __all__ = [
     "instrument_smolagents",
     "mark_failure",
     "mark_success",
+    "run_experiment",
     "set_custom_metrics",
     "set_metadata",
     "suppress_instrumentation",

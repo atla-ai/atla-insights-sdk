@@ -371,6 +371,19 @@ def run_my_agent() -> None:
 
 ⚠️ Note that you should use this marking functionality within an instrumented function.
 
+### Running experiments
+
+You can generate runs of your Atla Insights experiments by using the `run_experiment` context manager.
+
+```python
+from atla_insights import run_experiment
+
+with run_experiment(experiment_id="my-experiment-id"):
+    # Your experiment code here
+```
+
+To get started, you'll need to create an experiment in the [Atla Insights platform](https://app.atla-ai.com) and follow the instructions there.
+
 ### Compatibility with existing observability
 
 As `atla_insights` provides its own instrumentation, we should note potential interactions

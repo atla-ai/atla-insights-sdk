@@ -54,6 +54,8 @@ METADATA_MARK = f"{OTEL_NAMESPACE}.metadata"
 SUCCESS_MARK = f"{OTEL_NAMESPACE}.mark.success"
 VERSION_MARK = f"{OTEL_NAMESPACE}.sdk.version"
 
+EXPERIMENT_RUN_NAMESPACE = f"{OTEL_NAMESPACE}.experiment.run"
+
 OTEL_MODULE_NAME = "atla_insights"
 OTEL_TRACES_ENDPOINT = "https://logfire-eu.pydantic.dev/v1/traces"
 
