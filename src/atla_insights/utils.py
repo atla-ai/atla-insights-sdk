@@ -1,10 +1,15 @@
 """Utility functions for Atla Insights."""
 
 import importlib
+from typing import Optional
 
 import opentelemetry.trace
+import pygit2
+from cuid2 import Cuid
 from opentelemetry.sdk.trace import TracerProvider as SDKTracerProvider
 from opentelemetry.trace import ProxyTracerProvider, get_tracer_provider
+
+_cuid_generator = Cuid()
 
 
 def truncate_value(value: str, max_chars: int) -> str:
@@ -34,3 +39,51 @@ def maybe_get_existing_tracer_provider() -> SDKTracerProvider | None:
         return None
 
     return existing_tracer_provider
+
+
+def get_git_repo() -> Optional[pygit2.Repository]:
+    """Get the current Git repository."""
+    try:
+        return pygit2.Repository(".")
+    except Exception:
+        return None
+
+
+def get_git_branch(repo: Optional[pygit2.Repository] = None) -> Optional[str]:
+    """Get the current Git branch name."""
+    try:
+        repo = repo or get_git_repo()
+        if repo.head_is_unborn:
+            return None
+        return repo.head.shorthand
+
+    except Exception:
+        return None
+
+
+def get_git_commit_hash(repo: Optional[pygit2.Repository] = None) -> Optional[str]:
+    """Get the current Git commit hash."""
+    try:
+        repo = repo or get_git_repo()
+        if repo.head_is_unborn:
+            return None
+        return str(repo.head.target)
+    except Exception:
+        return None
+
+
+def get_git_commit_message(repo: Optional[pygit2.Repository] = None) -> Optional[str]:
+    """Get the current Git commit message."""
+    try:
+        repo = repo or get_git_repo()
+        if repo.head_is_unborn:
+            return None
+        commit = repo[repo.head.target]
+        return commit.message.strip()
+    except Exception:
+        return None
+
+
+def generate_cuid() -> str:
+    """Generate a new CUID."""
+    return _cuid_generator.generate()
