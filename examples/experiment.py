@@ -1,5 +1,7 @@
 """Running an experiment example."""
 
+import os
+
 from openai import OpenAI
 
 from atla_insights import (
@@ -26,9 +28,12 @@ def my_app(client: OpenAI) -> None:
 
 def main() -> None:
     """Main function."""
-    # Configure the client
-    configure(token="pylf_v1_eu_GWQ3C6xppx3CWfgvnsTgXmz5TRdPYdTfqHl6dtynlZVv")
-    # configure(token=os.environ["ATLA_INSIGHTS_TOKEN"])
+    # Configure the client. Experiments run in the "dev" environment by default,
+    # but setting this here avoids a warning.
+    configure(
+        token=os.environ["ATLA_INSIGHTS_TOKEN"],
+        environment="dev",
+    )
 
     # Create an OpenAI client
     client = OpenAI()
@@ -38,7 +43,7 @@ def main() -> None:
 
     # Run your app in the context of an experiment.
     # Your traces with be associated with a new run for the experiment.
-    with run_experiment("My experiment"):
+    with run_experiment(experiment_id="123"):
         my_app(client)
 
 
