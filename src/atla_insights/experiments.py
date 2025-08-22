@@ -55,7 +55,7 @@ def run_experiment(
 
     # The context variable is now available to the root span processor
     try:
-        yield
+        yield experiment_run
     finally:
         # Clean up context
         experiment_run_var.reset(experiment_run_token)
