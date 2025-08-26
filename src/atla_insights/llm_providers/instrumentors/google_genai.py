@@ -234,35 +234,86 @@ class AtlaGoogleGenAIInstrumentor(GoogleGenAIInstrumentor):
     name = "google-genai"
 
     def _instrument(self, **kwargs) -> None:
-        original_get_extra_attributes_from_request = (
-            _RequestAttributesExtractor.get_extra_attributes_from_request
-        )
-
-        def get_extra_attributes_from_request(
-            self: _RequestAttributesExtractor, request_parameters: Mapping[str, Any]
-        ) -> Iterator[Tuple[str, AttributeValue]]:
-            yield from original_get_extra_attributes_from_request(
-                self, request_parameters
+        # Idempotent patch for request extractor
+        if not hasattr(
+            _RequestAttributesExtractor,
+            "_atla_original_get_extra_attributes_from_request",
+        ):
+            (
+                _RequestAttributesExtractor._atla_original_get_extra_attributes_from_request
+            ) = (  # type: ignore[attr-defined]
+                _RequestAttributesExtractor.get_extra_attributes_from_request
             )
-            yield from get_tools_from_request(request_parameters)
 
-        _RequestAttributesExtractor.get_extra_attributes_from_request = (  # type: ignore[method-assign]
-            get_extra_attributes_from_request
-        )
+            def get_extra_attributes_from_request(
+                self: _RequestAttributesExtractor, request_parameters: Mapping[str, Any]
+            ) -> Iterator[Tuple[str, AttributeValue]]:
+                yield from (
+                    _RequestAttributesExtractor._atla_original_get_extra_attributes_from_request(  # type: ignore[attr-defined]
+                        self, request_parameters
+                    )
+                )
+                yield from get_tools_from_request(request_parameters)
 
-        original_get_attributes_from_content_parts = (
-            _ResponseAttributesExtractor._get_attributes_from_content_parts
-        )
+            _RequestAttributesExtractor.get_extra_attributes_from_request = (  # type: ignore[method-assign]
+                get_extra_attributes_from_request
+            )
 
-        def _get_attributes_from_content_parts(
-            self: _ResponseAttributesExtractor,
-            content_parts: Iterable[object],
-        ) -> Iterator[Tuple[str, AttributeValue]]:
-            yield from original_get_attributes_from_content_parts(self, content_parts)
-            yield from _get_tool_calls_from_content_parts(content_parts)
+        # Idempotent patch for response extractor
+        if not hasattr(
+            _ResponseAttributesExtractor,
+            "_atla_original_get_attributes_from_content_parts",
+        ):
+            (
+                _ResponseAttributesExtractor._atla_original_get_attributes_from_content_parts
+            ) = (  # type: ignore[attr-defined]
+                _ResponseAttributesExtractor._get_attributes_from_content_parts
+            )
 
-        _ResponseAttributesExtractor._get_attributes_from_content_parts = (  # type: ignore[method-assign]
-            _get_attributes_from_content_parts
-        )
+            def _get_attributes_from_content_parts(
+                self: _ResponseAttributesExtractor,
+                content_parts: Iterable[object],
+            ) -> Iterator[Tuple[str, AttributeValue]]:
+                # Always call the stored original to avoid wrapper chains
+                yield from (
+                    _ResponseAttributesExtractor._atla_original_get_attributes_from_content_parts(  # type: ignore[attr-defined]
+                        self, content_parts
+                    )
+                )
+                yield from _get_tool_calls_from_content_parts(content_parts)
+
+            _ResponseAttributesExtractor._get_attributes_from_content_parts = (  # type: ignore[method-assign]
+                _get_attributes_from_content_parts
+            )
 
         super()._instrument(**kwargs)
+
+    def _uninstrument(self, **kwargs) -> None:
+        # Restore request extractor if we patched it
+        if hasattr(
+            _RequestAttributesExtractor,
+            "_atla_original_get_extra_attributes_from_request",
+        ):
+            _RequestAttributesExtractor.get_extra_attributes_from_request = (  # type: ignore[method-assign]
+                _RequestAttributesExtractor._atla_original_get_extra_attributes_from_request  # type: ignore[attr-defined]
+            )
+            delattr(
+                _RequestAttributesExtractor,
+                "_atla_original_get_extra_attributes_from_request",
+            )
+
+        # Restore response extractor if we patched it
+        if hasattr(
+            _ResponseAttributesExtractor,
+            "_atla_original_get_attributes_from_content_parts",
+        ):
+            _ResponseAttributesExtractor._get_attributes_from_content_parts = (  # type: ignore[method-assign]
+                _ResponseAttributesExtractor._atla_original_get_attributes_from_content_parts  # type: ignore[attr-defined]
+            )
+            delattr(
+                _ResponseAttributesExtractor,
+                "_atla_original_get_attributes_from_content_parts",
+            )
+
+        # Uninstall base instrumentor hooks
+        super()._uninstrument(**kwargs)
