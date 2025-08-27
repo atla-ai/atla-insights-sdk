@@ -240,10 +240,8 @@ class AtlaGoogleGenAIInstrumentor(GoogleGenAIInstrumentor):
             "_atla_original_get_extra_attributes_from_request",
         ):
             (
-                _RequestAttributesExtractor._atla_original_get_extra_attributes_from_request
-            ) = (  # type: ignore[attr-defined]
-                _RequestAttributesExtractor.get_extra_attributes_from_request
-            )
+                _RequestAttributesExtractor._atla_original_get_extra_attributes_from_request  # type: ignore[attr-defined]
+            ) = _RequestAttributesExtractor.get_extra_attributes_from_request
 
             def get_extra_attributes_from_request(
                 self: _RequestAttributesExtractor, request_parameters: Mapping[str, Any]
@@ -265,10 +263,8 @@ class AtlaGoogleGenAIInstrumentor(GoogleGenAIInstrumentor):
             "_atla_original_get_attributes_from_content_parts",
         ):
             (
-                _ResponseAttributesExtractor._atla_original_get_attributes_from_content_parts
-            ) = (  # type: ignore[attr-defined]
-                _ResponseAttributesExtractor._get_attributes_from_content_parts
-            )
+                _ResponseAttributesExtractor._atla_original_get_attributes_from_content_parts  # type: ignore[attr-defined]
+            ) = _ResponseAttributesExtractor._get_attributes_from_content_parts
 
             def _get_attributes_from_content_parts(
                 self: _ResponseAttributesExtractor,
