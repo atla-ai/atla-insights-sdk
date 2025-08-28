@@ -50,6 +50,10 @@ You can retrieve your authentication token from the [Atla Insights platform](htt
 Separate traces between development and production environments:
 
 ```python
+import os
+
+from atla_insights import configure
+
 # Development environment
 configure(token="<TOKEN>", environment="dev")
 
@@ -57,7 +61,7 @@ configure(token="<TOKEN>", environment="dev")
 configure(token="<TOKEN>", environment="prod")
 
 # Via environment variable
-export ATLA_INSIGHTS_ENVIRONMENT=dev
+os.environ["ATLA_INSIGHTS_ENVIRONMENT"] = "dev"
 configure(token="<TOKEN>")  # Uses "dev" from env var
 ```
 
@@ -222,6 +226,17 @@ configure(
     token="<MY_ATLA_INSIGHTS_TOKEN>",
     metadata=metadata,
 )
+```
+
+#### Dynamic metadata
+
+Metadata set with the `configure` function will be attached to all traces. You can also set metadata dynamically during runtime. This is useful, for example, to "tag" specific traces with information that is only available during runtime.
+
+```python
+from atla_insights import set_metadata
+
+# ... within instrumented context ...
+set_metadata({"some_key": "some_value", "other_key": "other_value"})
 ```
 
 ### Tool invocations
