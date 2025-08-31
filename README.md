@@ -50,6 +50,10 @@ You can retrieve your authentication token from the [Atla Insights platform](htt
 Separate traces between development and production environments:
 
 ```python
+import os
+
+from atla_insights import configure
+
 # Development environment
 configure(token="<TOKEN>", environment="dev")
 
@@ -57,7 +61,7 @@ configure(token="<TOKEN>", environment="dev")
 configure(token="<TOKEN>", environment="prod")
 
 # Via environment variable
-export ATLA_INSIGHTS_ENVIRONMENT=dev
+os.environ["ATLA_INSIGHTS_ENVIRONMENT"] = "dev"
 configure(token="<TOKEN>")  # Uses "dev" from env var
 ```
 
@@ -224,6 +228,17 @@ configure(
 )
 ```
 
+#### Dynamic metadata
+
+Metadata set with the `configure` function will be attached to all traces. You can also set metadata dynamically during runtime. This is useful, for example, to "tag" specific traces with information that is only available during runtime.
+
+```python
+from atla_insights import set_metadata
+
+# ... within instrumented context ...
+set_metadata({"some_key": "some_value", "other_key": "other_value"})
+```
+
 ### Tool invocations
 
 If you want to ensure your function-based tool calls are logged correctly, you can wrap
@@ -370,6 +385,19 @@ def run_my_agent() -> None:
 ```
 
 ⚠️ Note that you should use this marking functionality within an instrumented function.
+
+### Running experiments
+
+You can generate runs of your Atla Insights experiments by using the `run_experiment` context manager.
+
+```python
+from atla_insights import run_experiment
+
+with run_experiment(experiment_id="my-experiment-id"):
+    # Your experiment code here
+```
+
+To get started, you'll need to create an experiment in the [Atla Insights platform](https://app.atla-ai.com) and follow the instructions there.
 
 ### Compatibility with existing observability
 
