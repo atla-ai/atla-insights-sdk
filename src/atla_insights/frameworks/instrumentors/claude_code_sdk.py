@@ -16,8 +16,8 @@ from typing import (
     cast,
 )
 
-from opentelemetry.instrumentation.instrumentor import (
-    BaseInstrumentor,  # type: ignore[attr-defined]
+from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
+    BaseInstrumentor,
 )
 from opentelemetry.trace import Status, StatusCode, Tracer
 from wrapt import wrap_function_wrapper
@@ -82,7 +82,8 @@ def _get_input_messages(
         if not isinstance(message, dict):
             continue
 
-        has_tool_result = _get_tool_result_presence(content := message.get("content"))
+        content = message.get("content")
+        has_tool_result = _get_tool_result_presence(content)
         if role := message.get("role"):
             yield (
                 f"{SpanAttributes.LLM_INPUT_MESSAGES}.{idx}.{MessageAttributes.MESSAGE_ROLE}",
@@ -105,9 +106,8 @@ def _get_output_message(
         else SpanAttributes.LLM_OUTPUT_MESSAGES
     )
     if output_message := message.get("message"):
-        has_tool_result = _get_tool_result_presence(
-            content := output_message.get("content")
-        )
+        content = output_message.get("content")
+        has_tool_result = _get_tool_result_presence(content)
         if role := output_message.get("role"):
             yield (
                 f"{prefix}.{message_idx}.{MessageAttributes.MESSAGE_ROLE}",
