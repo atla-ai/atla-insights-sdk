@@ -15,12 +15,6 @@ from opentelemetry.util.types import AttributeValue
 
 try:
     from openinference.instrumentation.google_genai import GoogleGenAIInstrumentor
-    from openinference.instrumentation.google_genai._request_attributes_extractor import (
-        _RequestAttributesExtractor,
-    )
-    from openinference.instrumentation.google_genai._response_attributes_extractor import (  # noqa: E501
-        _ResponseAttributesExtractor,
-    )
 except ImportError as e:
     raise ImportError(
         "Google GenAI instrumentation needs to be installed. "
@@ -233,9 +227,26 @@ class AtlaGoogleGenAIInstrumentor(GoogleGenAIInstrumentor):
 
     name = "google-genai"
 
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Initialize the AtlaGoogleGenAIInstrumentor."""
+        super().__init__(*args, **kwargs)
+
+        self.original_get_extra_attributes_from_request = None
+        self.original_get_attributes_from_content_parts = None
+
     def _instrument(self, **kwargs) -> None:
+        from openinference.instrumentation.google_genai._request_attributes_extractor import (  # noqa: E501
+            _RequestAttributesExtractor,
+        )
+        from openinference.instrumentation.google_genai._response_attributes_extractor import (  # noqa: E501
+            _ResponseAttributesExtractor,
+        )
+
         original_get_extra_attributes_from_request = (
             _RequestAttributesExtractor.get_extra_attributes_from_request
+        )
+        self.original_get_extra_attributes_from_request = (
+            original_get_extra_attributes_from_request
         )
 
         def get_extra_attributes_from_request(
@@ -253,6 +264,9 @@ class AtlaGoogleGenAIInstrumentor(GoogleGenAIInstrumentor):
         original_get_attributes_from_content_parts = (
             _ResponseAttributesExtractor._get_attributes_from_content_parts
         )
+        self.original_get_attributes_from_content_parts = (
+            original_get_attributes_from_content_parts
+        )
 
         def _get_attributes_from_content_parts(
             self: _ResponseAttributesExtractor,
@@ -266,3 +280,25 @@ class AtlaGoogleGenAIInstrumentor(GoogleGenAIInstrumentor):
         )
 
         super()._instrument(**kwargs)
+
+    def _uninstrument(self, **kwargs: Any) -> None:
+        from openinference.instrumentation.google_genai._request_attributes_extractor import (  # noqa: E501
+            _RequestAttributesExtractor,
+        )
+        from openinference.instrumentation.google_genai._response_attributes_extractor import (  # noqa: E501
+            _ResponseAttributesExtractor,
+        )
+
+        super()._uninstrument(**kwargs)
+
+        if self.original_get_extra_attributes_from_request is not None:
+            _RequestAttributesExtractor.get_extra_attributes_from_request = (  # type: ignore[method-assign]
+                self.original_get_extra_attributes_from_request
+            )
+            self.original_get_extra_attributes_from_request = None
+
+        if self.original_get_attributes_from_content_parts is not None:
+            _ResponseAttributesExtractor._get_attributes_from_content_parts = (  # type: ignore[method-assign]
+                self.original_get_attributes_from_content_parts
+            )
+            self.original_get_attributes_from_content_parts = None
