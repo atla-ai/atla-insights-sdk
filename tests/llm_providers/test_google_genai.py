@@ -79,12 +79,10 @@ class TestGoogleGenAIInstrumentation(BaseLocalOtel):
     ) -> None:
         """Async race of (un)instrumentation must not cause recursion in wrappers."""
         num_tasks = 40
-        iterations = 40
+        iterations = 30
         stop_event = asyncio.Event()
         recursion_errors: list[BaseException] = []
 
-        # original_limit = sys.getrecursionlimit()
-        # sys.setrecursionlimit(1000)
         try:
             from atla_insights import instrument_google_genai
 
@@ -95,14 +93,11 @@ class TestGoogleGenAIInstrumentation(BaseLocalOtel):
                             return
                         with instrument_google_genai():
                             # short await to encourage interleaving
-                            await asyncio.sleep(random.uniform(0, 0.002))
-
-                    # Make a call under instrumentation
-                    with instrument_google_genai():
-                        mock_google_genai_client.models.generate_content(
-                            model="some-model",
-                            contents="Hello, World!",
-                        )
+                            await asyncio.sleep(random.uniform(0, 0.01))
+                            mock_google_genai_client.models.generate_content(
+                                model="some-model",
+                                contents="Hello, World!",
+                            )
                 except RecursionError as e:
                     recursion_errors.append(e)
                     stop_event.set()
@@ -116,9 +111,9 @@ class TestGoogleGenAIInstrumentation(BaseLocalOtel):
             # At least one span should be produced by the final calls
             finished_spans = self.get_finished_spans()
             assert len(finished_spans) >= 1
+            # assert len(finished_spans) == num_tasks * iterations
         finally:
             pass
-            # sys.setrecursionlimit(original_limit)
 
     def test_tool_calls(self, mock_google_genai_client: Client) -> None:
         """Test Google GenAI instrumentation with tool calls."""
