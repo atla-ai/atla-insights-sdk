@@ -62,3 +62,57 @@ class TestClaudeCodeSdkInstrumentation(BaseLocalOtel):
             llm_call.attributes.get("llm.output_messages.0.message.role") == "assistant"
         )
         assert llm_call.attributes.get("llm.output_messages.0.message.content") == "bar"
+
+    def test_tool_result_in_input_is_marked_as_tool(self) -> None:
+        """Ensure input messages with tool_result are labeled as role 'tool'."""
+        from atla_insights.frameworks.instrumentors.claude_code_sdk import (
+            _get_input_messages,
+        )
+
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "tool_result", "content": "some tool output"},
+                ],
+            }
+        ]
+
+        attrs = dict(_get_input_messages(messages, options={}))
+
+        assert attrs.get("llm.input_messages.0.message.role") == "tool"
+
+    def test_tool_result_in_output_is_converted_to_tool_input(self) -> None:
+        """Ensure prior tool_result message is recorded as tool role in inputs."""
+        from atla_insights.frameworks.instrumentors.claude_code_sdk import (
+            _get_output_messages,
+        )
+
+        messages = [
+            {
+                "type": "user",
+                "message": {
+                    "role": "user",
+                    "content": [
+                        {"type": "tool_result", "content": "tool response"},
+                    ],
+                },
+            },
+            {
+                "type": "assistant",
+                "message": {
+                    "role": "assistant",
+                    "content": [{"type": "text", "text": "assistant text"}],
+                },
+            },
+        ]
+
+        # num_inputs=1: first message is counted as the first input
+        attrs = dict(_get_output_messages(messages, num_inputs=1))
+
+        # assistant output preserved
+        assert attrs.get("llm.output_messages.0.message.role") == "assistant"
+        assert attrs.get("llm.output_messages.0.message.content") == "assistant text"
+
+        # prior message with tool_result becomes an input with role 'tool'
+        assert attrs.get("llm.input_messages.1.message.role") == "tool"
