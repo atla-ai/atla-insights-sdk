@@ -15,12 +15,6 @@ from opentelemetry.util.types import AttributeValue
 
 try:
     from openinference.instrumentation.google_genai import GoogleGenAIInstrumentor
-    from openinference.instrumentation.google_genai._request_attributes_extractor import (
-        _RequestAttributesExtractor,
-    )
-    from openinference.instrumentation.google_genai._response_attributes_extractor import (  # noqa: E501
-        _ResponseAttributesExtractor,
-    )
 except ImportError as e:
     raise ImportError(
         "Google GenAI instrumentation needs to be installed. "
@@ -36,13 +30,13 @@ def _parse_function_call(
     if function_name := getattr(function_call, "name", None):
         yield (
             ".".join([function_call_prefix, ToolCallAttributes.TOOL_CALL_FUNCTION_NAME]),
-            function_name,
+            str(function_name),
         )
 
     if function_id := getattr(function_call, "id", None):
         yield (
             ".".join([function_call_prefix, ToolCallAttributes.TOOL_CALL_ID]),
-            function_id,
+            str(function_id),
         )
 
     function_args_json = "{}"
@@ -233,36 +227,80 @@ class AtlaGoogleGenAIInstrumentor(GoogleGenAIInstrumentor):
 
     name = "google-genai"
 
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Initialize the AtlaGoogleGenAIInstrumentor."""
+        super().__init__(*args, **kwargs)
+
+        self.original_get_extra_attributes_from_request = None
+        self.original_get_attributes_from_content_parts = None
+
     def _instrument(self, **kwargs) -> None:
-        original_get_extra_attributes_from_request = (
-            _RequestAttributesExtractor.get_extra_attributes_from_request
+        from openinference.instrumentation.google_genai._request_attributes_extractor import (  # noqa: E501
+            _RequestAttributesExtractor,
+        )
+        from openinference.instrumentation.google_genai._response_attributes_extractor import (  # noqa: E501
+            _ResponseAttributesExtractor,
         )
 
-        def get_extra_attributes_from_request(
-            self: _RequestAttributesExtractor, request_parameters: Mapping[str, Any]
-        ) -> Iterator[Tuple[str, AttributeValue]]:
-            yield from original_get_extra_attributes_from_request(
-                self, request_parameters
+        if self.original_get_extra_attributes_from_request is None:
+            original_get_extra_attributes_from_request = (
+                _RequestAttributesExtractor.get_extra_attributes_from_request
             )
-            yield from get_tools_from_request(request_parameters)
+            self.original_get_extra_attributes_from_request = (
+                original_get_extra_attributes_from_request  # type: ignore[assignment]
+            )
 
-        _RequestAttributesExtractor.get_extra_attributes_from_request = (  # type: ignore[method-assign]
-            get_extra_attributes_from_request
-        )
+            def get_extra_attributes_from_request(
+                self: _RequestAttributesExtractor, request_parameters: Mapping[str, Any]
+            ) -> Iterator[Tuple[str, AttributeValue]]:
+                yield from original_get_extra_attributes_from_request(
+                    self, request_parameters
+                )
+                yield from get_tools_from_request(request_parameters)
 
-        original_get_attributes_from_content_parts = (
-            _ResponseAttributesExtractor._get_attributes_from_content_parts
-        )
+            _RequestAttributesExtractor.get_extra_attributes_from_request = (  # type: ignore[method-assign]
+                get_extra_attributes_from_request
+            )
 
-        def _get_attributes_from_content_parts(
-            self: _ResponseAttributesExtractor,
-            content_parts: Iterable[object],
-        ) -> Iterator[Tuple[str, AttributeValue]]:
-            yield from original_get_attributes_from_content_parts(self, content_parts)
-            yield from _get_tool_calls_from_content_parts(content_parts)
+        if self.original_get_attributes_from_content_parts is None:
+            original_get_attributes_from_content_parts = (
+                _ResponseAttributesExtractor._get_attributes_from_content_parts
+            )
+            self.original_get_attributes_from_content_parts = (
+                original_get_attributes_from_content_parts  # type: ignore[assignment]
+            )
 
-        _ResponseAttributesExtractor._get_attributes_from_content_parts = (  # type: ignore[method-assign]
-            _get_attributes_from_content_parts
-        )
+            def _get_attributes_from_content_parts(
+                self: _ResponseAttributesExtractor,
+                content_parts: Iterable[object],
+            ) -> Iterator[Tuple[str, AttributeValue]]:
+                yield from original_get_attributes_from_content_parts(self, content_parts)
+                yield from _get_tool_calls_from_content_parts(content_parts)
+
+            _ResponseAttributesExtractor._get_attributes_from_content_parts = (  # type: ignore[method-assign]
+                _get_attributes_from_content_parts
+            )
 
         super()._instrument(**kwargs)
+
+    def _uninstrument(self, **kwargs: Any) -> None:
+        from openinference.instrumentation.google_genai._request_attributes_extractor import (  # noqa: E501
+            _RequestAttributesExtractor,
+        )
+        from openinference.instrumentation.google_genai._response_attributes_extractor import (  # noqa: E501
+            _ResponseAttributesExtractor,
+        )
+
+        super()._uninstrument(**kwargs)
+
+        if self.original_get_extra_attributes_from_request is not None:
+            _RequestAttributesExtractor.get_extra_attributes_from_request = (  # type: ignore[method-assign]
+                self.original_get_extra_attributes_from_request
+            )
+            self.original_get_extra_attributes_from_request = None
+
+        if self.original_get_attributes_from_content_parts is not None:
+            _ResponseAttributesExtractor._get_attributes_from_content_parts = (  # type: ignore[method-assign]
+                self.original_get_attributes_from_content_parts
+            )
+            self.original_get_attributes_from_content_parts = None

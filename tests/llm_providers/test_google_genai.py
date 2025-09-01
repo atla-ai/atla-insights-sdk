@@ -1,5 +1,7 @@
 """Test the Google GenAI instrumentation."""
 
+import asyncio
+import random
 from typing import Any, Iterable, Iterator, Mapping, Tuple
 
 import pytest
@@ -70,6 +72,48 @@ class TestGoogleGenAIInstrumentation(BaseLocalOtel):
         assert (
             span.attributes.get("llm.output_messages.0.message.content") == "hello world"
         )
+
+    @pytest.mark.asyncio
+    async def test_no_recursion_asyncio_race(
+        self, mock_google_genai_client: Client
+    ) -> None:
+        """Async race of (un)instrumentation must not cause recursion in wrappers."""
+        num_tasks = 40
+        iterations = 30
+        stop_event = asyncio.Event()
+        recursion_errors: list[BaseException] = []
+
+        try:
+            from atla_insights import instrument_google_genai
+
+            async def worker() -> None:
+                try:
+                    for _ in range(iterations):
+                        if stop_event.is_set():
+                            return
+                        with instrument_google_genai():
+                            # short await to encourage interleaving
+                            await asyncio.sleep(random.uniform(0, 0.01))
+                            mock_google_genai_client.models.generate_content(
+                                model="some-model",
+                                contents="Hello, World!",
+                            )
+                except RecursionError as e:
+                    recursion_errors.append(e)
+                    stop_event.set()
+
+            await asyncio.gather(*(worker() for _ in range(num_tasks)))
+
+            assert not recursion_errors, (
+                f"Unexpected RecursionError(s): {recursion_errors}"
+            )
+
+            # At least one span should be produced by the final calls
+            finished_spans = self.get_finished_spans()
+            assert len(finished_spans) >= 1
+            # assert len(finished_spans) == num_tasks * iterations
+        finally:
+            pass
 
     def test_tool_calls(self, mock_google_genai_client: Client) -> None:
         """Test Google GenAI instrumentation with tool calls."""
