@@ -30,13 +30,13 @@ def _parse_function_call(
     if function_name := getattr(function_call, "name", None):
         yield (
             ".".join([function_call_prefix, ToolCallAttributes.TOOL_CALL_FUNCTION_NAME]),
-            function_name,
+            str(function_name),
         )
 
     if function_id := getattr(function_call, "id", None):
         yield (
             ".".join([function_call_prefix, ToolCallAttributes.TOOL_CALL_ID]),
-            function_id,
+            str(function_id),
         )
 
     function_args_json = "{}"
