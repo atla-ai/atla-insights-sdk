@@ -16,17 +16,15 @@ from typing import (
     cast,
 )
 
-from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-defined]
-    BaseInstrumentor,
+from opentelemetry.instrumentation.instrumentor import (
+    BaseInstrumentor,  # type: ignore[attr-defined]
 )
 from opentelemetry.trace import Status, StatusCode, Tracer
 from wrapt import wrap_function_wrapper
 
 try:
     from claude_code_sdk._internal.client import InternalClient
-    from claude_code_sdk._internal.transport.subprocess_cli import (
-        SubprocessCLITransport,
-    )
+    from claude_code_sdk._internal.transport.subprocess_cli import SubprocessCLITransport
     from claude_code_sdk.types import ClaudeCodeOptions
 except ImportError as e:
     raise ImportError(
@@ -46,6 +44,19 @@ from openinference.semconv.trace import (
 from atla_insights.constants import OTEL_MODULE_NAME
 
 logger = logging.getLogger(OTEL_MODULE_NAME)
+
+
+def _get_tool_result_presence(content: Any) -> bool:
+    """Check if the message contains a tool_result block.
+
+    This is needed to correctly mark role as "tool" when these messages are treated as
+    inputs (Claude Code SDK may label them as "user").
+    """
+    if isinstance(content, Sequence):
+        for block in content:
+            if isinstance(block, dict) and block.get("type") == "tool_result":
+                return True
+    return False
 
 
 def _get_input_messages(
@@ -71,12 +82,13 @@ def _get_input_messages(
         if not isinstance(message, dict):
             continue
 
+        has_tool_result = _get_tool_result_presence(content := message.get("content"))
         if role := message.get("role"):
             yield (
                 f"{SpanAttributes.LLM_INPUT_MESSAGES}.{idx}.{MessageAttributes.MESSAGE_ROLE}",
-                role,
+                ("tool" if has_tool_result else role),
             )
-        if content := message.get("content"):
+        if content:
             yield (
                 f"{SpanAttributes.LLM_INPUT_MESSAGES}.{idx}.{MessageAttributes.MESSAGE_CONTENT}",
                 content,
@@ -93,12 +105,15 @@ def _get_output_message(
         else SpanAttributes.LLM_OUTPUT_MESSAGES
     )
     if output_message := message.get("message"):
+        has_tool_result = _get_tool_result_presence(
+            content := output_message.get("content")
+        )
         if role := output_message.get("role"):
             yield (
                 f"{prefix}.{message_idx}.{MessageAttributes.MESSAGE_ROLE}",
-                role,
+                ("tool" if (as_input and has_tool_result) else role),
             )
-        if content := output_message.get("content"):
+        if content:
             if isinstance(content, Sequence):
                 block_idx = 0
                 for block in content:
