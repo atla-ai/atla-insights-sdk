@@ -242,42 +242,44 @@ class AtlaGoogleGenAIInstrumentor(GoogleGenAIInstrumentor):
             _ResponseAttributesExtractor,
         )
 
-        original_get_extra_attributes_from_request = (
-            _RequestAttributesExtractor.get_extra_attributes_from_request
-        )
-        self.original_get_extra_attributes_from_request = (
-            original_get_extra_attributes_from_request
-        )
-
-        def get_extra_attributes_from_request(
-            self: _RequestAttributesExtractor, request_parameters: Mapping[str, Any]
-        ) -> Iterator[Tuple[str, AttributeValue]]:
-            yield from original_get_extra_attributes_from_request(
-                self, request_parameters
+        if self.original_get_extra_attributes_from_request is None:
+            original_get_extra_attributes_from_request = (
+                _RequestAttributesExtractor.get_extra_attributes_from_request
             )
-            yield from get_tools_from_request(request_parameters)
+            self.original_get_extra_attributes_from_request = (
+                original_get_extra_attributes_from_request  # type: ignore[assignment]
+            )
 
-        _RequestAttributesExtractor.get_extra_attributes_from_request = (  # type: ignore[method-assign]
-            get_extra_attributes_from_request
-        )
+            def get_extra_attributes_from_request(
+                self: _RequestAttributesExtractor, request_parameters: Mapping[str, Any]
+            ) -> Iterator[Tuple[str, AttributeValue]]:
+                yield from original_get_extra_attributes_from_request(
+                    self, request_parameters
+                )
+                yield from get_tools_from_request(request_parameters)
 
-        original_get_attributes_from_content_parts = (
-            _ResponseAttributesExtractor._get_attributes_from_content_parts
-        )
-        self.original_get_attributes_from_content_parts = (
-            original_get_attributes_from_content_parts
-        )
+            _RequestAttributesExtractor.get_extra_attributes_from_request = (  # type: ignore[method-assign]
+                get_extra_attributes_from_request
+            )
 
-        def _get_attributes_from_content_parts(
-            self: _ResponseAttributesExtractor,
-            content_parts: Iterable[object],
-        ) -> Iterator[Tuple[str, AttributeValue]]:
-            yield from original_get_attributes_from_content_parts(self, content_parts)
-            yield from _get_tool_calls_from_content_parts(content_parts)
+        if self.original_get_attributes_from_content_parts is None:
+            original_get_attributes_from_content_parts = (
+                _ResponseAttributesExtractor._get_attributes_from_content_parts
+            )
+            self.original_get_attributes_from_content_parts = (
+                original_get_attributes_from_content_parts  # type: ignore[assignment]
+            )
 
-        _ResponseAttributesExtractor._get_attributes_from_content_parts = (  # type: ignore[method-assign]
-            _get_attributes_from_content_parts
-        )
+            def _get_attributes_from_content_parts(
+                self: _ResponseAttributesExtractor,
+                content_parts: Iterable[object],
+            ) -> Iterator[Tuple[str, AttributeValue]]:
+                yield from original_get_attributes_from_content_parts(self, content_parts)
+                yield from _get_tool_calls_from_content_parts(content_parts)
+
+            _ResponseAttributesExtractor._get_attributes_from_content_parts = (  # type: ignore[method-assign]
+                _get_attributes_from_content_parts
+            )
 
         super()._instrument(**kwargs)
 
