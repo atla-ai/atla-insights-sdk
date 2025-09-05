@@ -75,7 +75,7 @@ def _get_input_messages(
         )
         yield (
             f"{SpanAttributes.LLM_INPUT_MESSAGES}.{0}.{MessageAttributes.MESSAGE_CONTENT}",
-            system_prompt,
+            str(system_prompt),
         )
 
     for idx, message in enumerate(messages, start=start_idx):
@@ -92,7 +92,7 @@ def _get_input_messages(
         if content:
             yield (
                 f"{SpanAttributes.LLM_INPUT_MESSAGES}.{idx}.{MessageAttributes.MESSAGE_CONTENT}",
-                content,
+                str(content),
             )
 
 
@@ -121,16 +121,16 @@ def _get_output_message(
                         if block.get("type") == "text":
                             yield (
                                 f"{prefix}.{message_idx}.{MessageAttributes.MESSAGE_CONTENT}",
-                                block["text"],
+                                str(block["text"]),
                             )
                         elif block.get("type") == "tool_use":
                             yield (
                                 f"{prefix}.{message_idx}.{MessageAttributes.MESSAGE_TOOL_CALLS}.{block_idx}.{ToolCallAttributes.TOOL_CALL_ID}",
-                                block["id"],
+                                str(block["id"]),
                             )
                             yield (
                                 f"{prefix}.{message_idx}.{MessageAttributes.MESSAGE_TOOL_CALLS}.{block_idx}.{ToolCallAttributes.TOOL_CALL_FUNCTION_NAME}",
-                                block["name"],
+                                str(block["name"]),
                             )
                             yield (
                                 f"{prefix}.{message_idx}.{MessageAttributes.MESSAGE_TOOL_CALLS}.{block_idx}.{ToolCallAttributes.TOOL_CALL_FUNCTION_ARGUMENTS_JSON}",
@@ -139,12 +139,12 @@ def _get_output_message(
                         elif block.get("type") == "tool_result":
                             yield (
                                 f"{prefix}.{message_idx}.{MessageAttributes.MESSAGE_CONTENT}",
-                                block["content"],
+                                str(block["content"]),
                             )
                         elif block.get("type") == "thinking":
                             yield (
                                 f"{prefix}.{message_idx}.{MessageAttributes.MESSAGE_CONTENT}",
-                                block["thinking"],
+                                str(block["thinking"]),
                             )
                     block_idx += 1
 
