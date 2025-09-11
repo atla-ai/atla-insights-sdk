@@ -48,7 +48,7 @@ class AtlaInsights:
 
     def configure(
         self,
-        token: str,
+        token: Optional[str] = None,
         sampling: TRACE_SAMPLING_TYPE = ALWAYS_ON,
         metadata: Optional[dict[str, str]] = None,
         additional_span_processors: Optional[Sequence[SpanProcessor]] = None,
@@ -75,8 +75,8 @@ class AtlaInsights:
         configure(token="your-token")
         ```
 
-        :param token (str): The Atla Insights token associated with your organization.
-            This can be found in the [Atla Insights platform](https://app.atla-ai.com).
+        :param token (Optional[str]): The Atla Insights token associated with your
+            organization. This can be found in the [Atla Insights platform](https://app.atla-ai.com).
         :param sampling (TRACE_SAMPLER_TYPE): The OpenTelemetry sampler to use. This must
             be a `ParentBased` or `StaticSampler` to ensure that the Atla Insights
             platform never receives partial traces. Defaults to a static sampler that
@@ -92,6 +92,9 @@ class AtlaInsights:
             If not provided, will use ATLA_INSIGHTS_ENVIRONMENT environment variable,
             or default to "prod".
         """
+        # Either use provided token, or read from environment variable.
+        token = token or os.environ["ATLA_INSIGHTS_TOKEN"]
+
         # Get and validate environment
         validated_environment = resolve_environment(environment)
 
