@@ -70,9 +70,10 @@ class AtlaInsights:
         provider.
 
         ```py
+        import os
         from atla_insights import configure
 
-        configure(token="your-token")
+        configure(token=os.environ["ATLA_INSIGHTS_TOKEN"])
         ```
 
         :param token (Optional[str]): The Atla Insights token associated with your
