@@ -41,10 +41,10 @@ def main() -> None:
         sampler=MetadataSampler(sampling_fn),
     )
 
-    # Calling the instrumented function will create a span behind the scenes
+    # This will be sampled
     feature_1()
 
-    # Calling the instrumented function will create a span behind the scenes
+    # This will not be sampled
     feature_2()
 
 
