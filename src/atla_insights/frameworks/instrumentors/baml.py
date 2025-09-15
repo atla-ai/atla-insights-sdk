@@ -3,7 +3,7 @@
 import logging
 from contextvars import ContextVar
 from importlib import import_module
-from typing import Any, Callable, Collection, Mapping
+from typing import Any, Callable, Collection, Literal, Mapping, Optional
 
 try:
     from baml_py import Collector
@@ -32,7 +32,7 @@ from atla_insights.parsers import get_llm_parser
 logger = logging.getLogger(__name__)
 
 # Context variable to store the collector for each call
-_atla_collector: ContextVar[Collector] = ContextVar("atla_collector")
+_atla_collector: ContextVar[Optional[Collector]] = ContextVar("atla_collector")
 
 
 def _get_updated_collectors(
@@ -63,7 +63,12 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
 
     name = "baml"
 
-    def __init__(self, llm_provider: SUPPORTED_LLM_FORMAT) -> None:
+    def __init__(
+        self,
+        llm_provider: SUPPORTED_LLM_FORMAT,
+        include_functions: list[str] | Literal["all"],
+        exclude_functions: Optional[list[str]],
+    ) -> None:
         """Initialize the Atla BAML instrumentator."""
         super().__init__()
 
@@ -80,6 +85,17 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         self.original_stream_function_async = None
         self.original_stream_final_response_function_async = None
 
+        self.include_functions = include_functions
+        self.exclude_functions = exclude_functions
+
+    def _should_instrument_function(self, function_name: str) -> bool:
+        """Determine if a function should be instrumented."""
+        if self.include_functions != "all":
+            return function_name in self.include_functions
+        if self.exclude_functions is not None:
+            return function_name not in self.exclude_functions
+        return True  # Default action is to instrument all BAML functions
+
     def _call_function_sync_wrapper(
         self,
         wrapped: Callable[..., Any],
@@ -88,6 +104,10 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         kwargs: Mapping[str, Any],
     ) -> Any:
         """Wrap the BAML call function."""
+        function_name = kwargs.get("function_name")
+        if function_name and not self._should_instrument_function(function_name):
+            return wrapped(*args, **kwargs)
+
         atla_collector = Collector(name="atla-insights")
         _atla_collector.set(atla_collector)
 
@@ -95,7 +115,7 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         instance.__setstate__({"baml_options": {"collector": new_collectors}})
 
         with self.tracer.start_as_current_span(
-            name=kwargs.get("function_name", "GenerateSync"),
+            name=function_name or "GenerateSync",
             attributes={
                 SpanAttributes.OPENINFERENCE_SPAN_KIND: (
                     OpenInferenceSpanKindValues.LLM.value
@@ -115,7 +135,6 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
 
             span.set_status(trace_api.StatusCode.OK)
 
-            atla_collector = _atla_collector.get()
             if (
                 atla_collector.last is not None
                 and atla_collector.last.selected_call is not None
@@ -142,6 +161,10 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         kwargs: Mapping[str, Any],
     ) -> Any:
         """Wrap the BAML create sync stream function."""
+        function_name = kwargs.get("function_name")
+        if function_name and not self._should_instrument_function(function_name):
+            return wrapped(*args, **kwargs)
+
         atla_collector = Collector(name="atla-insights")
         _atla_collector.set(atla_collector)
 
@@ -157,6 +180,12 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         kwargs: Mapping[str, Any],
     ) -> Any:
         """Wrap the BAML stream function."""
+        atla_collector = _atla_collector.get()
+        if not atla_collector:
+            for item in wrapped(*args, **kwargs):
+                yield item
+            return
+
         with self.tracer.start_as_current_span(
             name="GenerateStreamSync",  # TODO: Add function name
             attributes={
@@ -179,7 +208,6 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
 
             span.set_status(trace_api.StatusCode.OK)
 
-            atla_collector = _atla_collector.get()
             if (
                 atla_collector.last is not None
                 and atla_collector.last.selected_call is not None
@@ -209,6 +237,10 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         kwargs: Mapping[str, Any],
     ) -> Any:
         """Wrap the BAML stream function."""
+        atla_collector = _atla_collector.get()
+        if not atla_collector:
+            return wrapped(*args, **kwargs)
+
         with self.tracer.start_as_current_span(
             name="GenerateStreamSync",  # TODO: Add function name
             attributes={
@@ -230,7 +262,6 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
 
             span.set_status(trace_api.StatusCode.OK)
 
-            atla_collector = _atla_collector.get()
             if (
                 atla_collector.last is not None
                 and atla_collector.last.selected_call is not None
@@ -261,6 +292,10 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         kwargs: Mapping[str, Any],
     ) -> Any:
         """Wrap the BAML async call function."""
+        function_name = kwargs.get("function_name")
+        if function_name and not self._should_instrument_function(function_name):
+            return await wrapped(*args, **kwargs)
+
         atla_collector = Collector(name="atla-insights")
         _atla_collector.set(atla_collector)
 
@@ -268,7 +303,7 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         instance.__setstate__({"baml_options": {"collector": new_collectors}})
 
         with self.tracer.start_as_current_span(
-            name=kwargs.get("function_name", "GenerateAsync"),
+            name=function_name or "GenerateAsync",
             attributes={
                 SpanAttributes.OPENINFERENCE_SPAN_KIND: (
                     OpenInferenceSpanKindValues.LLM.value
@@ -314,6 +349,12 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         kwargs: Mapping[str, Any],
     ) -> Any:
         """Wrap the BAML stream function."""
+        atla_collector = _atla_collector.get()
+        if not atla_collector:
+            async for item in wrapped(*args, **kwargs):
+                yield item
+            return
+
         with self.tracer.start_as_current_span(
             name="GenerateStreamAsync",  # TODO: Add function name
             attributes={
@@ -336,7 +377,6 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
 
             span.set_status(trace_api.StatusCode.OK)
 
-            atla_collector = _atla_collector.get()
             if (
                 atla_collector.last is not None
                 and atla_collector.last.selected_call is not None
@@ -366,6 +406,10 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
         kwargs: Mapping[str, Any],
     ) -> Any:
         """Wrap the BAML stream function."""
+        atla_collector = _atla_collector.get()
+        if not atla_collector:
+            return await wrapped(*args, **kwargs)
+
         with self.tracer.start_as_current_span(
             name="GenerateStreamAsync",  # TODO: Add function name
             attributes={
@@ -387,7 +431,6 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
 
             span.set_status(trace_api.StatusCode.OK)
 
-            atla_collector = _atla_collector.get()
             if (
                 atla_collector.last is not None
                 and atla_collector.last.selected_call is not None
