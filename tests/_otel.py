@@ -1,5 +1,6 @@
 """OpenTelemetry assets to be used in instrumentation tests."""
 
+import importlib
 import time
 
 import litellm
@@ -26,3 +27,10 @@ class BaseLocalOtel:
             in_memory_span_exporter.get_finished_spans(),
             key=lambda x: x.start_time if x.start_time is not None else 0,
         )
+
+
+def reset_tracer_provider() -> None:
+    """Reset the tracer provider."""
+    import opentelemetry.trace
+
+    importlib.reload(opentelemetry.trace)

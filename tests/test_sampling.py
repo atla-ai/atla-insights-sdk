@@ -2,6 +2,7 @@
 
 from contextlib import contextmanager
 from typing import Generator, Optional, Sequence
+from unittest.mock import patch
 
 from opentelemetry.context import Context
 from opentelemetry.sdk.trace.sampling import (
@@ -48,9 +49,9 @@ class TestSampling(BaseLocalOtel):
     def test_trace_ratio_sampling(self) -> None:
         """Test trace ratio sampling."""
         from atla_insights import instrument
-        from atla_insights.sampling import TraceRatioSamplingOptions
+        from atla_insights.sampling import TraceRatioSampler
 
-        sampler = TraceRatioSamplingOptions(rate=1e-9).to_sampler()
+        sampler = TraceRatioSampler(rate=1e-9)
 
         with set_custom_sampler(sampler):
 
@@ -101,6 +102,59 @@ class TestSampling(BaseLocalOtel):
             spans = self.get_finished_spans()
 
         assert len(spans) == 0
+
+    def test_metadata_sampler(self) -> None:
+        """Test metadata sampler."""
+        from atla_insights import configure, instrument, set_metadata
+        from atla_insights.main import ATLA_INSTANCE
+        from atla_insights.sampling import MetadataSampler
+        from tests._otel import reset_tracer_provider
+        from tests.conftest import in_memory_span_exporter
+
+        # Undo any existing configuration.
+        reset_tracer_provider()
+        ATLA_INSTANCE.configured = False
+        ATLA_INSTANCE.tracer_provider = None
+        ATLA_INSTANCE.tracer = None
+
+        def decision_fn(metadata: Optional[dict[str, str]]) -> bool:
+            if metadata is None:
+                return False
+            return metadata.get("should_sample") == "true"
+
+        with patch(
+            "atla_insights.main.get_atla_span_exporter",
+            return_value=in_memory_span_exporter,
+        ):
+            configure(token="dummy", sampler=MetadataSampler(decision_fn), verbose=False)
+
+        @instrument("some_func")
+        def test_function():
+            set_metadata({"should_sample": "false"})
+            return "test result"
+
+        test_function()
+
+        spans = self.get_finished_spans()
+
+        assert len(spans) == 0
+
+        @instrument("some_func")
+        def test_function():
+            set_metadata({"should_sample": "true"})
+            return "test result"
+
+        test_function()
+
+        spans = self.get_finished_spans()
+
+        assert len(spans) == 1
+
+        # Reset special configs
+        reset_tracer_provider()
+        ATLA_INSTANCE.configured = False
+        ATLA_INSTANCE.tracer_provider = None
+        ATLA_INSTANCE.tracer = None
 
     def test_custom_sampler(self) -> None:
         """Test custom sampler."""

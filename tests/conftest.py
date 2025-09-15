@@ -15,7 +15,6 @@ from botocore.stub import ANY, Stubber
 from google.genai import Client
 from google.genai.types import HttpOptions
 from openai import AsyncAzureOpenAI, AsyncOpenAI, AzureOpenAI, OpenAI
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from pytest_httpserver import HTTPServer
 
@@ -26,16 +25,14 @@ with open(Path(__file__).parent / "test_data" / "mock_responses.json", "r") as f
     _MOCK_RESPONSES = json.load(f)
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(autouse=True)
 def mock_configure() -> None:
     """Mock Atla configuration to send traces to a local object instead."""
     from atla_insights import configure
 
-    span_processor = SimpleSpanProcessor(in_memory_span_exporter)
-
     with patch(
-        "atla_insights.span_processors.get_atla_span_processor",
-        return_value=span_processor,
+        "atla_insights.main.get_atla_span_exporter",
+        return_value=in_memory_span_exporter,
     ):
         configure(token="dummy", metadata={"environment": "unit-testing"}, verbose=False)
 

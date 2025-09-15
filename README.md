@@ -261,62 +261,95 @@ By default, Atla Insights will instrument & log all traces. In high-throughput s
 you may not want to log every trace you produce. In these cases, you can specify a
 sampler at configuration time.
 
--   **Using a built-in sampling method**:
+-   **Setting a trace ratio**:
 
-If you want a basic, reliable sampler, you can use one of our pre-built sampling methods.
+    If you want to sample a fixed ratio of traffic, we recommend using a `TraceRatioSampler`.
+    This is the simplest & most computationally efficient way to sample traces.
 
-```python
-from atla_insights import configure
-from atla_insights.sampling import TraceRatioSamplingOptions
+    ```python
+    from atla_insights import configure
+    from atla_insights.sampling import TraceRatioSampler
 
-# We want to log 10% of traces
-sampling_options = TraceRatioSamplingOptions(rate=0.10)
+    configure(
+        token="<MY_ATLA_INSIGHTS_TOKEN>",
+        sampler=TraceRatioSampler(rate=0.10),  # logging 10% of traces
+    )
+    ```
 
-configure(
-    token="<MY_ATLA_INSIGHTS_TOKEN>",
-    sampling=sampling_options,
-)
-```
+-   **Sampling decision based on metadata**:
 
--   **Using a custom sampling method**:
+    If you want more flexibility, you can define a custom sampling decision function based
+    on metadata.
 
-If you want to implement your own custom sampling method, you can pass in your own
-[OpenTelemery Sampler](https://opentelemetry-python.readthedocs.io/en/latest/sdk/trace.sampling.html).
+    ```python
+    import random
+    from typing import Optional
 
-```python
-from atla_insights import configure
-from opentelemetry.sdk.trace.sampling import Sampler
+    from atla_insights import configure
+    from atla_insights.sampling import MetadataSampler
 
-class MySampler(Sampler):
-    ...
+    def sampling_fn(metadata: Optional[dict[str, str]]) -> bool:
+        """Custom sampling decision function.
 
-my_sampler = MySampler()
+        :param metadata (Optional[dict[str, str]]): The metadata to sample.
+        :return (bool): Whether to sample the trace.
+        """
+        if metadata is None:
+            return False
 
-configure(
-    token="<MY_ATLA_INSIGHTS_TOKEN>",
-    sampling=my_sampler,
-)
-```
+        if metadata.get("feature") == "feature_1":
+            # Sample 50% of traffic for traces tagged as feature 1
+            return bool(random.random() < 0.50)
 
-⚠️ Note that the Atla Insights platform is **not** intended to work well with partial
-traces. Therefore, we highly recommend using either `ParentBased` or `StaticSampler`
-samplers. This ensures either all traces are treated the same way or all spans in the
-same trace are treated the same way.
+        # Sample 10% of traffic otherwise
+        return bool(random.random() < 0.10)
 
-```python
-from atla_insights import configure
-from opentelemetry.sdk.trace.sampling import ParentBased, Sampler
 
-class MySampler(Sampler):
-    ...
+    configure(
+        token="<MY_ATLA_INSIGHTS_TOKEN>",
+        sampler=MetadataSampler(sampling_fn),
+    )
+    ```
 
-my_sampler = ParentBased(root=MySampler())
+    Note that this is a more computationally intensive sampling method as we need to keep
+    all spans in a trace alive in-memory until the entire trace ends. As metadata is mutable,
+    we can only check the sampling decision function at the end of each trace.
 
-configure(
-    token="<MY_ATLA_INSIGHTS_TOKEN>",
-    sampling=my_sampler,
-)
-```
+-   **Custom sampling method**:
+    If you want to implement your own custom sampling method, you can pass in your own
+    [OpenTelemery Sampler](https://opentelemetry-python.readthedocs.io/en/latest/sdk/trace.sampling.html).
+
+    ```python
+    import os
+    from atla_insights import configure
+    from opentelemetry.sdk.trace.sampling import Sampler
+
+    class MySampler(Sampler):
+        ...
+
+    configure(
+        token=os.environ["ATLA_INSIGHTS_TOKEN"],
+        sampler=MySampler(),
+    )
+    ```
+
+    ⚠️ Note that the Atla Insights platform is **not** intended to work well with partial
+    traces. Therefore, we highly recommend using either `ParentBased` or `StaticSampler`
+    samplers. This ensures either all traces are treated the same way or all spans in the
+    same trace are treated the same way.
+
+    ```python
+    from atla_insights import configure
+    from opentelemetry.sdk.trace.sampling import ParentBased, Sampler
+
+    class MySampler(Sampler):
+        ...
+
+    configure(
+        token=os.environ["ATLA_INSIGHTS_TOKEN"],
+        sampler=ParentBased(root=MySampler()),
+    )
+    ```
 
 ### Adding custom metrics
 
