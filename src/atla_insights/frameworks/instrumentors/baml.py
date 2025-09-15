@@ -32,7 +32,7 @@ from atla_insights.parsers import get_llm_parser
 logger = logging.getLogger(__name__)
 
 # Context variable to store the collector for each call
-_atla_collector: ContextVar[Collector] = ContextVar("atla_collector", default=None)
+_atla_collector: ContextVar[Optional[Collector]] = ContextVar("atla_collector")
 
 
 def _get_updated_collectors(
@@ -135,7 +135,6 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
 
             span.set_status(trace_api.StatusCode.OK)
 
-            atla_collector = _atla_collector.get()
             if (
                 atla_collector.last is not None
                 and atla_collector.last.selected_call is not None
@@ -263,7 +262,6 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
 
             span.set_status(trace_api.StatusCode.OK)
 
-            atla_collector = _atla_collector.get()
             if (
                 atla_collector.last is not None
                 and atla_collector.last.selected_call is not None
@@ -379,7 +377,6 @@ class AtlaBamlInstrumentor(BaseInstrumentor):
 
             span.set_status(trace_api.StatusCode.OK)
 
-            atla_collector = _atla_collector.get()
             if (
                 atla_collector.last is not None
                 and atla_collector.last.selected_call is not None
