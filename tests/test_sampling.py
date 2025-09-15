@@ -129,22 +129,22 @@ class TestSampling(BaseLocalOtel):
             configure(token="dummy", sampler=MetadataSampler(decision_fn), verbose=False)
 
         @instrument("some_func")
-        def test_function():
+        def test_function_1():
             set_metadata({"should_sample": "false"})
             return "test result"
 
-        test_function()
+        test_function_1()
 
         spans = self.get_finished_spans()
 
         assert len(spans) == 0
 
         @instrument("some_func")
-        def test_function():
+        def test_function_2():
             set_metadata({"should_sample": "true"})
             return "test result"
 
-        test_function()
+        test_function_2()
 
         spans = self.get_finished_spans()
 
