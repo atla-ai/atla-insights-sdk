@@ -9,6 +9,7 @@ from atla_insights.suppression import NoOpContextManager, is_instrumentation_sup
 
 def instrument_baml(
     llm_provider: SUPPORTED_LLM_FORMAT,
+    *,
     include_functions: list[str] | Literal["all"] = "all",
     exclude_functions: Optional[list[str]] = None,
 ) -> ContextManager[None]:
