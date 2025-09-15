@@ -123,13 +123,13 @@ class TestEnvironment(BaseLocalOtel):
         atla_instance = AtlaInsights()
 
         with patch(
-            "atla_insights.main.add_span_processors_to_tracer_provider"
-        ) as mock_add_processors:
+            "atla_insights.main.AtlaInsights._setup_tracer_provider"
+        ) as mock_setup_tracer_provider:
             atla_instance.configure(token="dummy", environment="dev")
 
-            # Verify add_span_processors_to_tracer_provider was called with env="dev"
-            mock_add_processors.assert_called_once()
-            call_args = mock_add_processors.call_args
+            # Verify _setup_tracer_provider was called with env="dev"
+            mock_setup_tracer_provider.assert_called_once()
+            call_args = mock_setup_tracer_provider.call_args
             assert call_args.kwargs["environment"] == "dev"
 
     @patch.dict(os.environ, {"ATLA_INSIGHTS_ENVIRONMENT": "dev"})
@@ -142,12 +142,12 @@ class TestEnvironment(BaseLocalOtel):
         atla_instance = AtlaInsights()
 
         with patch(
-            "atla_insights.main.add_span_processors_to_tracer_provider"
-        ) as mock_add_processors:
+            "atla_insights.main.AtlaInsights._setup_tracer_provider"
+        ) as mock_setup_tracer_provider:
             atla_instance.configure(token="dummy")  # No environment parameter
 
             # Verify environment variable was picked up
-            call_args = mock_add_processors.call_args
+            call_args = mock_setup_tracer_provider.call_args
             assert call_args.kwargs["environment"] == "dev"
 
     @patch.dict(os.environ, {"ATLA_INSIGHTS_ENVIRONMENT": "dev"})
@@ -160,13 +160,13 @@ class TestEnvironment(BaseLocalOtel):
         atla_instance = AtlaInsights()
 
         with patch(
-            "atla_insights.main.add_span_processors_to_tracer_provider"
-        ) as mock_add_processors:
+            "atla_insights.main.AtlaInsights._setup_tracer_provider"
+        ) as mock_setup_tracer_provider:
             # Environment variable is "dev" but parameter is "prod"
             atla_instance.configure(token="dummy", environment="prod")
 
             # Verify parameter took precedence over environment variable
-            call_args = mock_add_processors.call_args
+            call_args = mock_setup_tracer_provider.call_args
             assert call_args.kwargs["environment"] == "prod"
 
     def test_configure_with_invalid_environment_parameter(self) -> None:

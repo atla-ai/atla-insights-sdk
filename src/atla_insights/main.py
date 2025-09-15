@@ -10,9 +10,14 @@ from opentelemetry.instrumentation.instrumentor import (  # type: ignore[attr-de
 )
 from opentelemetry.sdk.environment_variables import OTEL_ATTRIBUTE_COUNT_LIMIT
 from opentelemetry.sdk.trace import SpanProcessor, TracerProvider
+from opentelemetry.sdk.trace.export import (
+    BatchSpanProcessor,
+    SimpleSpanProcessor,
+)
 from opentelemetry.sdk.trace.sampling import ALWAYS_ON
 from opentelemetry.trace import Tracer, set_tracer_provider
 
+from atla_insights.console_span_exporter import ConsoleSpanExporter
 from atla_insights.constants import (
     DEFAULT_OTEL_ATTRIBUTE_COUNT_LIMIT,
     OTEL_MODULE_NAME,
@@ -20,8 +25,8 @@ from atla_insights.constants import (
 from atla_insights.environment import resolve_environment
 from atla_insights.id_generator import NoSeedIdGenerator
 from atla_insights.metadata import set_global_metadata
-from atla_insights.sampling import TRACE_SAMPLING_TYPE, add_sampling_to_tracer_provider
-from atla_insights.span_processors import add_span_processors_to_tracer_provider
+from atla_insights.sampling import SamplerType, _TailSampler
+from atla_insights.span_processors import AtlaRootSpanProcessor, get_atla_span_exporter
 from atla_insights.utils import maybe_get_existing_tracer_provider
 
 logger = logging.getLogger(OTEL_MODULE_NAME)
@@ -49,7 +54,7 @@ class AtlaInsights:
     def configure(
         self,
         token: Optional[str] = None,
-        sampling: TRACE_SAMPLING_TYPE = ALWAYS_ON,
+        sampler: SamplerType = ALWAYS_ON,
         metadata: Optional[dict[str, str]] = None,
         additional_span_processors: Optional[Sequence[SpanProcessor]] = None,
         verbose: bool = True,
@@ -78,10 +83,10 @@ class AtlaInsights:
 
         :param token (Optional[str]): The Atla Insights token associated with your
             organization. This can be found in the [Atla Insights platform](https://app.atla-ai.com).
-        :param sampling (TRACE_SAMPLER_TYPE): The OpenTelemetry sampler to use. This must
-            be a `ParentBased` or `StaticSampler` to ensure that the Atla Insights
-            platform never receives partial traces. Defaults to a static sampler that
-            samples all traces.
+        :param sampler (SamplerType): The OpenTelemetry sampler to use. This must
+            be a `ParentBased`, `StaticSampler` or `_TailSampler` to ensure that the
+            Atla Insights platform never receives partial traces. Defaults to a static
+            sampler that samples all traces.
         :param metadata (Optional[dict[str, str]]): A dictionary of metadata to be added
             to the trace.
         :param additional_span_processors (Optional[Sequence[SpanProcessor]]): Additional
@@ -93,37 +98,38 @@ class AtlaInsights:
             If not provided, will use ATLA_INSIGHTS_ENVIRONMENT environment variable,
             or default to "prod".
         """
+        if self.configured:
+            logger.warning("Atla insights already configured, skipping configuration.")
+            return
+
         # Either use provided token, or read from environment variable.
         token = token or os.environ["ATLA_INSIGHTS_TOKEN"]
-
-        # Get and validate environment
-        validated_environment = resolve_environment(environment)
 
         if metadata is not None:
             set_global_metadata(metadata)
 
-        self.tracer_provider = self._setup_tracer_provider()
-
-        add_span_processors_to_tracer_provider(
-            tracer_provider=self.tracer_provider,
+        self.tracer_provider = self._setup_tracer_provider(
             token=token,
+            sampler=sampler,
             additional_span_processors=additional_span_processors,
             verbose=verbose,
             debug=debug,
-            environment=validated_environment,
+            environment=resolve_environment(environment),
         )
-        add_sampling_to_tracer_provider(
-            tracer_provider=self.tracer_provider,
-            sampling=sampling,
-        )
-        self.tracer_provider.id_generator = NoSeedIdGenerator()
-
         self.tracer = self.get_tracer()
 
         self.configured = True
         logger.info("Atla insights configured correctly ✅")
 
-    def _setup_tracer_provider(self) -> TracerProvider:
+    def _setup_tracer_provider(
+        self,
+        token: str,
+        sampler: SamplerType,
+        additional_span_processors: Optional[Sequence[SpanProcessor]],
+        verbose: bool,
+        debug: bool,
+        environment: str,
+    ) -> TracerProvider:
         """Setup the tracer provider.
 
         If a (non-proxy) tracer provider is already set, we return it. All Atla-specific
@@ -133,16 +139,57 @@ class AtlaInsights:
         If no tracer provider is set, we create a new one and set it as the global tracer
         provider.
 
+        :param token (str): The Atla Insights token associated with your
+            organization. This can be found in the [Atla Insights platform](https://app.atla-ai.com).
+        :param sampler (SamplerType): The OpenTelemetry sampler to use. This must
+            be a `ParentBased`, `StaticSampler` or `_TailSampler` to ensure that the
+            Atla Insights platform never receives partial traces. Defaults to a static
+            sampler that samples all traces.
+        :param additional_span_processors (Optional[Sequence[SpanProcessor]]): Additional
+            span processors. Defaults to `None`.
+        :param verbose (bool): Whether to print verbose output to console.
+            Defaults to `True`.
+        :param debug (bool): Whether to log debug outputs. Defaults to `False`.
+        :param environment (str): The environment to use ("dev" or "prod").
+
         :return (TracerProvider): The tracer provider.
         """
         if existing_tracer_provider := maybe_get_existing_tracer_provider():
-            return existing_tracer_provider
+            tracer_provider = existing_tracer_provider
+        else:
+            # If no existing tracer provider is found, we create a new one and set it as
+            # the global tracer provider.
+            tracer_provider = TracerProvider()
+            set_tracer_provider(tracer_provider)
 
-        # If no existing tracer provider is found, we create a new one and set it as the
-        # global tracer provider.
-        new_tracer_provider = TracerProvider()
-        set_tracer_provider(new_tracer_provider)
-        return new_tracer_provider
+        atla_exporter = get_atla_span_exporter(token)
+
+        if isinstance(sampler, _TailSampler):
+            # If the sampler is a tail sampler, we add it as a span processor and have the
+            # sampler control the atla & console exporters.
+            sampler.add_exporter(atla_exporter)
+            if verbose:
+                sampler.add_exporter(ConsoleSpanExporter())
+
+            tracer_provider.add_span_processor(sampler)
+        else:
+            tracer_provider.sampler = sampler
+
+            tracer_provider.add_span_processor(SimpleSpanProcessor(atla_exporter))
+            if verbose:
+                console_span_exporter = ConsoleSpanExporter()
+                tracer_provider.add_span_processor(
+                    BatchSpanProcessor(console_span_exporter)
+                )
+
+        tracer_provider.add_span_processor(AtlaRootSpanProcessor(debug, environment))
+
+        if additional_span_processors:
+            for span_processor in additional_span_processors:
+                tracer_provider.add_span_processor(span_processor)
+
+        tracer_provider.id_generator = NoSeedIdGenerator()
+        return tracer_provider
 
     def get_tracer(self) -> Tracer:
         """Get the current active tracer.
