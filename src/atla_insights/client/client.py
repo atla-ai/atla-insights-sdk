@@ -4,11 +4,7 @@ import json
 from datetime import datetime
 from typing import Dict, List, Optional
 
-from atla_insights.client._generated_client import (
-    ApiClient,
-    Configuration,
-    SDKApi,
-)
+from atla_insights.client._generated_client import ApiClient, Configuration, SDKApi
 from atla_insights.client.types import (
     DetailedTraceListResponse,
     TraceDetailResponse,

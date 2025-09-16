@@ -1,19 +1,19 @@
 # Span
 
-
 ## Properties
 
-Name | Type | Description | Notes
------------- | ------------- | ------------- | -------------
-**id** | **str** |  | 
-**trace_id** | **str** |  | 
-**parent_span_id** | **str** |  | 
-**span_name** | **str** |  | 
-**start_timestamp** | **str** |  | 
-**end_timestamp** | **str** |  | 
-**is_exception** | **bool** |  | 
-**otel_events** | **List[object]** |  | 
-**annotations** | [**List[Annotation]**](Annotation.md) |  | [optional] 
+| Name                | Type                                  | Description | Notes      |
+| ------------------- | ------------------------------------- | ----------- | ---------- |
+| **id**              | **str**                               |             |
+| **trace_id**        | **str**                               |             |
+| **parent_span_id**  | **str**                               |             |
+| **span_name**       | **str**                               |             |
+| **start_timestamp** | **str**                               |             |
+| **end_timestamp**   | **str**                               |             |
+| **is_exception**    | **bool**                              |             |
+| **otel_events**     | **List[object]**                      |             |
+| **annotations**     | [**List[Annotation]**](Annotation.md) |             | [optional] |
+| **attributes**      | **Dict[str, object]**                 |             | [optional] |
 
 ## Example
 
@@ -32,6 +32,5 @@ span_dict = span_instance.to_dict()
 # create an instance of Span from a dict
 span_from_dict = Span.from_dict(span_dict)
 ```
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-
