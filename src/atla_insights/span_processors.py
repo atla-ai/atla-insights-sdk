@@ -1,6 +1,7 @@
 """Span processors."""
 
 import json
+import os
 import warnings
 from typing import Optional
 
@@ -11,6 +12,10 @@ from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor
 from atla_insights.constants import (
     ENVIRONMENT_MARK,
     EXPERIMENT_RUN_NAMESPACE,
+    GIT_BRANCH_MARK,
+    GIT_COMMIT_HASH_MARK,
+    GIT_REPO_MARK,
+    GIT_TRACKING_DISABLED_ENV_VAR,
     LIB_VERSIONS,
     LIB_VERSIONS_MARK,
     METADATA_MARK,
@@ -21,6 +26,11 @@ from atla_insights.constants import (
 )
 from atla_insights.context import experiment_run_var, root_span_var
 from atla_insights.metadata import get_metadata
+from atla_insights.utils import (
+    get_git_branch,
+    get_git_commit_hash,
+    get_git_repo,
+)
 
 
 class AtlaRootSpanProcessor(SpanProcessor):
@@ -35,6 +45,15 @@ class AtlaRootSpanProcessor(SpanProcessor):
         """On start span processing."""
         span.set_attribute(VERSION_MARK, __version__)
         span.set_attribute(ENVIRONMENT_MARK, self.environment)
+
+        if not os.getenv(GIT_TRACKING_DISABLED_ENV_VAR):
+            if git_branch := get_git_branch():
+                span.set_attribute(GIT_BRANCH_MARK, git_branch)
+            if git_commit_hash := get_git_commit_hash():
+                span.set_attribute(GIT_COMMIT_HASH_MARK, git_commit_hash)
+            if git_repo := get_git_repo():
+                git_repo_name = os.path.basename(os.path.normpath(git_repo.workdir))
+                span.set_attribute(GIT_REPO_MARK, git_repo_name)
 
         if self.debug:
             span.set_attribute(LIB_VERSIONS_MARK, LIB_VERSIONS)
