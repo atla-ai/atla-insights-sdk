@@ -38,7 +38,6 @@ class Span(BaseModel):
     is_exception: Optional[StrictBool] = Field(alias="isException")
     otel_events: List[Any] = Field(alias="otelEvents")
     annotations: Optional[List[Annotation]] = None
-    # New optional field returned by the data API containing span attributes
     attributes: Optional[Dict[str, Any]] = None
     __properties: ClassVar[List[str]] = ["id", "traceId", "parentSpanId", "spanName", "startTimestamp", "endTimestamp", "isException", "otelEvents", "annotations", "attributes"]
 
