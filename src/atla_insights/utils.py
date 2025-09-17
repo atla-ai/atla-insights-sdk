@@ -1,6 +1,7 @@
 """Utility functions for Atla Insights."""
 
 import importlib
+from functools import lru_cache
 from typing import Optional
 
 import opentelemetry.trace
@@ -41,6 +42,7 @@ def maybe_get_existing_tracer_provider() -> SDKTracerProvider | None:
     return existing_tracer_provider
 
 
+@lru_cache
 def get_git_repo() -> Optional[pygit2.Repository]:
     """Get the current Git repository."""
     try:
@@ -49,6 +51,7 @@ def get_git_repo() -> Optional[pygit2.Repository]:
         return None
 
 
+@lru_cache
 def get_git_branch(repo: Optional[pygit2.Repository] = None) -> Optional[str]:
     """Get the current Git branch name."""
     try:
@@ -63,6 +66,7 @@ def get_git_branch(repo: Optional[pygit2.Repository] = None) -> Optional[str]:
         return None
 
 
+@lru_cache
 def get_git_commit_hash(repo: Optional[pygit2.Repository] = None) -> Optional[str]:
     """Get the current Git commit hash."""
     try:
