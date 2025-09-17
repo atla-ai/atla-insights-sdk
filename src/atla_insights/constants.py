@@ -40,6 +40,7 @@ ENVIRONMENT_DEFAULT = "prod"
 
 GIT_BRANCH_MARK = "atla.git.branch"
 GIT_COMMIT_HASH_MARK = "atla.git.commit.hash"
+GIT_COMMIT_MESSAGE_MARK = "atla.git.commit.message"
 GIT_REPO_MARK = "atla.git.repo"
 GIT_TRACKING_DISABLED_ENV_VAR = "ATLA_DISABLE_GIT_TRACKING"
 

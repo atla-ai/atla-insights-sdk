@@ -14,6 +14,7 @@ from atla_insights.constants import (
     EXPERIMENT_RUN_NAMESPACE,
     GIT_BRANCH_MARK,
     GIT_COMMIT_HASH_MARK,
+    GIT_COMMIT_MESSAGE_MARK,
     GIT_REPO_MARK,
     GIT_TRACKING_DISABLED_ENV_VAR,
     LIB_VERSIONS,
@@ -29,6 +30,7 @@ from atla_insights.metadata import get_metadata
 from atla_insights.utils import (
     get_git_branch,
     get_git_commit_hash,
+    get_git_commit_message,
     get_git_repo,
 )
 
@@ -44,6 +46,7 @@ class AtlaRootSpanProcessor(SpanProcessor):
         self.git_branch = get_git_branch()
         self.git_commit_hash = get_git_commit_hash()
         self.git_repo = get_git_repo()
+        self.git_commit_message = get_git_commit_message()
 
     def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
         """On start span processing."""
@@ -58,6 +61,8 @@ class AtlaRootSpanProcessor(SpanProcessor):
             if self.git_repo:
                 git_repo_name = os.path.basename(os.path.normpath(self.git_repo.workdir))
                 span.set_attribute(GIT_REPO_MARK, git_repo_name)
+            if self.git_commit_message:
+                span.set_attribute(GIT_COMMIT_MESSAGE_MARK, self.git_commit_message)
 
         if self.debug:
             span.set_attribute(LIB_VERSIONS_MARK, LIB_VERSIONS)
