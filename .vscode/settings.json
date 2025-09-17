@@ -24,8 +24,6 @@
             "source.organizeImports": "explicit"
         }
     },
-    "python.analysis.extraPaths": ["./package", "./pipeline"],
-    "python.analysis.typeCheckingMode": "off",
     "python.defaultInterpreterPath": "./.venv/bin/python",
 
     "ruff.importStrategy": "fromEnvironment",
