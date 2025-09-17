@@ -41,18 +41,22 @@ class AtlaRootSpanProcessor(SpanProcessor):
         self.debug = debug
         self.environment = environment
 
+        self.git_branch = get_git_branch()
+        self.git_commit_hash = get_git_commit_hash()
+        self.git_repo = get_git_repo()
+
     def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
         """On start span processing."""
         span.set_attribute(VERSION_MARK, __version__)
         span.set_attribute(ENVIRONMENT_MARK, self.environment)
 
         if not os.getenv(GIT_TRACKING_DISABLED_ENV_VAR):
-            if git_branch := get_git_branch():
-                span.set_attribute(GIT_BRANCH_MARK, git_branch)
-            if git_commit_hash := get_git_commit_hash():
-                span.set_attribute(GIT_COMMIT_HASH_MARK, git_commit_hash)
-            if git_repo := get_git_repo():
-                git_repo_name = os.path.basename(os.path.normpath(git_repo.workdir))
+            if self.git_branch:
+                span.set_attribute(GIT_BRANCH_MARK, self.git_branch)
+            if self.git_commit_hash:
+                span.set_attribute(GIT_COMMIT_HASH_MARK, self.git_commit_hash)
+            if self.git_repo:
+                git_repo_name = os.path.basename(os.path.normpath(self.git_repo.workdir))
                 span.set_attribute(GIT_REPO_MARK, git_repo_name)
 
         if self.debug:
