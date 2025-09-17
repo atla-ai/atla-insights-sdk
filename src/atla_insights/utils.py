@@ -76,20 +76,6 @@ def get_git_commit_hash(repo: Optional[pygit2.Repository] = None) -> Optional[st
         return None
 
 
-def get_git_commit_message(repo: Optional[pygit2.Repository] = None) -> Optional[str]:
-    """Get the current Git commit message."""
-    try:
-        repo = repo or get_git_repo()
-        if repo is None:
-            return None
-        if repo.head_is_unborn:
-            return None
-        commit = repo[repo.head.target]
-        return commit.message.strip()  # type: ignore[attr-defined]
-    except Exception:
-        return None
-
-
 def generate_cuid() -> str:
     """Generate a new CUID."""
     return _cuid_generator.generate()
