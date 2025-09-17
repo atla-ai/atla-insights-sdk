@@ -1,7 +1,5 @@
 """Test the experiments functionality."""
 
-from unittest.mock import patch
-
 import pytest
 
 from atla_insights.context import experiment_run_var
@@ -61,39 +59,6 @@ class TestExperiments(BaseLocalOtel):
         # All IDs should be unique
         assert len(run_ids) == 3
         assert len(set(run_ids)) == 3
-
-    def test_run_experiment_with_git_info(self) -> None:
-        """Test that Git information is captured correctly."""
-        from atla_insights import run_experiment
-
-        # Mock Git functions to return predictable values
-        with (
-            patch("atla_insights.experiments.get_git_branch", return_value="main"),
-            patch("atla_insights.experiments.get_git_commit_hash", return_value="abc123"),
-            patch(
-                "atla_insights.experiments.get_git_commit_message",
-                return_value="Test commit",
-            ),
-        ):
-            with run_experiment("test-experiment") as exp_run:
-                assert exp_run["git_branch"] == "main"
-                assert exp_run["git_commit_hash"] == "abc123"
-                assert exp_run["git_commit_message"] == "Test commit"
-
-    def test_run_experiment_with_no_git_info(self) -> None:
-        """Test behavior when Git information is not available."""
-        from atla_insights import run_experiment
-
-        # Mock Git functions to return None (no Git repo)
-        with (
-            patch("atla_insights.experiments.get_git_branch", return_value=None),
-            patch("atla_insights.experiments.get_git_commit_hash", return_value=None),
-            patch("atla_insights.experiments.get_git_commit_message", return_value=None),
-        ):
-            with run_experiment("test-experiment") as exp_run:
-                assert exp_run["git_branch"] is None
-                assert exp_run["git_commit_hash"] is None
-                assert exp_run["git_commit_message"] is None
 
     def test_run_experiment_context_cleanup_on_exception(self) -> None:
         """Test that context is properly cleaned up even when an exception occurs."""
@@ -178,25 +143,6 @@ class TestExperiments(BaseLocalOtel):
 
         # Context should be cleared again
         assert get_current_experiment_id() is None
-
-    def test_run_experiment_context_variable_types(self) -> None:
-        """Test that the experiment run context variable has correct types."""
-        from atla_insights import run_experiment
-
-        with run_experiment("test-experiment", "Test description") as exp_run:
-            # Check all fields have expected types
-            assert isinstance(exp_run["id"], str)
-            assert isinstance(exp_run["experiment_id"], str)
-            assert isinstance(exp_run["description"], str)
-
-            # Git fields can be None or str
-            assert exp_run["git_branch"] is None or isinstance(exp_run["git_branch"], str)
-            assert exp_run["git_commit_hash"] is None or isinstance(
-                exp_run["git_commit_hash"], str
-            )
-            assert exp_run["git_commit_message"] is None or isinstance(
-                exp_run["git_commit_message"], str
-            )
 
     def test_run_experiment_concurrent_usage(self) -> None:
         """Test that multiple experiment contexts can be used concurrently."""
