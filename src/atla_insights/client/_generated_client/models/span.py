@@ -122,7 +122,7 @@ class Span(BaseModel):
             "endTimestamp": obj.get("endTimestamp"),
             "isException": obj.get("isException"),
             "otelEvents": obj.get("otelEvents"),
-            "annotations": [Annotation.from_dict(_item) for _item in obj.get("annotations", [])] if obj.get("annotations") is not None else None,
+            "annotations": [Annotation.from_dict(_item) for _item in obj["annotations"]] if obj.get("annotations") is not None else None,
             "attributes": obj.get("attributes"),
         })
         return _obj
