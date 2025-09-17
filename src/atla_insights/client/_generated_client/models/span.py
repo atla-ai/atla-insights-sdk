@@ -13,15 +13,17 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar, Dict, List, Optional, Set
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
-from atla_insights.client._generated_client.models.annotation import Annotation
-from typing import Optional, Set
 from typing_extensions import Self
+
+from atla_insights.client._generated_client.models.annotation import Annotation
+
 
 class Span(BaseModel):
     """
@@ -36,7 +38,8 @@ class Span(BaseModel):
     is_exception: Optional[StrictBool] = Field(alias="isException")
     otel_events: List[Any] = Field(alias="otelEvents")
     annotations: Optional[List[Annotation]] = None
-    __properties: ClassVar[List[str]] = ["id", "traceId", "parentSpanId", "spanName", "startTimestamp", "endTimestamp", "isException", "otelEvents", "annotations"]
+    attributes: Optional[Dict[str, Any]] = None
+    __properties: ClassVar[List[str]] = ["id", "traceId", "parentSpanId", "spanName", "startTimestamp", "endTimestamp", "isException", "otelEvents", "annotations", "attributes"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -119,8 +122,7 @@ class Span(BaseModel):
             "endTimestamp": obj.get("endTimestamp"),
             "isException": obj.get("isException"),
             "otelEvents": obj.get("otelEvents"),
-            "annotations": [Annotation.from_dict(_item) for _item in obj["annotations"]] if obj.get("annotations") is not None else None
+            "annotations": [Annotation.from_dict(_item) for _item in obj["annotations"]] if obj.get("annotations") is not None else None,
+            "attributes": obj.get("attributes"),
         })
         return _obj
-
-
