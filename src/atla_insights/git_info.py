@@ -34,7 +34,7 @@ class GitInfo:
         try:
             if self.repo is None:
                 return None
-            if "origin" not in self.repo.remotes:
+            if self.repo.remotes is None:
                 return None
             return self.repo.remotes["origin"].url
         except Exception:
@@ -75,7 +75,7 @@ class GitInfo:
         except Exception:
             return None
 
-    def get_git_commit_timestamp(self) -> Optional[datetime]:
+    def get_git_commit_timestamp(self) -> Optional[str]:
         """Get the current Git commit message."""
         try:
             if self.repo is None:
@@ -83,8 +83,8 @@ class GitInfo:
             if self.repo.head_is_unborn:
                 return None
             commit = self.repo[self.repo.head.target]
-            tz = timezone(timedelta(minutes=commit.commit_time_offset))
-            return datetime.fromtimestamp(commit.commit_time, tz=tz).isoformat()
+            tz = timezone(timedelta(minutes=commit.commit_time_offset))  # type: ignore[attr-defined]
+            return datetime.fromtimestamp(commit.commit_time, tz=tz).isoformat()  # type: ignore[attr-defined]
         except Exception:
             return None
 
@@ -97,7 +97,9 @@ class GitInfo:
                 return None
             commit = self.repo[self.repo.head.target]
             return self.repo.describe(
-                commit, describe_strategy=pygit2.GIT_DESCRIBE_TAGS, abbreviated_size=0
+                commit,  # type: ignore[arg-type]
+                describe_strategy=pygit2.GIT_DESCRIBE_TAGS,  # type: ignore[arg-type]
+                abbreviated_size=0,
             )
         except Exception:
             return None
