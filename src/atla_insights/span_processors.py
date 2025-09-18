@@ -1,6 +1,7 @@
 """Span processors."""
 
 import json
+import os
 import warnings
 from typing import Optional
 
@@ -11,6 +12,7 @@ from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor
 from atla_insights.constants import (
     ENVIRONMENT_MARK,
     EXPERIMENT_RUN_NAMESPACE,
+    GIT_TRACKING_DISABLED_ENV_VAR,
     LIB_VERSIONS,
     LIB_VERSIONS_MARK,
     METADATA_MARK,
@@ -20,6 +22,7 @@ from atla_insights.constants import (
     __version__,
 )
 from atla_insights.context import experiment_run_var, root_span_var
+from atla_insights.git_info import GitInfo
 from atla_insights.metadata import get_metadata
 
 
@@ -31,10 +34,17 @@ class AtlaRootSpanProcessor(SpanProcessor):
         self.debug = debug
         self.environment = environment
 
+        self.git_info = GitInfo()
+
     def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
         """On start span processing."""
         span.set_attribute(VERSION_MARK, __version__)
         span.set_attribute(ENVIRONMENT_MARK, self.environment)
+
+        if not os.getenv(GIT_TRACKING_DISABLED_ENV_VAR):
+            for attr_name, attr_value in self.git_info.attributes.items():
+                if attr_value is not None:
+                    span.set_attribute(attr_name, attr_value)
 
         if self.debug:
             span.set_attribute(LIB_VERSIONS_MARK, LIB_VERSIONS)

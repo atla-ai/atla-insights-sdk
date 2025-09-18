@@ -4,12 +4,7 @@ from contextlib import contextmanager
 from typing import Generator, Optional, TypedDict
 
 from atla_insights.context import experiment_run_var
-from atla_insights.utils import (
-    generate_cuid,
-    get_git_branch,
-    get_git_commit_hash,
-    get_git_commit_message,
-)
+from atla_insights.utils import generate_cuid
 
 
 class ExperimentRun(TypedDict):
@@ -17,12 +12,7 @@ class ExperimentRun(TypedDict):
 
     id: str
     experiment_id: str
-
     description: Optional[str]
-
-    git_branch: Optional[str]
-    git_commit_hash: Optional[str]
-    git_commit_message: Optional[str]
 
 
 @contextmanager
@@ -47,9 +37,6 @@ def run_experiment(
         id=generate_cuid(),
         experiment_id=experiment_id,
         description=description,
-        git_branch=get_git_branch(),
-        git_commit_hash=get_git_commit_hash(),
-        git_commit_message=get_git_commit_message(),
     )
     experiment_run_token = experiment_run_var.set(experiment_run)
 
