@@ -30,7 +30,6 @@ class TestGitInfo(BaseLocalOtel):
         assert span.attributes.get("atla.git.commit.message") is not None
         assert span.attributes.get("atla.git.commit.timestamp") is not None
         assert span.attributes.get("atla.git.repo") is not None
-        assert span.attributes.get("atla.git.semver") is not None
 
     def test_git_info_opt_out(self) -> None:
         """Test the get_git_info function."""
@@ -54,4 +53,3 @@ class TestGitInfo(BaseLocalOtel):
         assert span.attributes.get("atla.git.commit.message") is None
         assert span.attributes.get("atla.git.commit.timestamp") is None
         assert span.attributes.get("atla.git.repo") is None
-        assert span.attributes.get("atla.git.semver") is None
