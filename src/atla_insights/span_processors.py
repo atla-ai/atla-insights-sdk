@@ -12,10 +12,6 @@ from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor
 from atla_insights.constants import (
     ENVIRONMENT_MARK,
     EXPERIMENT_RUN_NAMESPACE,
-    GIT_BRANCH_MARK,
-    GIT_COMMIT_HASH_MARK,
-    GIT_COMMIT_MESSAGE_MARK,
-    GIT_REPO_MARK,
     GIT_TRACKING_DISABLED_ENV_VAR,
     LIB_VERSIONS,
     LIB_VERSIONS_MARK,
@@ -26,13 +22,8 @@ from atla_insights.constants import (
     __version__,
 )
 from atla_insights.context import experiment_run_var, root_span_var
+from atla_insights.git_info import GitInfo
 from atla_insights.metadata import get_metadata
-from atla_insights.utils import (
-    get_git_branch,
-    get_git_commit_hash,
-    get_git_commit_message,
-    get_git_repo,
-)
 
 
 class AtlaRootSpanProcessor(SpanProcessor):
@@ -43,10 +34,7 @@ class AtlaRootSpanProcessor(SpanProcessor):
         self.debug = debug
         self.environment = environment
 
-        self.git_branch = get_git_branch()
-        self.git_commit_hash = get_git_commit_hash()
-        self.git_repo = get_git_repo()
-        self.git_commit_message = get_git_commit_message()
+        self.git_info = GitInfo()
 
     def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
         """On start span processing."""
@@ -54,15 +42,9 @@ class AtlaRootSpanProcessor(SpanProcessor):
         span.set_attribute(ENVIRONMENT_MARK, self.environment)
 
         if not os.getenv(GIT_TRACKING_DISABLED_ENV_VAR):
-            if self.git_branch:
-                span.set_attribute(GIT_BRANCH_MARK, self.git_branch)
-            if self.git_commit_hash:
-                span.set_attribute(GIT_COMMIT_HASH_MARK, self.git_commit_hash)
-            if self.git_repo:
-                git_repo_name = os.path.basename(os.path.normpath(self.git_repo.workdir))
-                span.set_attribute(GIT_REPO_MARK, git_repo_name)
-            if self.git_commit_message:
-                span.set_attribute(GIT_COMMIT_MESSAGE_MARK, self.git_commit_message)
+            for attr_name, attr_value in self.git_info.attributes.items():
+                if attr_value is not None:
+                    span.set_attribute(attr_name, attr_value)
 
         if self.debug:
             span.set_attribute(LIB_VERSIONS_MARK, LIB_VERSIONS)
