@@ -294,5 +294,9 @@ def mock_claude_code_cli() -> Generator[None, None, None]:
             "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport.is_connected",
             return_value=True,
         ),
+        patch(
+            "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport._find_cli",
+            return_value="foo",
+        ),
     ):
         yield
