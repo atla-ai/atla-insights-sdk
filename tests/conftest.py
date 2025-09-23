@@ -287,6 +287,10 @@ def mock_claude_code_cli() -> Generator[None, None, None]:
             "write",
             return_value=AsyncMock(),
         ),
+        patch(
+            "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport._find_cli",
+            return_value="foobar",
+        ),
         patch.object(
             claude_code_sdk._internal.query.Query,
             "start",
