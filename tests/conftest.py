@@ -7,6 +7,9 @@ from typing import Any, AsyncGenerator, Callable, Generator, Tuple
 from unittest.mock import AsyncMock, patch
 
 import boto3
+import claude_code_sdk._internal.query
+import claude_code_sdk._internal.transport.subprocess_cli
+import claude_code_sdk.client
 import pytest
 from anthropic import Anthropic, AnthropicBedrock, AsyncAnthropic, AsyncAnthropicBedrock
 from botocore.client import BaseClient
@@ -274,25 +277,39 @@ def mock_claude_code_cli() -> Generator[None, None, None]:
             yield msg
 
     with (
-        patch(
-            "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport.send_request",
-            new_callable=AsyncMock,
+        patch.object(
+            claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport,
+            "connect",
+            return_value=AsyncMock(),
         ),
-        patch(
-            "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport.receive_messages",
-            return_value=mock_recv(),
+        patch.object(
+            claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport,
+            "write",
+            return_value=AsyncMock(),
         ),
         patch(
             "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport._find_cli",
             return_value="foobar",
         ),
-        patch(
-            "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport.connect",
-            new_callable=AsyncMock,
+        patch.object(
+            claude_code_sdk._internal.query.Query,
+            "start",
+            return_value=AsyncMock(),
         ),
-        patch(
-            "claude_code_sdk._internal.transport.subprocess_cli.SubprocessCLITransport.is_connected",
-            return_value=True,
+        patch.object(
+            claude_code_sdk._internal.query.Query,
+            "initialize",
+            return_value=AsyncMock(),
+        ),
+        patch.object(
+            claude_code_sdk._internal.query.Query,
+            "close",
+            return_value=AsyncMock(),
+        ),
+        patch.object(
+            claude_code_sdk._internal.query.Query,
+            "receive_messages",
+            return_value=mock_recv(),
         ),
     ):
         yield

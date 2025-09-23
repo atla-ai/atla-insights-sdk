@@ -3,7 +3,6 @@
 import json
 import logging
 from contextvars import ContextVar
-from dataclasses import asdict
 from typing import (
     Any,
     AsyncIterable,
@@ -24,7 +23,8 @@ from wrapt import wrap_function_wrapper
 
 try:
     from claude_code_sdk._internal.client import InternalClient
-    from claude_code_sdk._internal.transport.subprocess_cli import SubprocessCLITransport
+    from claude_code_sdk._internal.query import Query
+    from claude_code_sdk.client import ClaudeSDKClient
     from claude_code_sdk.types import ClaudeCodeOptions
 except ImportError as e:
     raise ImportError(
@@ -225,7 +225,7 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
         )
 
         self._original_process_query = None
-        self._original_send_request = None
+        self._original_query = None
         self._original_receive_messages = None
 
     def instrumentation_dependencies(self) -> Collection[str]:
@@ -252,7 +252,9 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
                     parsed_messages.append(message)
 
         if options is not None:
-            self._options.set(asdict(options))
+            options_dict = options.__dict__.copy()
+            options_dict.pop("debug_stderr")  # Non-hashable (and irrelevant) key
+            self._options.set(options_dict)
 
         num_inputs = len(parsed_messages)
         if options is not None and options.system_prompt is not None:
@@ -275,40 +277,44 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
         async for message in wrapped(*args, **kwargs):
             yield message
 
-    async def _wrap_send_request(
+    async def _wrap_query(
         self,
         wrapped: Callable[..., Any],
         instance: Any,
         args: tuple[Any, ...],
         kwargs: Mapping[str, Any],
     ) -> Any:
-        """Wrap send_request to start a span."""
-        if args and isinstance(args, Sequence) and isinstance(args[0], list):
-            messages: list[Any] = args[0]
+        """Wrap write to start a span."""
+        prompt: Optional[str | AsyncIterable[dict[str, Any]]] = (
+            kwargs.get("prompt") or args[0]
+        )
+        options: Optional[ClaudeCodeOptions] = getattr(instance, "options", None)
 
-            parsed_messages = []
-            for message in messages:
-                parsed_message = (
-                    message["message"]
-                    if isinstance(message, dict)
-                    else {"role": "user", "content": str(message)}
-                )
-                parsed_messages.append(parsed_message)
+        parsed_messages: list[dict[str, Any]] = []
+        if prompt is not None:
+            if isinstance(prompt, str):
+                parsed_messages.append({"role": "user", "content": prompt})
+            else:
+                async for message in prompt:
+                    parsed_messages.append(message)
 
-        if options := getattr(instance, "_options", None):
-            self._options.set(asdict(options))
+        if options is not None:
+            options_dict = options.__dict__.copy()
+            options_dict.pop("debug_stderr")  # Non-hashable (and irrelevant) key
+            self._options.set(options_dict)
 
         num_inputs = len(parsed_messages)
-        if options := self._options.get():
-            if options.get("system_prompt"):
-                num_inputs += 1
+        if options is not None and options.system_prompt is not None:
+            num_inputs += 1
         self._num_inputs.set(num_inputs)
 
         self._input_attributes.set(
             {
                 SpanAttributes.LLM_PROVIDER: "anthropic",
                 SpanAttributes.INPUT_MIME_TYPE: OpenInferenceMimeTypeValues.JSON.value,
-                SpanAttributes.INPUT_VALUE: json.dumps(args),
+                SpanAttributes.INPUT_VALUE: json.dumps(
+                    [*parsed_messages, self._options.get() or {}]
+                ),
                 SpanAttributes.OPENINFERENCE_SPAN_KIND: (
                     OpenInferenceSpanKindValues.LLM.value
                 ),
@@ -336,8 +342,9 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
             llm_tools: Optional[dict] = None
             llm_attributes: Optional[dict] = None
 
-            messages = []
+            messages: list[dict[str, Any]] = []
             async for message in wrapped(*args, **kwargs):
+                message = cast(dict[str, Any], message)
                 messages.append(message)
 
                 if llm_tools is None:
@@ -347,7 +354,7 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
                     llm_attributes = dict(_get_llm_attributes(message))
                     span.set_attributes(llm_attributes)
 
-                if isinstance(message, Mapping) and message.get("type") == "result":
+                if message.get("type") == "result":
                     output_message_attributes = dict(
                         _get_output_messages(messages, self._num_inputs.get())
                     )
@@ -372,17 +379,17 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
             self._wrap_process_query,
         )
 
-        self._original_send_request = SubprocessCLITransport.send_request  # type: ignore[assignment]
+        self._original_query = ClaudeSDKClient.query  # type: ignore[assignment]
         wrap_function_wrapper(
-            "claude_code_sdk._internal.transport.subprocess_cli",
-            "SubprocessCLITransport.send_request",
-            self._wrap_send_request,
+            "claude_code_sdk.client",
+            "ClaudeSDKClient.query",
+            self._wrap_query,
         )
 
-        self._original_receive_messages = SubprocessCLITransport.receive_messages  # type: ignore[assignment]
+        self._original_receive_messages = Query.receive_messages  # type: ignore[assignment]
         wrap_function_wrapper(
-            "claude_code_sdk._internal.transport.subprocess_cli",
-            "SubprocessCLITransport.receive_messages",
+            "claude_code_sdk._internal.query",
+            "Query.receive_messages",
             self._wrap_receive_messages,
         )
 
@@ -392,10 +399,10 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
             InternalClient.process_query = self._original_process_query
             self._original_process_query = None
 
-        if self._original_send_request is not None:
-            SubprocessCLITransport.send_request = self._original_send_request
-            self._original_send_request = None
+        if self._original_query is not None:
+            ClaudeSDKClient.query = self._original_query
+            self._original_query = None
 
         if self._original_receive_messages is not None:
-            SubprocessCLITransport.receive_messages = self._original_receive_messages
+            Query.receive_messages = self._original_receive_messages
             self._original_receive_messages = None

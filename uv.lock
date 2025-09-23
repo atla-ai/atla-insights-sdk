@@ -216,7 +216,7 @@ wheels = [
 
 [[package]]
 name = "atla-insights"
-version = "0.0.26"
+version = "0.0.27"
 source = { editable = "." }
 dependencies = [
     { name = "cuid2" },
@@ -339,7 +339,7 @@ requires-dist = [
     { name = "atla-insights", extras = ["agno", "anthropic", "baml", "bedrock", "claude-code-sdk", "crewai", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "smolagents"], marker = "extra == 'all'" },
     { name = "baml-py", marker = "extra == 'baml'", specifier = ">=0.201.0" },
     { name = "boto3", marker = "extra == 'bedrock'", specifier = ">=1.38.17" },
-    { name = "claude-code-sdk", marker = "extra == 'claude-code-sdk'", specifier = ">=0.0.19" },
+    { name = "claude-code-sdk", marker = "extra == 'claude-code-sdk'", specifier = ">=0.0.21" },
     { name = "crewai", marker = "extra == 'crewai'", specifier = ">=0.130.0" },
     { name = "cuid2", specifier = ">=2.0.1" },
     { name = "google-genai", marker = "extra == 'google-genai'", specifier = ">=1.19.0" },
@@ -725,15 +725,16 @@ wheels = [
 
 [[package]]
 name = "claude-code-sdk"
-version = "0.0.20"
+version = "0.0.23"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
+    { name = "mcp" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6b/c3/d40cf8bab3a5c75051914094990cff0a36ad13e4a2fe9ed85dbb4233a225/claude_code_sdk-0.0.20.tar.gz", hash = "sha256:5f9872f105563db8975de48ddc88c948d9c5e1244addca02241d6fcd2a47b3d6", size = 24329, upload-time = "2025-08-11T15:21:26.009Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/24/57/3d84b1e48fa8d7b0f14d5511cb21270e6d7b6e8930a19795c5aa6f3705c6/claude_code_sdk-0.0.23.tar.gz", hash = "sha256:17098365e03520637375a8dafab9e93ad2b50463ca1df6d744c5a85a450667e6", size = 41173, upload-time = "2025-09-18T02:45:54.492Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ca/1d/fa06e77d4e7440d2f4998d8375eedc7dbb740d7e552d63f23c8b23661c91/claude_code_sdk-0.0.20-py3-none-any.whl", hash = "sha256:6183771f9663a47e9bda3c4f03e5619f2e41f9272a9e9bd9775bf2537177e4a0", size = 17575, upload-time = "2025-08-11T15:21:24.904Z" },
+    { url = "https://files.pythonhosted.org/packages/b5/8d/8bb9db486fc934884420c9543eefb897b110df99f8605388172c0f3c1c3f/claude_code_sdk-0.0.23-py3-none-any.whl", hash = "sha256:5260d940f8a38d9b6eb93f443711b19f2f9130dedf662c2d73a4d78b8d1dc1f0", size = 30916, upload-time = "2025-09-18T02:45:53.555Z" },
 ]
 
 [[package]]
