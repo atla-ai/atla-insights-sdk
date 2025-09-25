@@ -7,6 +7,10 @@ from atla_insights.frameworks.claude_code_sdk import (
     uninstrument_claude_code_sdk,
 )
 from atla_insights.frameworks.crewai import instrument_crewai, uninstrument_crewai
+from atla_insights.frameworks.google_adk import (
+    instrument_google_adk,
+    uninstrument_google_adk,
+)
 from atla_insights.frameworks.langchain import (
     instrument_langchain,
     uninstrument_langchain,
@@ -26,6 +30,7 @@ __all__ = [
     "instrument_baml",
     "instrument_claude_code_sdk",
     "instrument_crewai",
+    "instrument_google_adk",
     "instrument_langchain",
     "instrument_mcp",
     "instrument_openai_agents",
@@ -34,6 +39,7 @@ __all__ = [
     "uninstrument_baml",
     "uninstrument_claude_code_sdk",
     "uninstrument_crewai",
+    "uninstrument_google_adk",
     "uninstrument_langchain",
     "uninstrument_mcp",
     "uninstrument_openai_agents",
