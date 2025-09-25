@@ -11,6 +11,10 @@ Atla Insights is a platform for monitoring and improving AI agents.
   <a href="https://x.com/Atla_AI"><img src="https://img.shields.io/twitter/follow/Atla_AI?style=social" alt="Twitter Follow"></a>
 </p>
 
+<p align="center">
+    <a href="https://www.producthunt.com/products/atla?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_source=badge-atla&#0045;2" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=1018748&theme=light&period=daily&t=1758823519480" alt="Atla - Automatically&#0032;detect&#0032;errors&#0032;in&#0032;your&#0032;AI&#0032;agents | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+</p>
+
 ## Getting started
 
 To get started with Atla Insights, you can either follow the instructions below, or let an agent instrument your code for you.
