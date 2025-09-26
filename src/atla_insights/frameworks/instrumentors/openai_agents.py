@@ -33,13 +33,18 @@ class AtlaOpenAIAgentsInstrumentor(OpenAIAgentsInstrumentor):
 
     name = "openai-agents"
 
+    def __init__(self, exclusive_processor: bool) -> None:
+        """Initialize the Atla OpenAI Agents SDK instrumentor class."""
+        self.exclusive_processor = exclusive_processor
+        super().__init__()
+
     def _instrument(self, **kwargs: Any) -> None:
         wrap_function_wrapper(
             "openinference.instrumentation.openai_agents._processor",
             "_get_attributes_from_function_span_data",
             _get_attributes_from_function_span_data,
         )
-        super()._instrument(**kwargs)
+        super()._instrument(exclusive_processor=self.exclusive_processor, **kwargs)
 
     def _uninstrument(self, **kwargs: Any) -> None:
         set_trace_processors([])
