@@ -32,7 +32,9 @@ from atla_insights.parsers import get_llm_parser
 logger = logging.getLogger(__name__)
 
 # Context variable to store the collector for each call
-_atla_collector: ContextVar[Optional[Collector]] = ContextVar("atla_collector")
+_atla_collector: ContextVar[Optional[Collector]] = ContextVar(
+    "atla_collector", default=None
+)
 
 
 def _get_updated_collectors(
