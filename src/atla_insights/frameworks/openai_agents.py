@@ -10,6 +10,7 @@ from atla_insights.suppression import NoOpContextManager, is_instrumentation_sup
 
 def instrument_openai_agents(
     llm_provider: LLM_PROVIDER_TYPE = "openai",
+    exclusive_processor: bool = False,
 ) -> ContextManager[None]:
     """Instrument the OpenAI Agents SDK.
 
@@ -28,6 +29,9 @@ def instrument_openai_agents(
 
     :param llm_provider (LLM_PROVIDER_TYPE): The LLM provider(s) to instrument. Defaults
         to "openai".
+    :param exclusive_processor (bool): Whether to use Atla as the exclusive trace
+        processor. When enabled, traces will only be sent to Atla and not to OpenAI.
+        Defaults to False.
     :return (ContextManager[None]): A context manager that instruments OpenAI Agents SDK.
     """
     if is_instrumentation_suppressed():
@@ -38,7 +42,7 @@ def instrument_openai_agents(
     )
 
     # Create an instrumentor for the OpenAI Agents SDK.
-    openai_agents_instrumentor = AtlaOpenAIAgentsInstrumentor()
+    openai_agents_instrumentor = AtlaOpenAIAgentsInstrumentor(exclusive_processor)
 
     # Create an instrumentor for the underlying LLM provider(s).
     llm_provider_instrumentors = get_instrumentors_for_provider(llm_provider)
