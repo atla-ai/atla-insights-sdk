@@ -29,8 +29,9 @@ def instrument_openai_agents(
 
     :param llm_provider (LLM_PROVIDER_TYPE): The LLM provider(s) to instrument. Defaults
         to "openai".
-    :param exclusive_processor (bool): Whether to use an exclusive processor for the
-        OpenAI Agents SDK. Defaults to False.
+    :param exclusive_processor (bool): Whether to use Atla as the exclusive trace
+        processor. When enabled, traces will only be sent to Atla and not to OpenAI.
+        Defaults to False.
     :return (ContextManager[None]): A context manager that instruments OpenAI Agents SDK.
     """
     if is_instrumentation_suppressed():
