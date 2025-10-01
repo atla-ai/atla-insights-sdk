@@ -208,6 +208,74 @@ class TestGoogleGenAIInstrumentation(BaseLocalOtel):
             == '{"type": "function", "function": {"name": "other_tool", "description": "Another mock tool for unit testing.", "parameters": {"type": "object", "properties": {"other_arg": {"type": "string", "description": "Another mock argument"}}, "required": ["other_arg"]}, "strict": null}}'  # noqa: E501
         )
 
+    def test_streaming(self, mock_google_genai_stream_client: Client) -> None:
+        """Test streaming with Google GenAI."""
+        from atla_insights import instrument_google_genai
+
+        with instrument_google_genai():
+            for _ in mock_google_genai_stream_client.models.generate_content_stream(
+                model="some-model",
+                contents="Hello, World!",
+            ):
+                pass
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 1
+        [span] = finished_spans
+
+        assert span.attributes is not None
+        assert span.name == "GenerateContentStream"
+        assert span.attributes.get("llm.input_messages.0.message.role") == "user"
+        assert (
+            span.attributes.get("llm.input_messages.0.message.content") == "Hello, World!"
+        )
+
+    @pytest.mark.asyncio
+    async def test_async_streaming(self, mock_google_genai_stream_client: Client) -> None:
+        """Test async streaming with Google GenAI."""
+        from atla_insights import instrument_google_genai
+
+        with instrument_google_genai():
+            async for (
+                _
+            ) in await mock_google_genai_stream_client.aio.models.generate_content_stream(
+                model="some-model",
+                contents="Hello, World!",
+            ):
+                pass
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 1
+        [span] = finished_spans
+
+        assert span.attributes is not None
+        assert span.name == "AsyncGenerateContentStream"
+        assert span.attributes.get("llm.input_messages.0.message.role") == "user"
+        assert (
+            span.attributes.get("llm.input_messages.0.message.content") == "Hello, World!"
+        )
+
+    def test_context_manager(self, mock_google_genai_client: Client) -> None:
+        """Test that instrumentation only applies within context."""
+        from atla_insights import instrument_google_genai
+
+        with instrument_google_genai():
+            mock_google_genai_client.models.generate_content(
+                model="some-model",
+                contents="Hello, World!",
+            )
+
+        # This call should not be instrumented (outside context)
+        mock_google_genai_client.models.generate_content(
+            model="some-model",
+            contents="Hello again!",
+        )
+
+        finished_spans = self.get_finished_spans()
+        assert len(finished_spans) == 1
+
 
 class TestGoogleGenAIInstrumentationHelpers:
     """Test the Google GenAI instrumentation helpers."""

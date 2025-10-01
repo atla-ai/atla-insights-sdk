@@ -103,6 +103,68 @@ def mock_async_azure_openai_client() -> Generator[AsyncAzureOpenAI, None, None]:
 
 
 @pytest.fixture(scope="class")
+def mock_openai_stream_client() -> Generator[OpenAI, None, None]:
+    """Mock the OpenAI client with streaming responses."""
+    with HTTPServer() as httpserver:
+        # Chat completions streaming
+        chat_stream_chunks = _MOCK_RESPONSES["openai_chat_completions_stream"]
+        chat_sse_data = (
+            "\n\n".join(f"data: {json.dumps(chunk)}" for chunk in chat_stream_chunks)
+            + "\n\ndata: [DONE]\n\n"
+        )
+
+        httpserver.expect_request("/v1/chat/completions").respond_with_data(
+            chat_sse_data, content_type="text/event-stream"
+        )
+
+        # Responses API streaming
+        responses_stream_chunks = _MOCK_RESPONSES["openai_responses_stream"]
+        # Format each event properly with event type and data
+        responses_events = []
+        for chunk in responses_stream_chunks:
+            event_type = chunk.get("type", "message")
+            responses_events.append(f"event: {event_type}\ndata: {json.dumps(chunk)}\n")
+        responses_sse_data = "\n".join(responses_events) + "\n"
+
+        httpserver.expect_request("/v1/responses").respond_with_data(
+            responses_sse_data, content_type="text/event-stream"
+        )
+
+        yield OpenAI(api_key="unit-test", base_url=httpserver.url_for("/v1"))
+
+
+@pytest.fixture(scope="class")
+def mock_async_openai_stream_client() -> Generator[AsyncOpenAI, None, None]:
+    """Mock the Async OpenAI client with streaming responses."""
+    with HTTPServer() as httpserver:
+        # Chat completions streaming
+        chat_stream_chunks = _MOCK_RESPONSES["openai_chat_completions_stream"]
+        chat_sse_data = (
+            "\n\n".join(f"data: {json.dumps(chunk)}" for chunk in chat_stream_chunks)
+            + "\n\ndata: [DONE]\n\n"
+        )
+
+        httpserver.expect_request("/v1/chat/completions").respond_with_data(
+            chat_sse_data, content_type="text/event-stream"
+        )
+
+        # Responses API streaming
+        responses_stream_chunks = _MOCK_RESPONSES["openai_responses_stream"]
+
+        responses_events = []
+        for chunk in responses_stream_chunks:
+            event_type = chunk.get("type", "message")
+            responses_events.append(f"event: {event_type}\ndata: {json.dumps(chunk)}\n")
+        responses_sse_data = "\n".join(responses_events) + "\n"
+
+        httpserver.expect_request("/v1/responses").respond_with_data(
+            responses_sse_data, content_type="text/event-stream"
+        )
+
+        yield AsyncOpenAI(api_key="unit-test", base_url=httpserver.url_for("/v1"))
+
+
+@pytest.fixture(scope="class")
 def mock_failing_openai_client() -> Generator[OpenAI, None, None]:
     """Mock a failing OpenAI client."""
     with HTTPServer() as httpserver:
@@ -130,12 +192,55 @@ def mock_anthropic_client() -> Generator[Anthropic, None, None]:
 
 
 @pytest.fixture(scope="class")
+def mock_anthropic_stream_client() -> Generator[Anthropic, None, None]:
+    """Mock the Anthropic client with streaming responses."""
+    with HTTPServer() as httpserver:
+        stream_events = _MOCK_RESPONSES["anthropic_messages_stream"]
+
+        # Anthropic uses SSE format with event: and data: lines
+        sse_lines = []
+        for event in stream_events:
+            event_type = event.get("type", "message")
+            sse_lines.append(f"event: {event_type}")
+            sse_lines.append(f"data: {json.dumps(event)}")
+            sse_lines.append("")
+        sse_data = "\n".join(sse_lines) + "\n"
+
+        httpserver.expect_request("/v1/messages").respond_with_data(
+            sse_data, content_type="text/event-stream"
+        )
+        yield Anthropic(api_key="unit-test", base_url=httpserver.url_for(""))
+
+
+@pytest.fixture(scope="class")
 def mock_async_anthropic_client() -> Generator[AsyncAnthropic, None, None]:
     """Mock the Async Anthropic client."""
     with HTTPServer() as httpserver:
         httpserver.expect_request("/v1/messages").respond_with_json(
             _MOCK_RESPONSES["anthropic_messages"]
         )
+        yield AsyncAnthropic(api_key="unit-test", base_url=httpserver.url_for(""))
+
+
+@pytest.fixture(scope="class")
+def mock_async_anthropic_stream_client() -> Generator[AsyncAnthropic, None, None]:
+    """Mock the Async Anthropic client with streaming responses."""
+    with HTTPServer() as httpserver:
+        stream_events = _MOCK_RESPONSES["anthropic_messages_stream"]
+
+        # Anthropic uses SSE format with event: and data: lines
+        sse_lines = []
+        for event in stream_events:
+            event_type = event.get("type", "message")
+            sse_lines.append(f"event: {event_type}")
+            sse_lines.append(f"data: {json.dumps(event)}")
+            sse_lines.append("")
+        sse_data = "\n".join(sse_lines) + "\n"
+
+        httpserver.expect_request("/v1/messages").respond_with_data(
+            sse_data, content_type="text/event-stream"
+        )
+
         yield AsyncAnthropic(api_key="unit-test", base_url=httpserver.url_for(""))
 
 
@@ -177,6 +282,25 @@ def mock_google_genai_client() -> Generator[Client, None, None]:
         httpserver.expect_request(
             "/v1beta/models/some-tool-call-model:generateContent"
         ).respond_with_json(_MOCK_RESPONSES["google_genai_tool_calls"])
+
+        yield Client(
+            api_key="unit-test",
+            http_options=HttpOptions(base_url=httpserver.url_for("")),
+        )
+
+
+@pytest.fixture(scope="class")
+def mock_google_genai_stream_client() -> Generator[Client, None, None]:
+    """Mock the Google GenAI client with streaming responses."""
+    with HTTPServer() as httpserver:
+        stream_chunks = _MOCK_RESPONSES["google_genai_content_stream"]
+
+        # Google GenAI uses newline-delimited JSON (NDJSON) for streaming
+        ndjson_data = "\n".join(json.dumps(chunk) for chunk in stream_chunks) + "\n"
+
+        httpserver.expect_request(
+            "/v1beta/models/some-model:streamGenerateContent"
+        ).respond_with_data(ndjson_data, content_type="application/json")
 
         yield Client(
             api_key="unit-test",

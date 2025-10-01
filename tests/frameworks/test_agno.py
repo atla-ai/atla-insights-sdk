@@ -1,10 +1,12 @@
 """Unit tests for the Agno instrumentation."""
 
+import pytest
 from agno.agent import Agent
 from agno.models.anthropic import Claude
 from agno.models.google import Gemini
 from agno.models.litellm import LiteLLM
 from agno.models.openai import OpenAIChat
+from agno.team import Team
 from agno.tools.function import Function, FunctionCall
 from anthropic import Anthropic
 from google.genai import Client
@@ -265,3 +267,309 @@ class TestAgnoInstrumentation(BaseLocalOtel):
 
         assert span.attributes.get("input.value") == '{"some_arg": "some-value"}'
         assert span.attributes.get("output.value") == "some-result"
+
+    def test_stream(self, mock_openai_stream_client: OpenAI) -> None:
+        """Test the Agno instrumentation with OpenAI."""
+        from atla_insights import instrument_agno
+
+        with instrument_agno("openai"):
+            agent = Agent(
+                model=OpenAIChat(
+                    id="mock-model",
+                    base_url=str(mock_openai_stream_client.base_url),
+                    api_key="unit-test",
+                ),
+            )
+
+            for _ in agent.run("Hello world!", stream=True):
+                pass
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 3
+        run, llm_call, request = finished_spans
+
+        assert run.name == "Agent.run"
+        assert llm_call.name == "OpenAIChat.invoke_stream"
+        assert request.name == "ChatCompletion"
+
+        assert request.attributes is not None
+        assert request.attributes.get("llm.input_messages.0.message.role") == "user"
+        assert (
+            request.attributes.get("llm.input_messages.0.message.content")
+            == "Hello world!"
+        )
+        assert request.attributes.get("llm.output_messages.0.message.role") == "assistant"
+        assert (
+            request.attributes.get("llm.output_messages.0.message.content")
+            == "hello world"
+        )
+
+    @pytest.mark.asyncio
+    async def test_async(self, mock_openai_client: OpenAI) -> None:
+        """Test the Agno instrumentation with OpenAI."""
+        from atla_insights import instrument_agno
+
+        with instrument_agno("openai"):
+            agent = Agent(
+                model=OpenAIChat(
+                    id="mock-model",
+                    base_url=str(mock_openai_client.base_url),
+                    api_key="unit-test",
+                ),
+            )
+
+            await agent.arun("Hello world!")
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 3
+        run, llm_call, request = finished_spans
+
+        assert run.name == "Agent.run"
+        assert llm_call.name == "OpenAIChat.ainvoke"
+        assert request.name == "ChatCompletion"
+
+        assert request.attributes is not None
+        assert request.attributes.get("llm.input_messages.0.message.role") == "user"
+        assert (
+            request.attributes.get("llm.input_messages.0.message.content")
+            == "Hello world!"
+        )
+        assert request.attributes.get("llm.output_messages.0.message.role") == "assistant"
+        assert (
+            request.attributes.get("llm.output_messages.0.message.content")
+            == "hello world"
+        )
+
+    @pytest.mark.asyncio
+    async def test_async_stream(self, mock_async_openai_stream_client: OpenAI) -> None:
+        """Test the Agno instrumentation with OpenAI."""
+        from atla_insights import instrument_agno
+
+        with instrument_agno("openai"):
+            agent = Agent(
+                model=OpenAIChat(
+                    id="mock-model",
+                    base_url=str(mock_async_openai_stream_client.base_url),
+                    api_key="unit-test",
+                ),
+            )
+
+            async for _ in agent.arun("Hello world!", stream=True):
+                pass
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 3
+        run, llm_call, request = finished_spans
+
+        assert run.name == "Agent.run"
+        assert llm_call.name == "OpenAIChat.ainvoke_stream"
+        assert request.name == "ChatCompletion"
+
+        assert request.attributes is not None
+        assert request.attributes.get("llm.input_messages.0.message.role") == "user"
+        assert (
+            request.attributes.get("llm.input_messages.0.message.content")
+            == "Hello world!"
+        )
+        assert request.attributes.get("llm.output_messages.0.message.role") == "assistant"
+        assert (
+            request.attributes.get("llm.output_messages.0.message.content")
+            == "hello world"
+        )
+
+    def test_team(self, mock_openai_client: OpenAI) -> None:
+        """Test the Agno instrumentation with OpenAI."""
+        from atla_insights import instrument_agno
+
+        with instrument_agno("openai"):
+            agent = Agent(
+                model=OpenAIChat(
+                    id="mock-model",
+                    base_url=str(mock_openai_client.base_url),
+                    api_key="unit-test",
+                ),
+            )
+
+            team = Team(
+                members=[agent],
+                model=OpenAIChat(
+                    id="mock-model",
+                    base_url=str(mock_openai_client.base_url),
+                    api_key="unit-test",
+                ),
+            )
+
+            team.run("Hello world!")
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 3
+        run, llm_call, request = finished_spans
+
+        assert run.name == "Agent.run"
+        assert llm_call.name == "OpenAIChat.invoke"
+        assert request.name == "ChatCompletion"
+
+        assert request.attributes is not None
+        assert request.attributes.get("llm.input_messages.0.message.role") == "developer"
+        assert request.attributes.get("llm.input_messages.0.message.content") is not None
+        assert request.attributes.get("llm.input_messages.1.message.role") == "user"
+        assert (
+            request.attributes.get("llm.input_messages.1.message.content")
+            == "Hello world!"
+        )
+        assert request.attributes.get("llm.output_messages.0.message.role") == "assistant"
+        assert (
+            request.attributes.get("llm.output_messages.0.message.content")
+            == "hello world"
+        )
+
+    def test_team_stream(self, mock_openai_stream_client: OpenAI) -> None:
+        """Test the Agno instrumentation with OpenAI."""
+        from atla_insights import instrument_agno
+
+        with instrument_agno("openai"):
+            agent = Agent(
+                model=OpenAIChat(
+                    id="mock-model",
+                    base_url=str(mock_openai_stream_client.base_url),
+                    api_key="unit-test",
+                ),
+            )
+
+            team = Team(
+                members=[agent],
+                model=OpenAIChat(
+                    id="mock-model",
+                    base_url=str(mock_openai_stream_client.base_url),
+                    api_key="unit-test",
+                ),
+            )
+
+            for _ in team.run("Hello world!", stream=True):
+                pass
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 3
+        run, llm_call, request = finished_spans
+
+        assert run.name == "Agent.run"
+        assert llm_call.name == "OpenAIChat.invoke_stream"
+        assert request.name == "ChatCompletion"
+
+        assert request.attributes is not None
+        assert request.attributes.get("llm.input_messages.0.message.role") == "developer"
+        assert request.attributes.get("llm.input_messages.0.message.content") is not None
+        assert request.attributes.get("llm.input_messages.1.message.role") == "user"
+        assert (
+            request.attributes.get("llm.input_messages.1.message.content")
+            == "Hello world!"
+        )
+        assert request.attributes.get("llm.output_messages.0.message.role") == "assistant"
+        assert (
+            request.attributes.get("llm.output_messages.0.message.content")
+            == "hello world"
+        )
+
+    @pytest.mark.asyncio
+    async def test_team_async(self, mock_async_openai_client: OpenAI) -> None:
+        """Test the Agno instrumentation with OpenAI."""
+        from atla_insights import instrument_agno
+
+        with instrument_agno("openai"):
+            agent = Agent(
+                model=OpenAIChat(
+                    id="mock-model",
+                    base_url=str(mock_async_openai_client.base_url),
+                    api_key="unit-test",
+                ),
+            )
+
+            team = Team(
+                members=[agent],
+                model=OpenAIChat(
+                    id="mock-model",
+                    base_url=str(mock_async_openai_client.base_url),
+                    api_key="unit-test",
+                ),
+            )
+
+            await team.arun("Hello world!")
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 3
+        run, llm_call, request = finished_spans
+
+        assert run.name == "Agent.run"
+        assert llm_call.name == "OpenAIChat.ainvoke"
+        assert request.name == "ChatCompletion"
+
+        assert request.attributes is not None
+        assert request.attributes.get("llm.input_messages.0.message.role") == "developer"
+        assert request.attributes.get("llm.input_messages.0.message.content") is not None
+        assert request.attributes.get("llm.input_messages.1.message.role") == "user"
+        assert (
+            request.attributes.get("llm.input_messages.1.message.content")
+            == "Hello world!"
+        )
+        assert request.attributes.get("llm.output_messages.0.message.role") == "assistant"
+        assert (
+            request.attributes.get("llm.output_messages.0.message.content")
+            == "hello world"
+        )
+
+    @pytest.mark.asyncio
+    async def test_team_async_stream(
+        self, mock_async_openai_stream_client: OpenAI
+    ) -> None:
+        """Test the Agno instrumentation with OpenAI."""
+        from atla_insights import instrument_agno
+
+        with instrument_agno("openai"):
+            agent = Agent(
+                model=OpenAIChat(
+                    id="mock-model",
+                    base_url=str(mock_async_openai_stream_client.base_url),
+                    api_key="unit-test",
+                ),
+            )
+
+            team = Team(
+                members=[agent],
+                model=OpenAIChat(
+                    id="mock-model",
+                    base_url=str(mock_async_openai_stream_client.base_url),
+                    api_key="unit-test",
+                ),
+            )
+
+            async for _ in team.arun("Hello world!", stream=True):
+                pass
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 3
+        run, llm_call, request = finished_spans
+
+        assert run.name == "Agent.run"
+        assert llm_call.name == "OpenAIChat.ainvoke_stream"
+        assert request.name == "ChatCompletion"
+
+        assert request.attributes is not None
+        assert request.attributes.get("llm.input_messages.0.message.role") == "developer"
+        assert request.attributes.get("llm.input_messages.0.message.content") is not None
+        assert request.attributes.get("llm.input_messages.1.message.role") == "user"
+        assert (
+            request.attributes.get("llm.input_messages.1.message.content")
+            == "Hello world!"
+        )
+        assert request.attributes.get("llm.output_messages.0.message.role") == "assistant"
+        assert (
+            request.attributes.get("llm.output_messages.0.message.content")
+            == "hello world"
+        )

@@ -158,3 +158,24 @@ class TestSmolAgentsInstrumentation(BaseLocalOtel):
 
         assert span.attributes.get("input.value") is not None
         assert span.attributes.get("output.value") == "some-result"
+
+    def test_streaming(self, mock_openai_stream_client: OpenAI) -> None:
+        """Test streaming with SmolAgents."""
+        from atla_insights import instrument_smolagents
+
+        agent = CodeAgent(
+            model=OpenAIServerModel(
+                model_id="mock-model",
+                api_base=str(mock_openai_stream_client.base_url),
+                api_key="unit-test",
+            ),
+            tools=[],
+            stream_outputs=True,
+        )
+
+        with instrument_smolagents("openai"):
+            agent.run("Hello world!", max_steps=1)
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 8

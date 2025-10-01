@@ -24,18 +24,14 @@ def instrument_anthropic() -> ContextManager[None]:
     if is_instrumentation_suppressed():
         return NoOpContextManager()
 
-    try:
-        from openinference.instrumentation.anthropic import AnthropicInstrumentor
-    except ImportError as e:
-        raise ImportError(
-            "Anthropic instrumentation needs to be installed. "
-            'Please install it via `pip install "atla-insights[anthropic]"`.'
-        ) from e
+    from atla_insights.llm_providers.instrumentors.anthropic import (
+        AtlaAnthropicInstrumentor,
+    )
 
-    anthropic_instrumentor = AnthropicInstrumentor()
+    anthropic_instrumentor = AtlaAnthropicInstrumentor()
 
     return ATLA_INSTANCE.instrument_service(
-        service="anthropic",
+        service=AtlaAnthropicInstrumentor.name,
         instrumentors=[anthropic_instrumentor],
     )
 
@@ -45,4 +41,8 @@ def uninstrument_anthropic() -> None:
     if is_instrumentation_suppressed():
         return
 
-    return ATLA_INSTANCE.uninstrument_service("anthropic")
+    from atla_insights.llm_providers.instrumentors.anthropic import (
+        AtlaAnthropicInstrumentor,
+    )
+
+    return ATLA_INSTANCE.uninstrument_service(AtlaAnthropicInstrumentor.name)

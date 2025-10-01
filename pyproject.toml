@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "atla-insights"
-version = "0.0.30"
+version = "0.0.31"
 description = "Atla is a platform for monitoring and improving AI agents."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -39,7 +39,7 @@ dev = ["atla-insights[all,ci]"]
 all = [
     "atla-insights[agno,anthropic,baml,bedrock,claude-code-sdk,crewai,google-adk,google-genai,google-generativeai,langchain,litellm,mcp,openai,openai-agents,smolagents]",
 ]
-agno = ["agno>=1.5.0", "openinference-instrumentation-agno>=0.1.4"]
+agno = ["agno>=1.5.2", "openinference-instrumentation-agno>=0.1.15"]
 anthropic = [
     "anthropic[bedrock]>=0.52.1",
     "openinference-instrumentation-anthropic>=0.1.18",
