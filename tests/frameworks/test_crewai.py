@@ -165,3 +165,73 @@ class TestCrewAIInstrumentation(BaseLocalOtel):
 
         assert span.attributes.get("input.value") is not None
         assert span.attributes.get("output.value") == "some-result"
+
+    def test_multi_agent_crew(self, mock_openai_client: OpenAI) -> None:
+        """Test CrewAI with multiple agents collaborating."""
+        from atla_insights import instrument_crewai
+
+        with instrument_crewai():
+            agent1 = Agent(
+                role="researcher",
+                goal="research topics",
+                backstory="expert researcher",
+                llm=LLM(
+                    model="openai/some-model",
+                    api_base=str(mock_openai_client.base_url),
+                    api_key="unit-test",
+                ),
+            )
+            agent2 = Agent(
+                role="writer",
+                goal="write content",
+                backstory="expert writer",
+                llm=LLM(
+                    model="openai/some-model",
+                    api_base=str(mock_openai_client.base_url),
+                    api_key="unit-test",
+                ),
+            )
+
+            task1 = Task(description="research", expected_output="report", agent=agent1)
+            task2 = Task(description="write", expected_output="article", agent=agent2)
+
+            crew = Crew(agents=[agent1, agent2], tasks=[task1, task2])
+            crew.kickoff()
+
+        finished_spans = self.get_finished_spans()
+
+        # Kickoff, crew creation, 2 task executions, 2 task creations, 2 llm requests
+        assert len(finished_spans) == 8
+
+        span_names = [span.name for span in finished_spans]
+        assert "Crew.kickoff" in span_names
+        assert "Crew Created" in span_names
+        assert span_names.count("Task._execute_core") == 2
+        assert span_names.count("Task Created") == 2
+
+    def test_kickoff_for_each(self, mock_openai_client: OpenAI) -> None:
+        """Test CrewAI kickoff_for_each for batch processing."""
+        from atla_insights import instrument_crewai
+
+        with instrument_crewai():
+            test_agent = Agent(
+                role="test",
+                goal="test",
+                backstory="test",
+                llm=LLM(
+                    model="openai/some-model",
+                    api_base=str(mock_openai_client.base_url),
+                    api_key="unit-test",
+                ),
+            )
+            test_task = Task(description="test", expected_output="test", agent=test_agent)
+            test_crew = Crew(agents=[test_agent], tasks=[test_task])
+
+            inputs = [{"topic": "foo"}, {"topic": "bar"}]
+            test_crew.kickoff_for_each(inputs=inputs)
+
+        finished_spans = self.get_finished_spans()
+
+        # One crew kickoff per input
+        kickoff_spans = [span for span in finished_spans if span.name == "Crew.kickoff"]
+        assert len(kickoff_spans) >= 2

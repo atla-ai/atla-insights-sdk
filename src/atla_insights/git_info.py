@@ -1,5 +1,6 @@
 """Git information."""
 
+import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -32,6 +33,8 @@ class GitInfo:
     def get_git_repo_url(self) -> Optional[str]:
         """Get the current Git repository remote URL."""
         try:
+            if repo_url := os.environ.get("ATLA_GIT_REPO"):
+                return repo_url
             if self.repo is None:
                 return None
             if self.repo.remotes is None:
@@ -43,6 +46,8 @@ class GitInfo:
     def get_git_branch(self) -> Optional[str]:
         """Get the current Git branch name."""
         try:
+            if git_branch := os.environ.get("ATLA_GIT_BRANCH"):
+                return git_branch
             if self.repo is None:
                 return None
             if self.repo.head_is_unborn:
@@ -55,6 +60,8 @@ class GitInfo:
     def get_git_commit_hash(self) -> Optional[str]:
         """Get the current Git commit hash."""
         try:
+            if git_commit_hash := os.environ.get("ATLA_GIT_COMMIT_HASH"):
+                return git_commit_hash
             if self.repo is None:
                 return None
             if self.repo.head_is_unborn:
@@ -66,6 +73,8 @@ class GitInfo:
     def get_git_commit_message(self) -> Optional[str]:
         """Get the current Git commit message."""
         try:
+            if git_commit_message := os.environ.get("ATLA_GIT_COMMIT_MESSAGE"):
+                return git_commit_message
             if self.repo is None:
                 return None
             if self.repo.head_is_unborn:
@@ -78,6 +87,8 @@ class GitInfo:
     def get_git_commit_timestamp(self) -> Optional[str]:
         """Get the current Git commit message."""
         try:
+            if git_commit_timestamp := os.environ.get("ATLA_GIT_COMMIT_TIMESTAMP"):
+                return git_commit_timestamp
             if self.repo is None:
                 return None
             if self.repo.head_is_unborn:
@@ -91,6 +102,8 @@ class GitInfo:
     def get_git_semver(self) -> Optional[str]:
         """Get the current Git commit message."""
         try:
+            if git_semver := os.environ.get("ATLA_GIT_SEMVER"):
+                return git_semver
             if self.repo is None:
                 return None
             if self.repo.head_is_unborn:

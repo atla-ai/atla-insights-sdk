@@ -272,3 +272,120 @@ class TestOpenAIInstrumentation(BaseLocalOtel):
         assert (
             span.attributes.get("llm.output_messages.0.message.content") == "hello world"
         )
+
+    def test_streaming(self, mock_openai_stream_client: OpenAI) -> None:
+        """Test streaming with OpenAI."""
+        from atla_insights import instrument_openai
+
+        with instrument_openai():
+            for _ in mock_openai_stream_client.chat.completions.create(
+                model="some-model",
+                messages=[{"role": "user", "content": "hello world"}],
+                stream=True,
+            ):
+                pass
+
+        spans = self.get_finished_spans()
+
+        assert len(spans) == 1
+        [span] = spans
+
+        assert span.attributes is not None
+        assert span.attributes.get("llm.input_messages.0.message.role") == "user"
+        assert (
+            span.attributes.get("llm.input_messages.0.message.content") == "hello world"
+        )
+
+    @pytest.mark.asyncio
+    async def test_async_streaming(
+        self, mock_async_openai_stream_client: AsyncOpenAI
+    ) -> None:
+        """Test async streaming with OpenAI."""
+        from atla_insights import instrument_openai
+
+        with instrument_openai():
+            async for _ in await mock_async_openai_stream_client.chat.completions.create(
+                model="some-model",
+                messages=[{"role": "user", "content": "hello world"}],
+                stream=True,
+            ):
+                pass
+
+        spans = self.get_finished_spans()
+
+        assert len(spans) == 1
+        [span] = spans
+
+        assert span.attributes is not None
+        assert span.attributes.get("llm.input_messages.0.message.role") == "user"
+        assert (
+            span.attributes.get("llm.input_messages.0.message.content") == "hello world"
+        )
+
+    def test_responses_streaming(self, mock_openai_stream_client: OpenAI) -> None:
+        """Test streaming with Responses API."""
+        from atla_insights import instrument_openai
+
+        with instrument_openai():
+            for _ in mock_openai_stream_client.responses.create(
+                model="some-model",
+                input="hello world",
+                stream=True,
+            ):
+                pass
+
+        spans = self.get_finished_spans()
+
+        assert len(spans) == 1
+        [span] = spans
+
+        assert span.attributes is not None
+        assert span.attributes.get("llm.input_messages.1.message.role") == "user"
+        assert (
+            span.attributes.get("llm.input_messages.1.message.content") == "hello world"
+        )
+
+    @pytest.mark.asyncio
+    async def test_async_responses_streaming(
+        self, mock_async_openai_stream_client: AsyncOpenAI
+    ) -> None:
+        """Test async streaming with Responses API."""
+        from atla_insights import instrument_openai
+
+        with instrument_openai():
+            async for _ in await mock_async_openai_stream_client.responses.create(
+                model="some-model",
+                input="hello world",
+                stream=True,
+            ):
+                pass
+
+        spans = self.get_finished_spans()
+
+        assert len(spans) == 1
+        [span] = spans
+
+        assert span.attributes is not None
+        assert span.attributes.get("llm.input_messages.1.message.role") == "user"
+        assert (
+            span.attributes.get("llm.input_messages.1.message.content") == "hello world"
+        )
+
+    def test_context_manager(self, mock_openai_client: OpenAI) -> None:
+        """Test that instrumentation only applies within context."""
+        from atla_insights import instrument_openai
+
+        with instrument_openai():
+            mock_openai_client.chat.completions.create(
+                model="some-model",
+                messages=[{"role": "user", "content": "hello world"}],
+            )
+
+        # This call should not be instrumented (outside context)
+        mock_openai_client.chat.completions.create(
+            model="some-model",
+            messages=[{"role": "user", "content": "hello again"}],
+        )
+
+        spans = self.get_finished_spans()
+        assert len(spans) == 1

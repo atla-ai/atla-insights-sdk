@@ -193,3 +193,74 @@ class TestLitellmInstrumentation(BaseLocalOtel):
         assert request.name == "litellm_request"
         assert request.parent is not None
         assert request.parent.span_id == root_span.context.span_id
+
+    def test_streaming(self, mock_openai_stream_client: OpenAI) -> None:
+        """Test streaming with LiteLLM."""
+        from atla_insights import instrument_litellm
+
+        with instrument_litellm():
+            response = completion(
+                model="openai/gpt-3.5-turbo",
+                messages=[{"role": "user", "content": "hello world"}],
+                api_base=str(mock_openai_stream_client.base_url),
+                api_key="unit-test",
+                stream=True,
+            )
+            for _ in response:
+                pass
+
+        spans = self.get_finished_spans()
+
+        assert len(spans) == 1
+        [span] = spans
+
+        assert span.attributes is not None
+        assert span.attributes.get("gen_ai.prompt.0.role") == "user"
+        assert span.attributes.get("gen_ai.prompt.0.content") == "hello world"
+
+    @pytest.mark.asyncio
+    async def test_async_streaming(self, mock_async_openai_stream_client: OpenAI) -> None:
+        """Test async streaming with LiteLLM."""
+        from atla_insights import instrument_litellm
+
+        with instrument_litellm():
+            response = await acompletion(
+                model="openai/gpt-3.5-turbo",
+                messages=[{"role": "user", "content": "hello world"}],
+                api_base=str(mock_async_openai_stream_client.base_url),
+                api_key="unit-test",
+                stream=True,
+            )
+            async for _ in response:
+                pass
+
+        await asyncio.sleep(0.001)  # wait for spans to get collected
+        spans = self.get_finished_spans()
+
+        assert len(spans) == 1
+        [span] = spans
+
+        assert span.attributes is not None
+        assert span.attributes.get("gen_ai.prompt.0.role") == "user"
+        assert span.attributes.get("gen_ai.prompt.0.content") == "hello world"
+
+    def test_context_manager(self) -> None:
+        """Test that instrumentation only applies within context."""
+        from atla_insights import instrument_litellm
+
+        with instrument_litellm():
+            completion(
+                model="openai/gpt-3.5-turbo",
+                messages=[{"role": "user", "content": "hello world"}],
+                mock_response="hello world",
+            )
+
+        # This call should not be instrumented (outside context)
+        completion(
+            model="openai/gpt-3.5-turbo",
+            messages=[{"role": "user", "content": "hello again"}],
+            mock_response="hello again",
+        )
+
+        finished_spans = self.get_finished_spans()
+        assert len(finished_spans) == 1

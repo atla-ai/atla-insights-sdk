@@ -157,3 +157,49 @@ class TestAnthropicInstrumentation(BaseLocalOtel):
             span.attributes.get("llm.output_messages.0.message.content")
             == "Hello! How are you doing today?"
         )
+
+    def test_streaming(self, mock_anthropic_stream_client: Anthropic) -> None:
+        """Test streaming with Anthropic."""
+        from atla_insights import instrument_anthropic
+
+        with instrument_anthropic():
+            with mock_anthropic_stream_client.messages.stream(
+                model="some-model",
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Hello, Claude"}],
+            ) as stream:
+                for _ in stream:
+                    pass
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 1
+        [span] = finished_spans
+
+        assert span.attributes is not None
+        assert span.name == "MessagesStream"
+        assert span.attributes.get("llm.input_messages.0.message.role") == "user"
+        assert (
+            span.attributes.get("llm.input_messages.0.message.content") == "Hello, Claude"
+        )
+
+    def test_context_manager(self, mock_anthropic_client: Anthropic) -> None:
+        """Test that instrumentation only applies within context."""
+        from atla_insights import instrument_anthropic
+
+        with instrument_anthropic():
+            mock_anthropic_client.messages.create(
+                model="some-model",
+                max_tokens=1024,
+                messages=[{"role": "user", "content": "Hello, Claude"}],
+            )
+
+        # This call should not be instrumented (outside context)
+        mock_anthropic_client.messages.create(
+            model="some-model",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": "Hello again"}],
+        )
+
+        finished_spans = self.get_finished_spans()
+        assert len(finished_spans) == 1

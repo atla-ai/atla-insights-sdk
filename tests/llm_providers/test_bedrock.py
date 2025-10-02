@@ -81,3 +81,40 @@ class TestBedrockInstrumentation(BaseLocalOtel):
 
         finished_spans = self.get_finished_spans()
         assert len(finished_spans) == 1
+
+    def test_context_manager(self, bedrock_client_factory) -> None:
+        """Test that instrumentation only applies within context."""
+        from atla_insights import instrument_bedrock
+        from tests.conftest import _MOCK_RESPONSES
+
+        model_id = "us.anthropic.claude-3-5-haiku-20241022-v1:0"
+        response_content = _MOCK_RESPONSES["bedrock_anthropic_invoke_model"]
+
+        with instrument_bedrock():
+            client, _ = bedrock_client_factory(model_id, response_content)
+            client.invoke_model(
+                body=json.dumps(
+                    {
+                        "anthropic_version": "bedrock-2023-05-31",
+                        "max_tokens": 100,
+                        "messages": [{"role": "user", "content": "Hello"}],
+                    }
+                ),
+                modelId=model_id,
+            )
+
+        # This call should not be instrumented (outside context)
+        client, _ = bedrock_client_factory(model_id, response_content)
+        client.invoke_model(
+            body=json.dumps(
+                {
+                    "anthropic_version": "bedrock-2023-05-31",
+                    "max_tokens": 100,
+                    "messages": [{"role": "user", "content": "Hello again"}],
+                }
+            ),
+            modelId=model_id,
+        )
+
+        finished_spans = self.get_finished_spans()
+        assert len(finished_spans) == 1
