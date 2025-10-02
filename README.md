@@ -210,6 +210,26 @@ with start_as_current_span("my-llm-generation") as span:
 
 Note that the expected data format are OpenAI Chat Completions compatible messages / tools.
 
+### Git integration
+
+In order to make use of advanced Atla features, you can use the SDK to connect to git.
+
+If your deployment has access to the repo's `.git` file and has the git CLI installed,
+this information will get collected automatically.
+You can opt out by setting `ATLA_DISABLE_GIT_TRACKING=1` in your environment.
+
+If your deployment does not have access to the repo's `.git` file or does not have the git
+CLI installed, you can manually specify the necessary git info via environment variables:
+
+| Environment variable        | Git command                      | Example value                                |
+| --------------------------- | -------------------------------- | -------------------------------------------- |
+| `ATLA_GIT_REPO`             | `git remote get-url origin`      | https://github.com/atla-ai/atla-insights-sdk |
+| `ATLA_GIT_BRANCH`           | `git symbolic-ref --short HEAD`  | feature/my-new-experiment                    |
+| `ATLA_GIT_COMMIT_HASH`      | `git rev-parse HEAD`             | 269d6bfa34af668309df396ee5bce7e54257c320     |
+| `ATLA_GIT_COMMIT_MESSAGE`   | `git log -1 --pretty=%B`         | Implement my new feature                     |
+| `ATLA_GIT_COMMIT_TIMESTAMP` | `git remote get-url origin`      | 2025-10-01T18:45:47+01:00                    |
+| `ATLA_GIT_SEMVER`           | `git describe --tags --abbrev=0` | v1.7                                         |
+
 ### Adding metadata
 
 You can attach metadata to a run that provides additional information about the specs of
