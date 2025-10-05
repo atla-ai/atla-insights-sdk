@@ -376,6 +376,54 @@ sampler at configuration time.
     )
     ```
 
+### Recording multimodal content (Audio)
+
+You can record audio content in your messages using the manual instrumentation API:
+
+```python
+import base64
+from atla_insights import configure, instrument_openai
+from atla_insights.span import start_as_current_span
+
+configure(...)
+
+# Load audio file
+with open("audio.mp3", "rb") as f:
+    audio_bytes = f.read()
+    audio_base64 = base64.b64encode(audio_bytes).decode("utf-8")
+
+# Record generation with audio
+with start_as_current_span("audio-generation") as span:
+    span.record_generation(
+        input_messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "What's in this audio?"},
+                    {
+                        "type": "input_audio",
+                        "input_audio": {
+                            "data": audio_base64,
+                            "format": "mp3"
+                        }
+                    }
+                ]
+            }
+        ],
+        output_messages=[
+            {
+                "role": "assistant",
+                "content": "I heard someone saying..."
+            }
+        ]
+    )
+```
+
+⚠️ Note: Audio files are uploaded to S3 storage during trace export. The audio data
+is temporarily stored in span attributes and replaced with S3 references server-side.
+
+Supported audio formats: `mp3`, `wav`, `webm`, `ogg`
+
 ### Adding custom metrics
 
 You can add custom evaluation metrics to your trace.
