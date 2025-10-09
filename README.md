@@ -452,7 +452,7 @@ You can run experiments by using the `run_experiment` context manager.
 from atla_insights import run_experiment
 
 with run_experiment(
-    experiment_id="my-experiment-id",  # optional: defaults to random identifier
+    experiment_name="my-experiment-name",  # optional: defaults to random identifier
     description="Testing out shiny new feature",  # optional
 ):
     # Your experiment code here
