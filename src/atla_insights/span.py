@@ -14,6 +14,7 @@ from openai.types.chat import (
 from openai.types.chat.chat_completion_assistant_message_param import FunctionCall
 from openinference.semconv.trace import (
     MessageAttributes,
+    MessageContentAttributes,
     OpenInferenceMimeTypeValues,
     OpenInferenceSpanKindValues,
     SpanAttributes,
@@ -54,8 +55,7 @@ class AtlaSpan:
         :param messages (Sequence[ChatCompletionMessageParam]): The messages to record.
         """
         for message_idx, message in enumerate(messages):
-            # OpenInference standard format: {prefix}.{idx}.message.{field}
-            message_prefix = f"{prefix}.{message_idx}.message"
+            message_prefix = f"{prefix}.{message_idx}"
 
             self._span.set_attribute(
                 f"{message_prefix}.{MessageAttributes.MESSAGE_ROLE}", message["role"]
@@ -67,41 +67,43 @@ class AtlaSpan:
                         f"{message_prefix}.{MessageAttributes.MESSAGE_CONTENT}", content
                     )
                 elif isinstance(content, list):
-                    # Handle multimodal content (list of content parts)
-                    # Use custom attribute path (not OpenInference standard) for
-                    # content_parts
                     for part_idx, content_part in enumerate(content):
                         if not isinstance(content_part, Mapping):
                             continue
 
                         content_type = content_part.get("type")
-                        # Custom path: message.content_parts.{idx}.{field}
-                        part_prefix = f"{message_prefix}.content_parts.{part_idx}"
+                        part_prefix = (
+                            f"{message_prefix}.{MessageAttributes.MESSAGE_CONTENTS}"
+                            f".{part_idx}"
+                        )
 
                         if content_type == "text":
                             content_part = cast(
                                 ChatCompletionContentPartTextParam, content_part
                             )
-                            self._span.set_attribute(f"{part_prefix}.type", "text")
                             self._span.set_attribute(
-                                f"{part_prefix}.text", content_part["text"]
+                                f"{part_prefix}.{MessageContentAttributes.MESSAGE_CONTENT_TYPE}",
+                                "text",
+                            )
+                            self._span.set_attribute(
+                                f"{part_prefix}.{MessageContentAttributes.MESSAGE_CONTENT_TEXT}",
+                                content_part["text"],
                             )
                         elif content_type == "input_audio":
-                            # Handle audio content parts
-                            self._span.set_attribute(f"{part_prefix}.type", "input_audio")
+                            # Audio not yet in OpenInference spec - using custom attrs
+                            self._span.set_attribute(
+                                f"{part_prefix}.{MessageContentAttributes.MESSAGE_CONTENT_TYPE}",
+                                "input_audio",
+                            )
                             input_audio = content_part.get("input_audio", {})
                             if isinstance(input_audio, Mapping):
-                                # Store audio data (base64 or binary) - will be uploaded
-                                # to S3 server-side
-                                if "data" in input_audio:
+                                message_content_audio = "message_content.input_audio"
+                                for key, value in input_audio.items():
+                                    if key not in ["data", "format"]:
+                                        continue
                                     self._span.set_attribute(
-                                        f"{part_prefix}.input_audio.data",
-                                        str(input_audio["data"]),
-                                    )
-                                if "format" in input_audio:
-                                    self._span.set_attribute(
-                                        f"{part_prefix}.input_audio.format",
-                                        str(input_audio["format"]),
+                                        f"{part_prefix}.{message_content_audio}.{key}",
+                                        str(value),
                                     )
 
             if tool_call_id := message.get("tool_call_id"):
