@@ -99,7 +99,7 @@ class AtlaSpan:
                             if isinstance(input_audio, Mapping):
                                 message_content_audio = "message_content.input_audio"
                                 for key, value in input_audio.items():
-                                    if key not in ["data", "format"]:
+                                    if key not in ["data", "format", "transcript"]:
                                         continue
                                     self._span.set_attribute(
                                         f"{part_prefix}.{message_content_audio}.{key}",
