@@ -14,6 +14,7 @@ from openai.types.chat import (
 from openai.types.chat.chat_completion_assistant_message_param import FunctionCall
 from openinference.semconv.trace import (
     MessageAttributes,
+    MessageContentAttributes,
     OpenInferenceMimeTypeValues,
     OpenInferenceSpanKindValues,
     SpanAttributes,
@@ -66,19 +67,50 @@ class AtlaSpan:
                         f"{message_prefix}.{MessageAttributes.MESSAGE_CONTENT}", content
                     )
                 elif isinstance(content, list):
-                    for content_part in content:
+                    for part_idx, content_part in enumerate(content):
                         if not isinstance(content_part, Mapping):
                             continue
 
-                        if content_part.get("type") == "text":
+                        content_type = content_part.get("type")
+                        part_prefix = (
+                            f"{message_prefix}.{MessageAttributes.MESSAGE_CONTENTS}"
+                            f".{part_idx}"
+                        )
+
+                        if content_type == "text":
                             content_part = cast(
                                 ChatCompletionContentPartTextParam, content_part
                             )
-                            text_content = content_part["text"]
                             self._span.set_attribute(
-                                f"{message_prefix}.{MessageAttributes.MESSAGE_CONTENT}",
-                                text_content,
+                                f"{part_prefix}.{MessageContentAttributes.MESSAGE_CONTENT_TYPE}",
+                                "text",
                             )
+                            self._span.set_attribute(
+                                f"{part_prefix}.{MessageContentAttributes.MESSAGE_CONTENT_TEXT}",
+                                content_part["text"],
+                            )
+                        elif content_type == "input_audio":
+                            # Audio not yet in OpenInference spec - using custom attrs
+                            self._span.set_attribute(
+                                f"{part_prefix}.{MessageContentAttributes.MESSAGE_CONTENT_TYPE}",
+                                "input_audio",
+                            )
+                            input_audio = content_part.get("input_audio", {})
+                            if isinstance(input_audio, Mapping):
+                                message_content_audio = "message_content.input_audio"
+                                for key, value in input_audio.items():
+                                    # Include s3_key for pre-uploaded audio (demo mode)
+                                    if key not in [
+                                        "data",
+                                        "format",
+                                        "transcript",
+                                        "s3_key",
+                                    ]:
+                                        continue
+                                    self._span.set_attribute(
+                                        f"{part_prefix}.{message_content_audio}.{key}",
+                                        str(value),
+                                    )
 
             if tool_call_id := message.get("tool_call_id"):
                 self._span.set_attribute(
