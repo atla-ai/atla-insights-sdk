@@ -12,6 +12,7 @@ from atla_insights.frameworks import (
     instrument_langchain,
     instrument_mcp,
     instrument_openai_agents,
+    instrument_pydantic_ai,
     instrument_smolagents,
     uninstrument_agno,
     uninstrument_baml,
@@ -21,6 +22,7 @@ from atla_insights.frameworks import (
     uninstrument_langchain,
     uninstrument_mcp,
     uninstrument_openai_agents,
+    uninstrument_pydantic_ai,
     uninstrument_smolagents,
 )
 from atla_insights.instrument import instrument
@@ -63,6 +65,7 @@ __all__ = [
     "instrument_mcp",
     "instrument_openai",
     "instrument_openai_agents",
+    "instrument_pydantic_ai",
     "instrument_smolagents",
     "mark_failure",
     "mark_success",
@@ -84,5 +87,6 @@ __all__ = [
     "uninstrument_mcp",
     "uninstrument_openai",
     "uninstrument_openai_agents",
+    "uninstrument_pydantic_ai",
     "uninstrument_smolagents",
 ]

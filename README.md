@@ -161,6 +161,7 @@ We currently support the following frameworks:
 | **LangChain**       | `instrument_langchain`       | This includes e.g., LangGraph as well                                                                       |
 | **MCP**             | `instrument_mcp`             | Only includes context propagation. You will need to instrument the model calling the MCP server separately. |
 | **OpenAI Agents**   | `instrument_openai_agents`   | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
+| **Pydantic AI**     | `instrument_pydantic_ai`     |                                                                                                             |
 | **Smolagents**      | `instrument_smolagents`      | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
 
 ⚠️ \*Note that some frameworks do not provide their own LLM interface. In these cases, you will
