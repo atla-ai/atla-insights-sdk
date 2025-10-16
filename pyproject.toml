@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "atla-insights"
-version = "0.0.31"
+version = "0.0.32"
 description = "Atla is a platform for monitoring and improving AI agents."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -20,7 +20,7 @@ dependencies = [
     "httpx>=0.24.0",
     "openai>=1.77.0",
     "openinference-instrumentation>=0.1.32",
-    "openinference-semantic-conventions>=0.1.17",
+    "openinference-semantic-conventions>=0.1.24",
     "opentelemetry-api>=1.32.1",
     "opentelemetry-exporter-otlp-proto-grpc>=1.32.1",
     "opentelemetry-exporter-otlp-proto-http>=1.32.1",
@@ -37,7 +37,7 @@ dev = ["atla-insights[all,ci]"]
 
 [project.optional-dependencies]
 all = [
-    "atla-insights[agno,anthropic,baml,bedrock,claude-code-sdk,crewai,google-adk,google-genai,google-generativeai,langchain,litellm,mcp,openai,openai-agents,smolagents]",
+    "atla-insights[agno,anthropic,baml,bedrock,claude-code-sdk,crewai,google-adk,google-genai,google-generativeai,langchain,litellm,mcp,openai,openai-agents,pydantic-ai,smolagents]",
 ]
 agno = ["agno>=1.5.2", "openinference-instrumentation-agno>=0.1.15"]
 anthropic = [
@@ -57,7 +57,7 @@ claude-code-sdk = ["claude-code-sdk>=0.0.21"]
 crewai = [
     "crewai>=0.130.0",
     "litellm>=1.72.0,<1.74.0",
-    "openinference-instrumentation-crewai>=0.1.10",
+    "openinference-instrumentation-crewai==0.1.10",
 ]
 google-adk = [
     "google-adk >= 1.2.1",
@@ -85,8 +85,12 @@ openai-agents = [
     "openinference-instrumentation-openai>=0.1.30",
     "openinference-instrumentation-openai-agents>=0.1.12",
 ]
+pydantic-ai = [
+    "openinference-instrumentation-pydantic-ai>=0.1.8",
+    "pydantic-ai>=0.2.0",
+]
 smolagents = [
-    "openinference-instrumentation-smolagents>=0.1.14",
+    "openinference-instrumentation-smolagents==0.1.14",
     "smolagents<1.21.0,>=1.19.0",
 ]
 

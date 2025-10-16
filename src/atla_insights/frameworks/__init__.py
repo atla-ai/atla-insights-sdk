@@ -20,6 +20,10 @@ from atla_insights.frameworks.openai_agents import (
     instrument_openai_agents,
     uninstrument_openai_agents,
 )
+from atla_insights.frameworks.pydantic_ai import (
+    instrument_pydantic_ai,
+    uninstrument_pydantic_ai,
+)
 from atla_insights.frameworks.smolagents import (
     instrument_smolagents,
     uninstrument_smolagents,
@@ -34,6 +38,7 @@ __all__ = [
     "instrument_langchain",
     "instrument_mcp",
     "instrument_openai_agents",
+    "instrument_pydantic_ai",
     "instrument_smolagents",
     "uninstrument_agno",
     "uninstrument_baml",
@@ -43,5 +48,6 @@ __all__ = [
     "uninstrument_langchain",
     "uninstrument_mcp",
     "uninstrument_openai_agents",
+    "uninstrument_pydantic_ai",
     "uninstrument_smolagents",
 ]
