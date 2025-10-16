@@ -60,8 +60,9 @@ class _PydanticAIInstrumentor(BaseInstrumentor):
         # Ensure actual span processor only gets added once to the tracer provider.
         if not self.is_instrumented:
             self.is_instrumented = True
-            ATLA_INSTANCE.tracer_provider.add_span_processor(
-                _AtlaOpenInferenceSpanProcessor()
+            ATLA_INSTANCE.tracer_provider._active_span_processor._span_processors = (
+                _AtlaOpenInferenceSpanProcessor(),
+                *ATLA_INSTANCE.tracer_provider._active_span_processor._span_processors,
             )
 
     def _uninstrument(self, **kwargs: Any) -> None:
