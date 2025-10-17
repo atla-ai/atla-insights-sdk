@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = ">=3.10"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -297,11 +297,12 @@ wheels = [
 
 [[package]]
 name = "atla-insights"
-version = "0.0.33"
+version = "0.0.34"
 source = { editable = "." }
 dependencies = [
     { name = "cuid2" },
     { name = "httpx" },
+    { name = "human-id" },
     { name = "openai" },
     { name = "openinference-instrumentation" },
     { name = "openinference-semantic-conventions" },
@@ -439,6 +440,7 @@ requires-dist = [
     { name = "google-genai", marker = "extra == 'google-genai'", specifier = ">=1.19.0" },
     { name = "google-generativeai", marker = "extra == 'google-generativeai'", specifier = ">=0.7.0" },
     { name = "httpx", specifier = ">=0.24.0" },
+    { name = "human-id", specifier = ">=0.2.0" },
     { name = "langchain", marker = "extra == 'langchain'", specifier = ">=0.3.18" },
     { name = "langchain-openai", marker = "extra == 'langchain'", specifier = ">=0.3.4" },
     { name = "langgraph", marker = "extra == 'langchain'", specifier = ">=0.3.20" },
@@ -2284,6 +2286,18 @@ wheels = [
 [package.optional-dependencies]
 inference = [
     { name = "aiohttp" },
+]
+
+[[package]]
+name = "human-id"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4a/59/ef55a878f44a339b401b3d4c4d83b145f99e200abeddf61359a24dd3c40d/human_id-0.2.0.tar.gz", hash = "sha256:19768373c96685f8dcd35da7f747e37e7483bb9c2c5383612a2a072d90542422", size = 4132, upload-time = "2022-03-24T23:59:02.488Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a3/fb/ee29329b25ffea61994b98f72f4efdefcca5703de4d9d37d89871b7ddc53/human_id-0.2.0-py3-none-any.whl", hash = "sha256:d2c7f0fea0244114a3a6e9b30343733515522031c6948bfdf3e0294a7d76335e", size = 4466, upload-time = "2022-03-24T23:59:00.422Z" },
 ]
 
 [[package]]

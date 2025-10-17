@@ -2,7 +2,6 @@
 
 import json
 import os
-import warnings
 from typing import Optional
 
 from opentelemetry.context import Context
@@ -11,7 +10,7 @@ from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor
 
 from atla_insights.constants import (
     ENVIRONMENT_MARK,
-    EXPERIMENT_RUN_NAMESPACE,
+    EXPERIMENT_NAMESPACE,
     GIT_TRACKING_DISABLED_ENV_VAR,
     LIB_VERSIONS,
     LIB_VERSIONS_MARK,
@@ -21,7 +20,7 @@ from atla_insights.constants import (
     VERSION_MARK,
     __version__,
 )
-from atla_insights.context import experiment_run_var, root_span_var
+from atla_insights.context import experiment_var, root_span_var
 from atla_insights.git_info import GitInfo
 from atla_insights.metadata import get_metadata
 
@@ -58,19 +57,12 @@ class AtlaRootSpanProcessor(SpanProcessor):
         if metadata := get_metadata():
             span.set_attribute(METADATA_MARK, json.dumps(metadata))
 
-        if experiment_run := experiment_run_var.get():
+        if experiment := experiment_var.get():
             # Experiments are by definition run in dev environment.
-            if self.environment != "dev":
-                warnings.warn(
-                    "Setting environment to 'dev' during experiment run. "
-                    "To avoid this warning, update your ATLA_INSIGHTS_ENVIRONMENT "
-                    "environment variable or your configure() call.",
-                    stacklevel=2,
-                )
-                span.set_attribute(ENVIRONMENT_MARK, "dev")
-            for key, value in experiment_run.items():
+            span.set_attribute(ENVIRONMENT_MARK, "dev")
+            for key, value in experiment.items():
                 if value is not None:
-                    span.set_attribute(f"{EXPERIMENT_RUN_NAMESPACE}.{key}", str(value))
+                    span.set_attribute(f"{EXPERIMENT_NAMESPACE}.{key}", str(value))
 
     def on_end(self, span: ReadableSpan) -> None:
         """On end span processing."""
