@@ -7,6 +7,7 @@ from typing import Generator, Optional, TypedDict
 from human_id import generate_id
 
 from atla_insights.context import experiment_var
+from atla_insights.main import logger
 
 
 class Experiment(TypedDict):
@@ -38,6 +39,8 @@ def run_experiment(
     if experiment_name is None:
         experiment_name = generate_id(word_count=3) + "-" + uuid.uuid4().hex[:8]
 
+    logger.info(f"Running experiment {experiment_name}...")
+
     # Create experiment run object in context
     experiment = Experiment(name=experiment_name, description=description)
     experiment_token = experiment_var.set(experiment)
@@ -47,3 +50,5 @@ def run_experiment(
         yield experiment
     finally:
         experiment_var.reset(experiment_token)
+
+    logger.info(f"Ended experiment {experiment_name} ✅")
