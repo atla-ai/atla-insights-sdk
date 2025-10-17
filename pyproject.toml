@@ -86,7 +86,7 @@ openai-agents = [
     "openinference-instrumentation-openai-agents>=0.1.12",
 ]
 pydantic-ai = [
-    "openinference-instrumentation-pydantic-ai>=0.1.8",
+    "openinference-instrumentation-pydantic-ai==0.1.8",
     "pydantic-ai>=0.2.0",
 ]
 smolagents = [

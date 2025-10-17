@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.10"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -461,7 +461,7 @@ requires-dist = [
     { name = "openinference-instrumentation-openai", marker = "extra == 'openai'", specifier = ">=0.1.30" },
     { name = "openinference-instrumentation-openai", marker = "extra == 'openai-agents'", specifier = ">=0.1.30" },
     { name = "openinference-instrumentation-openai-agents", marker = "extra == 'openai-agents'", specifier = ">=0.1.12" },
-    { name = "openinference-instrumentation-pydantic-ai", marker = "extra == 'pydantic-ai'", specifier = ">=0.1.8" },
+    { name = "openinference-instrumentation-pydantic-ai", marker = "extra == 'pydantic-ai'", specifier = "==0.1.8" },
     { name = "openinference-instrumentation-smolagents", marker = "extra == 'smolagents'", specifier = "==0.1.14" },
     { name = "openinference-semantic-conventions", specifier = ">=0.1.24" },
     { name = "opentelemetry-api", specifier = ">=1.32.1" },
