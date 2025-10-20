@@ -447,16 +447,19 @@ def run_my_agent() -> None:
 
 ### Running experiments
 
-You can generate runs of your Atla Insights experiments by using the `run_experiment` context manager.
+You can run experiments by using the `run_experiment` context manager.
 
 ```python
 from atla_insights import run_experiment
 
-with run_experiment(experiment_id="my-experiment-id"):
+with run_experiment(
+    experiment_name="my-experiment-name",  # optional: defaults to random identifier
+    description="Testing out shiny new feature",  # optional
+):
     # Your experiment code here
 ```
 
-To get started, you'll need to create an experiment in the [Atla Insights platform](https://app.atla-ai.com) and follow the instructions there.
+These experiments will show up in your Atla Insights `workbench`.
 
 ### Compatibility with existing observability
 
