@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.10"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -297,7 +297,7 @@ wheels = [
 
 [[package]]
 name = "atla-insights"
-version = "0.0.34"
+version = "0.0.35"
 source = { editable = "." }
 dependencies = [
     { name = "cuid2" },
@@ -462,7 +462,7 @@ requires-dist = [
     { name = "openinference-instrumentation-mcp", marker = "extra == 'mcp'", specifier = ">=1.3.0" },
     { name = "openinference-instrumentation-openai", marker = "extra == 'openai'", specifier = ">=0.1.30" },
     { name = "openinference-instrumentation-openai", marker = "extra == 'openai-agents'", specifier = ">=0.1.30" },
-    { name = "openinference-instrumentation-openai-agents", marker = "extra == 'openai-agents'", specifier = ">=0.1.12" },
+    { name = "openinference-instrumentation-openai-agents", marker = "extra == 'openai-agents'", specifier = ">=1.3.0" },
     { name = "openinference-instrumentation-pydantic-ai", marker = "extra == 'pydantic-ai'", specifier = "==0.1.8" },
     { name = "openinference-instrumentation-smolagents", marker = "extra == 'smolagents'", specifier = "==0.1.14" },
     { name = "openinference-semantic-conventions", specifier = ">=0.1.24" },
@@ -3619,7 +3619,7 @@ wheels = [
 
 [[package]]
 name = "openinference-instrumentation-agno"
-version = "0.1.17"
+version = "0.1.19"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "openinference-instrumentation" },
@@ -3630,9 +3630,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "wrapt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ce/5c/34ac85ba6d716507f3a18cf0cf4387dc858813c26127218f1cca3a916bab/openinference_instrumentation_agno-0.1.17.tar.gz", hash = "sha256:860a707b36afe30746cb45038c5669cb977c9a6c63330aebbc9cbe23b3c51a80", size = 14696, upload-time = "2025-10-14T06:15:16.867Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/21/a8/f51d4c6f008d18690a0f47425e30c08dd18c0fa1eed254a5a1a025bc1028/openinference_instrumentation_agno-0.1.19.tar.gz", hash = "sha256:ede2a503f712e7a519a4a89b2d9d96c002ce6e1af08ea31efa0e12f0a52ff4d0", size = 15330, upload-time = "2025-10-23T04:36:13.967Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/04/8a/c1efd28db5a462bb3d902f683901026291d8ce74bd72dd2fd266900361c4/openinference_instrumentation_agno-0.1.17-py3-none-any.whl", hash = "sha256:4e6de14a4bd89950e45d9a4232e9ce8c616b7671a08ee5f68625807bb35845f1", size = 16331, upload-time = "2025-10-14T06:15:15.705Z" },
+    { url = "https://files.pythonhosted.org/packages/f6/e9/61adc29604bba9b196454cc49343b5b767bbfc74501f038da42d6b124238/openinference_instrumentation_agno-0.1.19-py3-none-any.whl", hash = "sha256:dbf5713e13494cad47952699aabfd29b94b7fe5970eddc91bcf718bfc82a8d45", size = 16998, upload-time = "2025-10-23T04:36:12.72Z" },
 ]
 
 [[package]]
@@ -3777,7 +3777,7 @@ wheels = [
 
 [[package]]
 name = "openinference-instrumentation-openai-agents"
-version = "1.0.0"
+version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "openinference-instrumentation" },
@@ -3788,9 +3788,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "wrapt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8e/63/a3e825e2d40c94319bda1f4679cbe9a11b9ad16677b3a50e5853d54657ed/openinference_instrumentation_openai_agents-1.0.0.tar.gz", hash = "sha256:c196186194dbc95f26d4bd003c7f44a88564493c7f1c50348fad1c2b265a396a", size = 11648, upload-time = "2025-07-02T05:01:39.434Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/04/89/da03d95e695403a6f080aaad50676bbbfd54dcabc8392c05a551f5187e47/openinference_instrumentation_openai_agents-1.3.0.tar.gz", hash = "sha256:25d447187868d8c572662b9ba8a0009338cd3f0888ea3db640744370949d282a", size = 12442, upload-time = "2025-09-08T19:07:28.465Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/09/6e/fa72af65c22b41b141a7b31056ec39ab8e586f34dd64008aecddae662618/openinference_instrumentation_openai_agents-1.0.0-py3-none-any.whl", hash = "sha256:6c8cb179c9db1f543f58ed8f773456a96fd771bfcc0394e0e5eabebbbc0dd045", size = 13530, upload-time = "2025-07-02T05:01:38.334Z" },
+    { url = "https://files.pythonhosted.org/packages/9a/4a/d5a915ffd136cfc6d9f8f27ec99f156f900677c323ae04791f35afd13ce5/openinference_instrumentation_openai_agents-1.3.0-py3-none-any.whl", hash = "sha256:4038b5b080dc1194de236ae153026924c69896a48b2f7668c8fd87a628f726d1", size = 14270, upload-time = "2025-09-08T19:07:24.941Z" },
 ]
 
 [[package]]

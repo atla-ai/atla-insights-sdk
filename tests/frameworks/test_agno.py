@@ -232,6 +232,44 @@ class TestAgnoInstrumentation(BaseLocalOtel):
             == "hello world"
         )
 
+    def test_multi_agent(self, mock_openai_client: OpenAI) -> None:
+        """Test multi-agent name tracking."""
+        from atla_insights import instrument_agno
+
+        my_agent = Agent(
+            name="my-agent",
+            model=OpenAIChat(
+                id="mock-model",
+                base_url=str(mock_openai_client.base_url),
+                api_key="unit-test",
+            ),
+        )
+        other_agent = Agent(
+            name="other-agent",
+            model=OpenAIChat(
+                id="mock-model",
+                base_url=str(mock_openai_client.base_url),
+                api_key="unit-test",
+            ),
+        )
+
+        with instrument_agno("openai"):
+            my_agent.run("Hello world!")
+            other_agent.run("Hello world!")
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 6
+        my_agent_run, _, _, other_agent_run, _, _ = finished_spans
+
+        assert my_agent_run.attributes is not None
+        assert my_agent_run.attributes.get("graph.node.id") is not None
+        assert my_agent_run.attributes.get("graph.node.name") == "my-agent"
+
+        assert other_agent_run.attributes is not None
+        assert other_agent_run.attributes.get("graph.node.id") is not None
+        assert other_agent_run.attributes.get("graph.node.name") == "other-agent"
+
     def test_tool_invocation(self) -> None:
         """Test the Agno instrumentation with tool invocation."""
         from atla_insights import instrument_agno
@@ -326,7 +364,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
         assert len(finished_spans) == 3
         run, llm_call, request = finished_spans
 
-        assert run.name == "Agent.run"
+        assert run.name == "Agent.arun"
         assert llm_call.name == "OpenAIChat.ainvoke"
         assert request.name == "ChatCompletion"
 
@@ -364,7 +402,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
         assert len(finished_spans) == 3
         run, llm_call, request = finished_spans
 
-        assert run.name == "Agent.run"
+        assert run.name == "Agent.arun"
         assert llm_call.name == "OpenAIChat.ainvoke_stream"
         assert request.name == "ChatCompletion"
 
@@ -409,7 +447,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
         assert len(finished_spans) == 3
         run, llm_call, request = finished_spans
 
-        assert run.name == "Agent.run"
+        assert run.name == "Team.run"
         assert llm_call.name == "OpenAIChat.invoke"
         assert request.name == "ChatCompletion"
 
@@ -457,7 +495,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
         assert len(finished_spans) == 3
         run, llm_call, request = finished_spans
 
-        assert run.name == "Agent.run"
+        assert run.name == "Team.run"
         assert llm_call.name == "OpenAIChat.invoke_stream"
         assert request.name == "ChatCompletion"
 
@@ -505,7 +543,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
         assert len(finished_spans) == 3
         run, llm_call, request = finished_spans
 
-        assert run.name == "Agent.run"
+        assert run.name == "Team.arun"
         assert llm_call.name == "OpenAIChat.ainvoke"
         assert request.name == "ChatCompletion"
 
@@ -556,7 +594,7 @@ class TestAgnoInstrumentation(BaseLocalOtel):
         assert len(finished_spans) == 3
         run, llm_call, request = finished_spans
 
-        assert run.name == "Agent.run"
+        assert run.name == "Team.arun"
         assert llm_call.name == "OpenAIChat.ainvoke_stream"
         assert request.name == "ChatCompletion"
 
