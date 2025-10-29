@@ -151,18 +151,19 @@ def run_my_agent() -> None:
 
 We currently support the following frameworks:
 
-| Framework           | Instrumentation Function     | Notes                                                                                                       |
-| ------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **Agno**            | `instrument_agno`            | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
-| **BAML**            | `instrument_baml`            | Supported with `openai`, `anthropic` or `bedrock` models\*                                                  |
-| **Claude Code SDK** | `instrument_claude_code_sdk` |                                                                                                             |
-| **CrewAI**          | `instrument_crewai`          |                                                                                                             |
-| **Google ADK**      | `instrument_google_adk`      |                                                                                                             |
-| **LangChain**       | `instrument_langchain`       | This includes e.g., LangGraph as well                                                                       |
-| **MCP**             | `instrument_mcp`             | Only includes context propagation. You will need to instrument the model calling the MCP server separately. |
-| **OpenAI Agents**   | `instrument_openai_agents`   | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
-| **Pydantic AI**     | `instrument_pydantic_ai`     |                                                                                                             |
-| **Smolagents**      | `instrument_smolagents`      | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
+| Framework            | Instrumentation Function      | Notes                                                                                                       |
+| -------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Agno**             | `instrument_agno`             | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
+| **BAML**             | `instrument_baml`             | Supported with `openai`, `anthropic` or `bedrock` models\*                                                  |
+| **Claude Agent SDK** | `instrument_claude_agent_sdk` |                                                                                                             |
+| **Claude Code SDK**  | `instrument_claude_code_sdk`  |                                                                                                             |
+| **CrewAI**           | `instrument_crewai`           |                                                                                                             |
+| **Google ADK**       | `instrument_google_adk`       |                                                                                                             |
+| **LangChain**        | `instrument_langchain`        | This includes e.g., LangGraph as well                                                                       |
+| **MCP**              | `instrument_mcp`              | Only includes context propagation. You will need to instrument the model calling the MCP server separately. |
+| **OpenAI Agents**    | `instrument_openai_agents`    | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
+| **Pydantic AI**      | `instrument_pydantic_ai`      |                                                                                                             |
+| **Smolagents**       | `instrument_smolagents`       | Supported with `openai`, `google-genai`, `litellm` and/or `anthropic` models\*                              |
 
 ⚠️ \*Note that some frameworks do not provide their own LLM interface. In these cases, you will
 need to instrument both the framework _and_ the underlying LLM provider(s) as follows:
