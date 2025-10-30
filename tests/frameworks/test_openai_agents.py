@@ -105,6 +105,37 @@ class TestOpenaiAgentsInstrumentation(BaseLocalOtel):
         )
 
     @pytest.mark.asyncio
+    async def test_multi_agent_tracking(
+        self, mock_async_openai_client: AsyncOpenAI
+    ) -> None:
+        """Test OpenAI Agents SDK multi-agent tracking."""
+        from atla_insights import instrument_openai_agents
+
+        set_default_openai_client(mock_async_openai_client, use_for_tracing=False)
+
+        with instrument_openai_agents():
+            my_agent = Agent(name="my-agent", instructions="You are a helpful agent.")
+            result = await Runner.run(my_agent, "Hello world")
+
+            other_agent = Agent(
+                name="other-agent", instructions="You are a helpful agent."
+            )
+            result = await Runner.run(other_agent, "Hello world")
+
+        assert result.final_output == "hello world"
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 8
+        _, my_agent_span, _, _, _, other_agent_span, _, _ = finished_spans
+
+        assert my_agent_span.attributes is not None
+        assert my_agent_span.attributes.get("graph.node.id") == "my-agent"
+
+        assert other_agent_span.attributes is not None
+        assert other_agent_span.attributes.get("graph.node.id") == "other-agent"
+
+    @pytest.mark.asyncio
     async def test_tool_invocation(self, mock_async_openai_client: AsyncOpenAI) -> None:
         """Test the OpenAI Agents SDK instrumentation with tool invocation."""
         from atla_insights import instrument_openai_agents

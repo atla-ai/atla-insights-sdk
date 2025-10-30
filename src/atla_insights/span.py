@@ -253,3 +253,47 @@ def start_as_current_span(name: str) -> Iterator[AtlaSpan]:
     tracer = tracer_provider.get_tracer("openinference.instrumentation.manual")
     with tracer.start_as_current_span(name) as span:
         yield AtlaSpan(span)
+
+
+@contextmanager
+def record_agent(agent_id: str, parent_agent_id: Optional[str] = None) -> Iterator[Span]:
+    """Start an agent span to nest agent-related spans within.
+
+    This function is intended to be used to denote the scope of a particular agent's LLM
+    calls. The `parent_agent_id` value can be used to denote relationships between
+    different agents in a multi-agent system.
+
+    ```py
+    from atla_insights.span import record_agent
+
+    with record_agent("my-main-agent") as span:
+        ...
+        with record_agent("my-secondary-agent", parent_agent_id="my-main-agent") as span:
+            ...
+    ```
+
+    :param agent_id (str): The name (or other identifier) of the agent.
+    :param parent_agent_id (Optional[str]): The name (or other identifier) of the parent
+        agent, if there is any. Defaults to None.
+    :return (Iterator[Span]): An iterator that yields the agent span.
+    """
+    tracer_provider = ATLA_INSTANCE.tracer_provider
+    if tracer_provider is None:
+        raise ValueError("Must first configure Atla Insights before using the span API.")
+
+    tracer = tracer_provider.get_tracer("openinference.instrumentation.manual")
+    with tracer.start_as_current_span(agent_id) as span:
+        span.set_attributes(
+            {
+                SpanAttributes.OPENINFERENCE_SPAN_KIND: (
+                    OpenInferenceSpanKindValues.AGENT.value
+                ),
+                SpanAttributes.GRAPH_NODE_ID: str(agent_id),
+                SpanAttributes.GRAPH_NODE_NAME: str(agent_id),
+            }
+        )
+
+        if parent_agent_id:
+            span.set_attribute(SpanAttributes.GRAPH_NODE_PARENT_ID, str(parent_agent_id))
+
+        yield span
