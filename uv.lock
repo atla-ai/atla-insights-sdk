@@ -327,6 +327,7 @@ all = [
     { name = "anthropic", extra = ["bedrock"] },
     { name = "baml-py" },
     { name = "boto3" },
+    { name = "claude-agent-sdk" },
     { name = "claude-code-sdk" },
     { name = "crewai" },
     { name = "google-adk" },
@@ -370,6 +371,9 @@ ci = [
     { name = "pytest-asyncio" },
     { name = "pytest-httpserver" },
     { name = "ruff" },
+]
+claude-agent-sdk = [
+    { name = "claude-agent-sdk" },
 ]
 claude-code-sdk = [
     { name = "claude-code-sdk" },
@@ -430,9 +434,10 @@ dev = [
 requires-dist = [
     { name = "agno", marker = "extra == 'agno'", specifier = ">=1.5.2" },
     { name = "anthropic", extras = ["bedrock"], marker = "extra == 'anthropic'", specifier = ">=0.52.1" },
-    { name = "atla-insights", extras = ["agno", "anthropic", "baml", "bedrock", "claude-code-sdk", "crewai", "google-adk", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "pydantic-ai", "smolagents"], marker = "extra == 'all'" },
+    { name = "atla-insights", extras = ["agno", "anthropic", "baml", "bedrock", "claude-agent-sdk", "claude-code-sdk", "crewai", "google-adk", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "pydantic-ai", "smolagents"], marker = "extra == 'all'" },
     { name = "baml-py", marker = "extra == 'baml'", specifier = ">=0.201.0" },
     { name = "boto3", marker = "extra == 'bedrock'", specifier = ">=1.38.17" },
+    { name = "claude-agent-sdk", marker = "extra == 'claude-agent-sdk'", specifier = ">=0.1.5" },
     { name = "claude-code-sdk", marker = "extra == 'claude-code-sdk'", specifier = ">=0.0.21" },
     { name = "crewai", marker = "extra == 'crewai'", specifier = ">=0.130.0" },
     { name = "cuid2", specifier = ">=2.0.1" },
@@ -482,7 +487,7 @@ requires-dist = [
     { name = "smolagents", marker = "extra == 'smolagents'", specifier = ">=1.19.0,<1.21.0" },
     { name = "wrapt", specifier = ">=1.17.2" },
 ]
-provides-extras = ["all", "agno", "anthropic", "baml", "bedrock", "ci", "claude-code-sdk", "crewai", "google-adk", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "pydantic-ai", "smolagents"]
+provides-extras = ["all", "agno", "anthropic", "baml", "bedrock", "ci", "claude-agent-sdk", "claude-code-sdk", "crewai", "google-adk", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "pydantic-ai", "smolagents"]
 
 [package.metadata.requires-dev]
 dev = [{ name = "atla-insights", extras = ["all", "ci"] }]
@@ -894,6 +899,20 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/45/1a/02defe2f1c8d1daedb084bbe85f5b6083510a3ba192ed57797a3649a4310/chromadb-1.1.1-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:06776dad41389a00e7d63d936c3a15c179d502becaf99f75745ee11b062c9b6a", size = 18855754, upload-time = "2025-10-05T02:49:03.299Z" },
     { url = "https://files.pythonhosted.org/packages/5a/0d/80be82717e5dc19839af24558494811b6f2af2b261a8f21c51b872193b09/chromadb-1.1.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bba0096a7f5e975875ead23a91c0d41d977fbd3767f60d3305a011b0ace7afd3", size = 19893681, upload-time = "2025-10-05T02:49:06.481Z" },
     { url = "https://files.pythonhosted.org/packages/2d/6e/956e62975305a4e31daf6114a73b3b0683a8f36f8d70b20aabd466770edb/chromadb-1.1.1-cp39-abi3-win_amd64.whl", hash = "sha256:a77aa026a73a18181fd89bbbdb86191c9a82fd42aa0b549ff18d8cae56394c8b", size = 19844042, upload-time = "2025-10-05T02:49:16.925Z" },
+]
+
+[[package]]
+name = "claude-agent-sdk"
+version = "0.1.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "mcp" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9d/7b/7ef276c6b98ca406a3cfedfd0b6f3fb4fec82725516c7469ecee835753b0/claude_agent_sdk-0.1.5.tar.gz", hash = "sha256:a3a3896219c29574a352d2a9b316c9fa4093aa6963379c0b009b3390a1907161", size = 48884, upload-time = "2025-10-24T22:50:22.922Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2e/29/fb199a6b5c1fdb3bb0228fac4c8db18cd76b9c021fd956f101833eeabb3a/claude_agent_sdk-0.1.5-py3-none-any.whl", hash = "sha256:17b4085032c1c5f6d662239f1121641699cd6d09bf4a56b575ce75b76757f1f2", size = 36274, upload-time = "2025-10-24T22:50:21.688Z" },
 ]
 
 [[package]]

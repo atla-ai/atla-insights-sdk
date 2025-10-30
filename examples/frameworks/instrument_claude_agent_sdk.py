@@ -1,18 +1,18 @@
-"""Instrument Claude Code SDK (deprecated)."""
+"""Instrument Claude Agent SDK."""
 
 import asyncio
 import os
 
-from claude_code_sdk import ClaudeCodeOptions, ClaudeSDKClient
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
 
-from atla_insights import configure, instrument, instrument_claude_code_sdk
+from atla_insights import configure, instrument, instrument_claude_agent_sdk
 
 
-@instrument("My Claude Code SDK application")
+@instrument("My Claude Agent SDK application")
 async def my_app() -> None:
-    """My Claude Code SDK application."""
+    """My Claude Agent SDK application."""
     async with ClaudeSDKClient(
-        options=ClaudeCodeOptions(
+        options=ClaudeAgentOptions(
             system_prompt="You are a performance engineer",
             allowed_tools=["Bash", "Read", "WebSearch"],
             max_turns=3,
@@ -28,19 +28,12 @@ async def my_app() -> None:
 
 
 async def main() -> None:
-    """Main function.
-
-    NOTE: The `claude-code-sdk` library is deprecated in favor of the `claude-agent-sdk`
-    library.
-
-    Please visit [Anthopric's migration guide](https://docs.claude.com/en/docs/claude-code/sdk/migration-guide)
-    for more information.
-    """
+    """Main function."""
     # Configure the client
     configure(token=os.environ["ATLA_INSIGHTS_TOKEN"])
 
-    # Instrument the Claude Code SDK
-    instrument_claude_code_sdk()
+    # Instrument the Claude Agent SDK
+    instrument_claude_agent_sdk()
 
     # Calling the instrumented function will create spans behind the scenes
     await my_app()

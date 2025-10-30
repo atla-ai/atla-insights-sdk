@@ -1,6 +1,7 @@
 """Google Generative AI instrumentation."""
 
 import json
+import warnings
 from typing import (
     Any,
     AsyncIterator,
@@ -240,6 +241,14 @@ class GoogleGenerativeAIInstrumentor(BaseInstrumentor):
         return ("google-generativeai",)
 
     def _instrument(self, **kwargs: Any) -> None:
+        warnings.warn(
+            "instrument_google_generativeai is deprecated. The google-generativeai "
+            "package has been deprecated in favor of google-genai and reached EOL on "
+            "September 30, 2025. Please use instrument_google_genai instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         if not (tracer_provider := kwargs.get("tracer_provider")):
             tracer_provider = get_tracer_provider()
         if not (config := kwargs.get("config")):
