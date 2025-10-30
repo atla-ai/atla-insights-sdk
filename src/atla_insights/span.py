@@ -268,7 +268,7 @@ def record_agent(agent_id: str, parent_agent_id: Optional[str] = None) -> Iterat
 
     with record_agent("my-main-agent") as span:
         ...
-        with record_agent("my-secondary-agent") as span:
+        with record_agent("my-secondary-agent", parent_agent_id="my-main-agent") as span:
             ...
     ```
 
