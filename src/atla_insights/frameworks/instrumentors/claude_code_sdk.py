@@ -2,6 +2,7 @@
 
 import json
 import logging
+import warnings
 from contextvars import ContextVar
 from typing import (
     Any,
@@ -372,6 +373,16 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
 
     def _instrument(self, **kwargs) -> None:
         """Instrument Claude Code SDK transport methods."""
+        warnings.warn(
+            "instrument_claude_code_sdk is deprecated. The claude-code-sdk package has "
+            "been deprecated in favor of claude-agent-sdk. Please use "
+            "uninstrument_claude_agent_sdk instead. Visit "
+            "https://docs.claude.com/en/docs/claude-code/sdk/migration-guide for "
+            "migration information.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         self._original_process_query = InternalClient.process_query  # type: ignore[assignment]
         wrap_function_wrapper(
             "claude_code_sdk._internal.client",
