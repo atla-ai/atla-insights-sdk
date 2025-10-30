@@ -11,6 +11,15 @@ from atla_insights.suppression import NoOpContextManager, is_instrumentation_sup
 def instrument_claude_code_sdk() -> ContextManager[None]:
     """Instrument the Claude Code SDK.
 
+    Note that the `claude-code-sdk` package has been deprecated in favor of
+    `claude-agent-sdk`. Please visit [the official migration guide](https://docs.claude.com/en/docs/claude-code/sdk/migration-guide)
+    for information on how to migrate from Claude Code SDK to Claude Agent SDK.
+
+    This instrumentation is only provided for backwards compatibility, and is **not** the
+    intended way to instrument Claude Code.
+
+    Please use `instrument_claude_agent_sdk` instead.
+
     This function creates a context manager that instruments the Claude Code SDK,
     within its context.
 
