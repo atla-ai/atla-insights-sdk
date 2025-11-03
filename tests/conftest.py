@@ -7,6 +7,9 @@ from typing import Any, AsyncGenerator, Callable, Generator, Tuple
 from unittest.mock import AsyncMock, patch
 
 import boto3
+import claude_agent_sdk._internal.query
+import claude_agent_sdk._internal.transport.subprocess_cli
+import claude_agent_sdk.client
 import claude_code_sdk._internal.query
 import claude_code_sdk._internal.transport.subprocess_cli
 import claude_code_sdk.client
@@ -432,6 +435,90 @@ def mock_claude_code_cli() -> Generator[None, None, None]:
         ),
         patch.object(
             claude_code_sdk._internal.query.Query,
+            "receive_messages",
+            return_value=mock_recv(),
+        ),
+    ):
+        yield
+
+
+@pytest.fixture(autouse=True)
+def mock_claude_agent_cli() -> Generator[None, None, None]:
+    """Mock the Claude Agent CLI."""
+
+    async def mock_recv() -> AsyncGenerator[dict[str, Any], None]:
+        responses: list[dict[str, Any]] = [
+            {
+                "type": "system",
+                "subtype": "system",
+                "message": {
+                    "role": "system",
+                    "content": [{"type": "text", "text": "You are a helpful assistant."}],
+                },
+            },
+            {
+                "type": "user",
+                "message": {
+                    "role": "user",
+                    "content": [{"type": "text", "text": "foo"}],
+                },
+            },
+            {
+                "type": "assistant",
+                "message": {
+                    "role": "assistant",
+                    "model": "some-model",
+                    "content": [{"type": "text", "text": "bar"}],
+                },
+            },
+            {
+                "type": "result",
+                "subtype": "result",
+                "duration_ms": 100,
+                "duration_api_ms": 100,
+                "is_error": False,
+                "num_turns": 1,
+                "session_id": "default",
+                "total_cost_usd": 0.0001,
+                "usage": {"prompt_tokens": 100, "completion_tokens": 100},
+                "result": "bar",
+            },
+        ]
+        for msg in responses:
+            yield msg
+
+    with (
+        patch.object(
+            claude_agent_sdk._internal.transport.subprocess_cli.SubprocessCLITransport,
+            "connect",
+            return_value=AsyncMock(),
+        ),
+        patch.object(
+            claude_agent_sdk._internal.transport.subprocess_cli.SubprocessCLITransport,
+            "write",
+            return_value=AsyncMock(),
+        ),
+        patch(
+            "claude_agent_sdk._internal.transport.subprocess_cli.SubprocessCLITransport._find_cli",
+            return_value="foobar",
+        ),
+        patch.object(
+            claude_agent_sdk._internal.query.Query,
+            "start",
+            return_value=AsyncMock(),
+        ),
+        patch.object(
+            claude_agent_sdk._internal.query.Query,
+            "initialize",
+            return_value=AsyncMock(),
+        ),
+        patch.object(
+            claude_agent_sdk._internal.query.Query,
+            "close",
+            return_value=AsyncMock(),
+        ),
+        patch.object(
+            claude_agent_sdk._internal.query.Query,
             "receive_messages",
             return_value=mock_recv(),
         ),

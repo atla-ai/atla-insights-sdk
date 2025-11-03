@@ -42,8 +42,11 @@ def main() -> None:
     instrument_openai()
 
     # Run your app in the context of an experiment.
-    # Your traces with be associated with a new run for the experiment.
-    with run_experiment(experiment_id="123"):
+    # Your traces with be associated with this experiment.
+    with run_experiment(
+        experiment_name="My fancy new feature",
+        description="Trying out a few changes",
+    ):
         my_app(client)
 
 

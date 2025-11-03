@@ -5,8 +5,6 @@ import os
 from atla_insights import configure, instrument
 from atla_insights.span import start_as_current_span
 
-configure(token=os.environ["ATLA_INSIGHTS_TOKEN"])
-
 
 @instrument("My GenAI application")
 def my_app() -> None:

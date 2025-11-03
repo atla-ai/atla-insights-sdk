@@ -1,8 +1,7 @@
-"""Claude Code SDK instrumentor."""
+"""Claude Agent SDK instrumentor."""
 
 import json
 import logging
-import warnings
 from contextvars import ContextVar
 from typing import (
     Any,
@@ -23,14 +22,14 @@ from opentelemetry.trace import Status, StatusCode, Tracer
 from wrapt import wrap_function_wrapper
 
 try:
-    from claude_code_sdk._internal.client import InternalClient
-    from claude_code_sdk._internal.query import Query
-    from claude_code_sdk.client import ClaudeSDKClient
-    from claude_code_sdk.types import ClaudeCodeOptions
+    from claude_agent_sdk._internal.client import InternalClient
+    from claude_agent_sdk._internal.query import Query
+    from claude_agent_sdk.client import ClaudeSDKClient
+    from claude_agent_sdk.types import ClaudeAgentOptions
 except ImportError as e:
     raise ImportError(
-        "Claude Code SDK instrumentation needs to be installed. "
-        'Please install it via `pip install "atla-insights[claude-code-sdk]"`.'
+        "Claude Agent SDK instrumentation needs to be installed. "
+        'Please install it via `pip install "atla-insights[claude-agent-sdk]"`.'
     ) from e
 
 from openinference.semconv.trace import (
@@ -51,7 +50,7 @@ def _get_tool_result_presence(content: Any) -> bool:
     """Check if the message contains a tool_result block.
 
     This is needed to correctly mark role as "tool" when these messages are treated as
-    inputs (Claude Code SDK may label them as "user").
+    inputs (Claude Agent SDK may label them as "user").
     """
     if isinstance(content, Sequence):
         for block in content:
@@ -189,7 +188,7 @@ def _get_llm_tools(
             )
 
         # TODO(mathias): Filter tools based on allowed_tools and disallowed_tools, while
-        # accounting for Claude Code SDK's tool filtering logic (e.g. `Bash(rm*)`).
+        # accounting for Claude Agent SDK's tool filtering logic (e.g. `Bash(rm*)`).
 
         for idx, tool in enumerate(tools):
             tool_json = {"type": "function", "function": {"name": tool}}
@@ -207,13 +206,13 @@ def _get_llm_attributes(
         yield SpanAttributes.LLM_MODEL_NAME, model
 
 
-class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
-    """Atla Claude Code SDK instrumentor class."""
+class AtlaClaudeAgentSdkInstrumentor(BaseInstrumentor):
+    """Atla Claude Agent SDK instrumentor class."""
 
-    name = "claude-code-sdk"
+    name = "claude-agent-sdk"
 
     def __init__(self, tracer: Tracer) -> None:
-        """Initialize the Atla Claude Code SDK instrumentor."""
+        """Initialize the Atla Claude Agent SDK instrumentor."""
         super().__init__()
         self.tracer = tracer
 
@@ -231,7 +230,7 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
 
     def instrumentation_dependencies(self) -> Collection[str]:
         """Return the instrumentation dependencies."""
-        return ("claude_code_sdk",)
+        return ("claude_agent_sdk",)
 
     async def _wrap_process_query(
         self,
@@ -242,7 +241,7 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
     ) -> Any:
         """Wrap process_query to start a span."""
         prompt: Optional[str | AsyncIterable[dict[str, Any]]] = kwargs.get("prompt")
-        options: Optional[ClaudeCodeOptions] = kwargs.get("options")
+        options: Optional[ClaudeAgentOptions] = kwargs.get("options")
 
         parsed_messages: list[dict[str, Any]] = []
         if prompt is not None:
@@ -289,7 +288,7 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
         prompt: Optional[str | AsyncIterable[dict[str, Any]]] = (
             kwargs.get("prompt") or args[0]
         )
-        options: Optional[ClaudeCodeOptions] = getattr(instance, "options", None)
+        options: Optional[ClaudeAgentOptions] = getattr(instance, "options", None)
 
         parsed_messages: list[dict[str, Any]] = []
         if prompt is not None:
@@ -333,7 +332,7 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
     ) -> Any:
         """Wrap receive_messages to continue the span until generator is consumed."""
         span = self.tracer.start_span(
-            name="Claude Code SDK Response",
+            name="Claude Agent SDK Response",
             attributes=self._input_attributes.get(),
             record_exception=False,
         )
@@ -372,40 +371,30 @@ class AtlaClaudeCodeSdkInstrumentor(BaseInstrumentor):
             span.end()
 
     def _instrument(self, **kwargs) -> None:
-        """Instrument Claude Code SDK transport methods."""
-        warnings.warn(
-            "instrument_claude_code_sdk is deprecated. The claude-code-sdk package has "
-            "been deprecated in favor of claude-agent-sdk. Please use "
-            "uninstrument_claude_agent_sdk instead. Visit "
-            "https://docs.claude.com/en/docs/claude-code/sdk/migration-guide for "
-            "migration information.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
+        """Instrument Claude Agent SDK transport methods."""
         self._original_process_query = InternalClient.process_query  # type: ignore[assignment]
         wrap_function_wrapper(
-            "claude_code_sdk._internal.client",
+            "claude_agent_sdk._internal.client",
             "InternalClient.process_query",
             self._wrap_process_query,
         )
 
         self._original_query = ClaudeSDKClient.query  # type: ignore[assignment]
         wrap_function_wrapper(
-            "claude_code_sdk.client",
+            "claude_agent_sdk.client",
             "ClaudeSDKClient.query",
             self._wrap_query,
         )
 
         self._original_receive_messages = Query.receive_messages  # type: ignore[assignment]
         wrap_function_wrapper(
-            "claude_code_sdk._internal.query",
+            "claude_agent_sdk._internal.query",
             "Query.receive_messages",
             self._wrap_receive_messages,
         )
 
     def _uninstrument(self, **kwargs) -> None:
-        """Uninstrument Claude Code SDK."""
+        """Uninstrument Claude Agent SDK."""
         if self._original_process_query is not None:
             InternalClient.process_query = self._original_process_query
             self._original_process_query = None

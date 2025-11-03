@@ -10,7 +10,7 @@ def instrument_google_generativeai() -> ContextManager[None]:
     """Instrument the Google Generative AI LLM provider.
 
     Note that the `google-generativeai` package has been deprecated in favor of
-    `google-genai`, and will reach EOL on September 30, 2025.
+    `google-genai`, and reached EOL on September 30, 2025.
 
     This instrumentation is only provided for backwards compatibility, and is **not** the
     intended way to instrument Google's Generative AI services.

@@ -165,3 +165,29 @@ class TestSpan(BaseLocalOtel):
                 },
             }
         )
+
+    def test_multi_agent(self) -> None:
+        """Test manually recording multi-agent executions."""
+        from atla_insights import instrument
+        from atla_insights.span import record_agent
+
+        @instrument
+        def my_function():
+            with record_agent("secondary-agent", "main-agent"):
+                ...
+
+        with record_agent("main-agent"):
+            my_function()
+
+        spans = self.get_finished_spans()
+        assert len(spans) == 3
+
+        main_agent, _, secondary_agent = spans
+
+        assert main_agent.attributes is not None
+        assert main_agent.attributes.get("graph.node.id") == "main-agent"
+        assert main_agent.attributes.get("graph.node.parent_id") is None
+
+        assert secondary_agent.attributes is not None
+        assert secondary_agent.attributes.get("graph.node.id") == "secondary-agent"
+        assert secondary_agent.attributes.get("graph.node.parent_id") == "main-agent"

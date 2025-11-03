@@ -1,5 +1,7 @@
 """Test the LangChain instrumentation."""
 
+import json
+
 import pytest
 from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
@@ -283,3 +285,68 @@ class TestLangChainInstrumentation(BaseLocalOtel):
 
         finished_spans = self.get_finished_spans()
         assert len(finished_spans) == 1
+
+    def test_multi_agent(self, mock_openai_client: OpenAI) -> None:
+        """Test multi-agent tracking."""
+        from atla_insights import instrument_langchain
+
+        with instrument_langchain():
+            chat = ChatOpenAI(  # type: ignore[call-arg]
+                api_key=SecretStr("unit-test"),
+                base_url=str(mock_openai_client.base_url),
+                model="some-model",
+                metadata={"langgraph_node": "my-agent"},
+            )
+
+            messages = [HumanMessage(content="Hello, world!")]
+            chat.invoke(messages)
+
+        finished_spans = self.get_finished_spans()
+        assert len(finished_spans) == 1
+
+        [llm_call] = finished_spans
+
+        assert llm_call.attributes is not None
+        metadata = dict(json.loads(str(llm_call.attributes.get("metadata"))))
+        assert metadata.get("langgraph_node") == "my-agent"
+
+    def test_multi_agent_graph(self, mock_openai_client: OpenAI) -> None:
+        """Test multi-agent tracking in a graph."""
+        from atla_insights import instrument_langchain
+
+        with instrument_langchain():
+            chat = ChatOpenAI(  # type: ignore[call-arg]
+                api_key=SecretStr("unit-test"),
+                base_url=str(mock_openai_client.base_url),
+                model="some-model",
+            )
+
+            def generate_message(state):
+                messages = [HumanMessage(content="Hello, world!")]
+                response = chat.invoke(messages)
+                state["messages"] = [*messages, response]
+                return state
+
+            class TestState(TypedDict):
+                messages: list
+
+            workflow = StateGraph(TestState)
+            workflow.add_node("my-agent", generate_message)
+            workflow.set_entry_point("my-agent")
+            workflow.add_edge("my-agent", END)
+
+            app = workflow.compile()
+            app.invoke(TestState(messages=[]))  # type: ignore[arg-type]
+
+        finished_spans = self.get_finished_spans()
+
+        assert len(finished_spans) == 3
+        _, llm_call, request = finished_spans
+
+        assert llm_call.attributes is not None
+        llm_call_metadata = dict(json.loads(str(llm_call.attributes.get("metadata"))))
+        assert llm_call_metadata.get("langgraph_node") == "my-agent"
+
+        assert request.attributes is not None
+        request_metadata = dict(json.loads(str(request.attributes.get("metadata"))))
+        assert request_metadata.get("langgraph_node") == "my-agent"
