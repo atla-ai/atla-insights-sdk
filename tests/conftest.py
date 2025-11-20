@@ -18,11 +18,14 @@ from anthropic import Anthropic, AnthropicBedrock, AsyncAnthropic, AsyncAnthropi
 from botocore.client import BaseClient
 from botocore.response import StreamingBody
 from botocore.stub import ANY, Stubber
+from elevenlabs import AsyncElevenLabs, ElevenLabs
 from google.genai import Client
 from google.genai.types import HttpOptions
 from openai import AsyncAzureOpenAI, AsyncOpenAI, AzureOpenAI, OpenAI
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from pytest_httpserver import HTTPServer
+
+from tests._ws import MockAsyncWebSocketConnection, MockWebSocketConnection
 
 in_memory_span_exporter = InMemorySpanExporter()
 
@@ -309,6 +312,54 @@ def mock_google_genai_stream_client() -> Generator[Client, None, None]:
             api_key="unit-test",
             http_options=HttpOptions(base_url=httpserver.url_for("")),
         )
+
+
+@pytest.fixture(scope="class")
+def mock_elevenlabs_client() -> Generator[ElevenLabs, None, None]:
+    """Mock the ElevenLabs client."""
+    # Mock init message for the WebSocket connection to return.
+    message = json.dumps(
+        {
+            "type": "conversation_initiation_metadata",
+            "conversation_initiation_metadata_event": {"conversation_id": "unit-test"},
+        }
+    )
+
+    with (
+        patch(
+            "elevenlabs.conversational_ai.conversation.connect",
+            new=lambda *args, **kwargs: MockWebSocketConnection(message),
+        ),
+        patch(
+            "atla_insights.llm_providers.elevenlabs._has_elevenlabs_api_key",
+            return_value=True,
+        ),
+    ):
+        yield ElevenLabs(api_key="unit-test")
+
+
+@pytest.fixture(scope="class")
+def mock_async_elevenlabs_client() -> Generator[AsyncElevenLabs, None, None]:
+    """Mock the AsyncElevenLabs client."""
+    # Mock init message for the WebSocket connection to return.
+    message = json.dumps(
+        {
+            "type": "conversation_initiation_metadata",
+            "conversation_initiation_metadata_event": {"conversation_id": "unit-test"},
+        }
+    )
+
+    with (
+        patch(
+            "elevenlabs.conversational_ai.conversation.websockets.connect",
+            new=lambda *args, **kwargs: MockAsyncWebSocketConnection(message),
+        ),
+        patch(
+            "atla_insights.llm_providers.elevenlabs._has_elevenlabs_api_key",
+            return_value=True,
+        ),
+    ):
+        yield AsyncElevenLabs(api_key="unit-test")
 
 
 @pytest.fixture(scope="function")

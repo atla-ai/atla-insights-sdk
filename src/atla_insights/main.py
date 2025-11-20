@@ -103,13 +103,13 @@ class AtlaInsights:
             return
 
         # Either use provided token, or read from environment variable.
-        token = token or os.environ["ATLA_INSIGHTS_TOKEN"]
+        self.token = token or os.environ["ATLA_INSIGHTS_TOKEN"]
 
         if metadata is not None:
             set_global_metadata(metadata)
 
         self.tracer_provider = self._setup_tracer_provider(
-            token=token,
+            token=self.token,
             sampler=sampler,
             additional_span_processors=additional_span_processors,
             verbose=verbose,

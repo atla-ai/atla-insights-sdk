@@ -297,7 +297,7 @@ wheels = [
 
 [[package]]
 name = "atla-insights"
-version = "0.0.36"
+version = "0.0.37"
 source = { editable = "." }
 dependencies = [
     { name = "cuid2" },
@@ -330,6 +330,7 @@ all = [
     { name = "claude-agent-sdk" },
     { name = "claude-code-sdk" },
     { name = "crewai" },
+    { name = "elevenlabs" },
     { name = "google-adk" },
     { name = "google-genai" },
     { name = "google-generativeai" },
@@ -383,6 +384,9 @@ crewai = [
     { name = "litellm" },
     { name = "openinference-instrumentation-crewai" },
 ]
+elevenlabs = [
+    { name = "elevenlabs" },
+]
 google-adk = [
     { name = "google-adk" },
     { name = "openinference-instrumentation-google-adk" },
@@ -434,13 +438,14 @@ dev = [
 requires-dist = [
     { name = "agno", marker = "extra == 'agno'", specifier = ">=1.5.2" },
     { name = "anthropic", extras = ["bedrock"], marker = "extra == 'anthropic'", specifier = ">=0.52.1" },
-    { name = "atla-insights", extras = ["agno", "anthropic", "baml", "bedrock", "claude-agent-sdk", "claude-code-sdk", "crewai", "google-adk", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "pydantic-ai", "smolagents"], marker = "extra == 'all'" },
+    { name = "atla-insights", extras = ["agno", "anthropic", "baml", "bedrock", "claude-agent-sdk", "claude-code-sdk", "crewai", "elevenlabs", "google-adk", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "pydantic-ai", "smolagents"], marker = "extra == 'all'" },
     { name = "baml-py", marker = "extra == 'baml'", specifier = ">=0.201.0" },
     { name = "boto3", marker = "extra == 'bedrock'", specifier = ">=1.38.17" },
     { name = "claude-agent-sdk", marker = "extra == 'claude-agent-sdk'", specifier = ">=0.1.5" },
     { name = "claude-code-sdk", marker = "extra == 'claude-code-sdk'", specifier = ">=0.0.21" },
     { name = "crewai", marker = "extra == 'crewai'", specifier = ">=0.130.0" },
     { name = "cuid2", specifier = ">=2.0.1" },
+    { name = "elevenlabs", marker = "extra == 'elevenlabs'", specifier = ">=2.16.0" },
     { name = "google-adk", marker = "extra == 'google-adk'", specifier = ">=1.2.1" },
     { name = "google-genai", marker = "extra == 'google-genai'", specifier = ">=1.19.0" },
     { name = "google-generativeai", marker = "extra == 'google-generativeai'", specifier = ">=0.7.0" },
@@ -487,7 +492,7 @@ requires-dist = [
     { name = "smolagents", marker = "extra == 'smolagents'", specifier = ">=1.19.0,<1.21.0" },
     { name = "wrapt", specifier = ">=1.17.2,<2.0.0" },
 ]
-provides-extras = ["all", "agno", "anthropic", "baml", "bedrock", "ci", "claude-agent-sdk", "claude-code-sdk", "crewai", "google-adk", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "pydantic-ai", "smolagents"]
+provides-extras = ["all", "agno", "anthropic", "baml", "bedrock", "ci", "claude-agent-sdk", "claude-code-sdk", "crewai", "elevenlabs", "google-adk", "google-genai", "google-generativeai", "langchain", "litellm", "mcp", "openai", "openai-agents", "pydantic-ai", "smolagents"]
 
 [package.metadata.requires-dev]
 dev = [{ name = "atla-insights", extras = ["all", "ci"] }]
@@ -1153,6 +1158,23 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/9d/a4/e44218c2b394e31a6dd0d6b095c4e1f32d0be54c2a4b250032d717647bab/durationpy-0.10.tar.gz", hash = "sha256:1fa6893409a6e739c9c72334fc65cca1f355dbdd93405d30f726deb5bde42fba", size = 3335, upload-time = "2025-05-17T13:52:37.26Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b0/0d/9feae160378a3553fa9a339b0e9c1a048e147a4127210e286ef18b730f03/durationpy-0.10-py3-none-any.whl", hash = "sha256:3b41e1b601234296b4fb368338fdcd3e13e0b4fb5b67345948f4f2bf9868b286", size = 3922, upload-time = "2025-05-17T13:52:36.463Z" },
+]
+
+[[package]]
+name = "elevenlabs"
+version = "2.16.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "pydantic-core" },
+    { name = "requests" },
+    { name = "typing-extensions" },
+    { name = "websockets" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c3/cf/d44f4d3089adad95089026fe5d8247836daa441a0de174c0c64fa40fb5cb/elevenlabs-2.16.0.tar.gz", hash = "sha256:3a26ea20a3ce4a30ffada125f77b102bd88dc2d3230a912bd144017087d36795", size = 356398, upload-time = "2025-09-18T14:00:11.644Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/45/a9/f98999d95b3b0b0cb6ac7f03d9f2b424a2d5892a361a55079d6801c9cf21/elevenlabs-2.16.0-py3-none-any.whl", hash = "sha256:ba46cb8029c11f3fff5c8e083f5857a90adf0aa463bbd4cf01f5511017940d58", size = 955598, upload-time = "2025-09-18T14:00:09.832Z" },
 ]
 
 [[package]]
