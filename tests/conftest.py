@@ -325,14 +325,11 @@ def mock_elevenlabs_client() -> Generator[ElevenLabs, None, None]:
         }
     )
 
-    with (
-        HTTPServer() as httpserver,
-        patch(
-            "elevenlabs.conversational_ai.conversation.connect",
-            new=lambda *args, **kwargs: MockWebSocketConnection(message),
-        ),
+    with patch(
+        "elevenlabs.conversational_ai.conversation.connect",
+        new=lambda *args, **kwargs: MockWebSocketConnection(message),
     ):
-        yield ElevenLabs(api_key="unit-test", base_url=httpserver.url_for(""))
+        yield ElevenLabs(api_key="unit-test")
 
 
 @pytest.fixture(scope="class")
@@ -346,14 +343,11 @@ def mock_async_elevenlabs_client() -> Generator[AsyncElevenLabs, None, None]:
         }
     )
 
-    with (
-        HTTPServer() as httpserver,
-        patch(
-            "elevenlabs.conversational_ai.conversation.websockets.connect",
-            new=lambda *args, **kwargs: MockAsyncWebSocketConnection(message),
-        ),
+    with patch(
+        "elevenlabs.conversational_ai.conversation.websockets.connect",
+        new=lambda *args, **kwargs: MockAsyncWebSocketConnection(message),
     ):
-        yield AsyncElevenLabs(api_key="unit-test", base_url=httpserver.url_for(""))
+        yield AsyncElevenLabs(api_key="unit-test")
 
 
 @pytest.fixture(scope="function")
