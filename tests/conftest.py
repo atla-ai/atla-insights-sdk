@@ -332,11 +332,6 @@ def mock_elevenlabs_client() -> Generator[ElevenLabs, None, None]:
             new=lambda *args, **kwargs: MockWebSocketConnection(message),
         ),
     ):
-        httpserver.expect_request(
-            "/v1/convai/conversation/get-signed-url"
-        ).respond_with_json({"signed_url": httpserver.url_for("")})
-        httpserver.expect_request("/v1/convai/conversation").respond_with_json({})
-
         yield ElevenLabs(api_key="unit-test", base_url=httpserver.url_for(""))
 
 
@@ -358,11 +353,6 @@ def mock_async_elevenlabs_client() -> Generator[AsyncElevenLabs, None, None]:
             new=lambda *args, **kwargs: MockAsyncWebSocketConnection(message),
         ),
     ):
-        httpserver.expect_request(
-            "/v1/convai/conversation/get-signed-url"
-        ).respond_with_json({"signed_url": httpserver.url_for("")})
-        httpserver.expect_request("/v1/convai/conversation").respond_with_json({})
-
         yield AsyncElevenLabs(api_key="unit-test", base_url=httpserver.url_for(""))
 
 
