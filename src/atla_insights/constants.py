@@ -61,6 +61,10 @@ EXPERIMENT_NAMESPACE = f"{OTEL_NAMESPACE}.experiment"
 OTEL_MODULE_NAME = "atla_insights"
 OTEL_TRACES_ENDPOINT = "https://logfire-eu.pydantic.dev/v1/traces"
 
+ELEVENLABS_API_KEY_VERIFY_ENDPOINT = (
+    "https://app.atla-ai.com/api/sdk/v1/integrations/elevenlabs"
+)
+
 SUPPORTED_LLM_FORMAT = Literal["anthropic", "bedrock", "openai"]
 SUPPORTED_LLM_PROVIDER = Literal["anthropic", "google-genai", "litellm", "openai"]
 LLM_PROVIDER_TYPE = Union[Sequence[SUPPORTED_LLM_PROVIDER], SUPPORTED_LLM_PROVIDER]

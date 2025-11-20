@@ -325,9 +325,15 @@ def mock_elevenlabs_client() -> Generator[ElevenLabs, None, None]:
         }
     )
 
-    with patch(
-        "elevenlabs.conversational_ai.conversation.connect",
-        new=lambda *args, **kwargs: MockWebSocketConnection(message),
+    with (
+        patch(
+            "elevenlabs.conversational_ai.conversation.connect",
+            new=lambda *args, **kwargs: MockWebSocketConnection(message),
+        ),
+        patch(
+            "atla_insights.llm_providers.elevenlabs._has_elevenlabs_api_key",
+            return_value=True,
+        ),
     ):
         yield ElevenLabs(api_key="unit-test")
 
@@ -343,9 +349,15 @@ def mock_async_elevenlabs_client() -> Generator[AsyncElevenLabs, None, None]:
         }
     )
 
-    with patch(
-        "elevenlabs.conversational_ai.conversation.websockets.connect",
-        new=lambda *args, **kwargs: MockAsyncWebSocketConnection(message),
+    with (
+        patch(
+            "elevenlabs.conversational_ai.conversation.websockets.connect",
+            new=lambda *args, **kwargs: MockAsyncWebSocketConnection(message),
+        ),
+        patch(
+            "atla_insights.llm_providers.elevenlabs._has_elevenlabs_api_key",
+            return_value=True,
+        ),
     ):
         yield AsyncElevenLabs(api_key="unit-test")
 
