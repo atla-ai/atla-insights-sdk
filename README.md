@@ -121,6 +121,7 @@ We currently support the following LLM providers:
 | **Anthropic**    | `instrument_anthropic`    | Also supports `AnthropicBedrock` client from Anthropic |
 | **Google GenAI** | `instrument_google_genai` | E.g., Gemini                                           |
 | **LiteLLM**      | `instrument_litellm`      | Supports all available models in the LiteLLM framework |
+| **ElevenLabs**   | `instrument_elevenlabs`   |                                                        |
 | **OpenAI**       | `instrument_openai`       | Includes Azure OpenAI                                  |
 | **Bedrock**      | `instrument_bedrock`      |                                                        |
 
