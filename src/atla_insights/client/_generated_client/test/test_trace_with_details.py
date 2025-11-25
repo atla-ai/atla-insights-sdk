@@ -49,33 +49,33 @@ class TestTraceWithDetails(unittest.TestCase):
                 ingested_at = '',
                 spans = [
                     _generated_client.models.get_traces_by_ids_200_response_traces_inner_spans_inner.getTracesByIds_200_response_traces_inner_spans_inner(
-                        id = '', 
-                        trace_id = '', 
-                        parent_span_id = '', 
-                        span_name = '', 
-                        start_timestamp = '', 
-                        end_timestamp = '', 
-                        is_exception = True, 
+                        id = '',
+                        trace_id = '',
+                        parent_span_id = '',
+                        span_name = '',
+                        start_timestamp = '',
+                        end_timestamp = '',
+                        is_exception = True,
                         otel_events = [
                             null
-                            ], 
+                            ],
                         annotations = [
                             _generated_client.models.get_traces_by_ids_200_response_traces_inner_spans_inner_annotations_inner.getTracesByIds_200_response_traces_inner_spans_inner_annotations_inner(
-                                span_id = '', 
-                                failure_mode = '', 
-                                atla_critique = '', 
+                                span_id = '',
+                                failure_mode = '',
+                                atla_critique = '',
                                 id = '', )
                             ], )
                     ],
                 custom_metric_values = [
                     _generated_client.models.get_traces_by_ids_200_response_traces_inner_custom_metric_values_inner.getTracesByIds_200_response_traces_inner_customMetricValues_inner(
-                        id = '', 
-                        trace_id = '', 
-                        custom_metric_id = '', 
-                        value = '', 
+                        id = '',
+                        trace_id = '',
+                        custom_metric_id = '',
+                        value = 1.337,
                         custom_metric = _generated_client.models.get_traces_by_ids_200_response_traces_inner_custom_metric_values_inner_custom_metric.getTracesByIds_200_response_traces_inner_customMetricValues_inner_customMetric(
-                            id = '', 
-                            name = '', 
+                            id = '',
+                            name = '',
                             data_type = 'BOOLEAN', ), )
                     ]
             )

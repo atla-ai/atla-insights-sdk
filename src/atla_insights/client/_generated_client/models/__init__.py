@@ -12,7 +12,6 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-
 # import models into model package
 from atla_insights.client._generated_client.models.annotation import Annotation
 from atla_insights.client._generated_client.models.custom_metric import CustomMetric
