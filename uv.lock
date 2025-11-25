@@ -297,7 +297,7 @@ wheels = [
 
 [[package]]
 name = "atla-insights"
-version = "0.0.37"
+version = "0.0.38"
 source = { editable = "." }
 dependencies = [
     { name = "cuid2" },
