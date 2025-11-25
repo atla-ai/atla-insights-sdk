@@ -1,10 +1,12 @@
 _generated_client/__init__.py
 _generated_client/api/__init__.py
+_generated_client/api/audio_api.py
 _generated_client/api/sdk_api.py
 _generated_client/api_client.py
 _generated_client/api_response.py
 _generated_client/configuration.py
 _generated_client/docs/Annotation.md
+_generated_client/docs/AudioApi.md
 _generated_client/docs/CustomMetric.md
 _generated_client/docs/CustomMetricValue.md
 _generated_client/docs/DetailedTraceListResponse.md
@@ -28,6 +30,7 @@ _generated_client/models/trace_with_details.py
 _generated_client/rest.py
 _generated_client/test/__init__.py
 _generated_client/test/test_annotation.py
+_generated_client/test/test_audio_api.py
 _generated_client/test/test_custom_metric.py
 _generated_client/test/test_custom_metric_value.py
 _generated_client/test/test_detailed_trace_list_response.py

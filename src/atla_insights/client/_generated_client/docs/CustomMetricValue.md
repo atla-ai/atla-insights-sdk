@@ -5,11 +5,11 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **str** |  | 
-**trace_id** | **str** |  | 
-**custom_metric_id** | **str** |  | 
-**value** | **str** |  | 
-**custom_metric** | [**CustomMetric**](CustomMetric.md) |  | [optional] 
+**id** | **str** |  |
+**trace_id** | **str** |  |
+**custom_metric_id** | **str** |  |
+**value** | **float** |  |
+**custom_metric** | [**CustomMetric**](CustomMetric.md) |  | [optional]
 
 ## Example
 
@@ -29,5 +29,3 @@ custom_metric_value_dict = custom_metric_value_instance.to_dict()
 custom_metric_value_from_dict = CustomMetricValue.from_dict(custom_metric_value_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

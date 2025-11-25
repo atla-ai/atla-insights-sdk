@@ -18,6 +18,7 @@ __version__ = "1.0.0"
 
 # Define package exports
 __all__ = [
+    "AudioApi",
     "SDKApi",
     "ApiResponse",
     "ApiClient",
@@ -40,6 +41,7 @@ __all__ = [
 ]
 
 # import apis into sdk package
+from atla_insights.client._generated_client.api.audio_api import AudioApi as AudioApi
 from atla_insights.client._generated_client.api.sdk_api import SDKApi as SDKApi
 
 # import ApiClient

@@ -7,6 +7,36 @@
     },
     "servers": [{ "url": "https://app.atla-ai.com", "description": "API server" }],
     "paths": {
+        "/api/sdk/v1/audio/{audioId}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved audio file",
+                        "content": {
+                            "audio/mpeg": {
+                                "schema": { "type": "string", "format": "binary" }
+                            }
+                        }
+                    },
+                    "401": { "description": "Unauthorized - Invalid or missing API key" },
+                    "404": { "description": "Audio file not found or access denied" },
+                    "500": { "description": "Internal Server Error" }
+                },
+                "operationId": "getAudioById",
+                "tags": ["Audio", "SDK"],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "audioId",
+                        "schema": { "type": "string" },
+                        "required": true
+                    }
+                ],
+                "summary": "Get a single audio file by ID",
+                "description": "Streams the audio file bytes for the given audio ID.",
+                "security": [{ "bearerAuth": [] }]
+            }
+        },
         "/api/sdk/v1/traces": {
             "get": {
                 "responses": {
@@ -233,7 +263,7 @@
                                                                     "type": "string"
                                                                 },
                                                                 "value": {
-                                                                    "type": "string"
+                                                                    "type": "number"
                                                                 },
                                                                 "customMetric": {
                                                                     "type": "object",
@@ -432,7 +462,7 @@
                                                             "customMetricId": {
                                                                 "type": "string"
                                                             },
-                                                            "value": { "type": "string" },
+                                                            "value": { "type": "number" },
                                                             "customMetric": {
                                                                 "type": "object",
                                                                 "properties": {

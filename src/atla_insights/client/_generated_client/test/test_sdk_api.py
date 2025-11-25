@@ -26,6 +26,13 @@ class TestSDKApi(unittest.TestCase):
     def tearDown(self) -> None:
         pass
 
+    def test_get_audio_by_id(self) -> None:
+        """Test case for get_audio_by_id
+
+        Get a single audio file by ID
+        """
+        pass
+
     def test_get_trace_by_id(self) -> None:
         """Test case for get_trace_by_id
 

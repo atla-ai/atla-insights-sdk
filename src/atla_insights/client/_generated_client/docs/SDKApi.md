@@ -4,10 +4,81 @@ All URIs are relative to *https://app.atla-ai.com*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**get_audio_by_id**](SDKApi.md#get_audio_by_id) | **GET** /api/sdk/v1/audio/{audioId} | Get a single audio file by ID
 [**get_trace_by_id**](SDKApi.md#get_trace_by_id) | **GET** /api/sdk/v1/traces/{traceId} | Get a single trace by ID
 [**get_traces_by_ids**](SDKApi.md#get_traces_by_ids) | **GET** /api/sdk/v1/traces/ids | Get multiple traces by IDs
 [**list_traces**](SDKApi.md#list_traces) | **GET** /api/sdk/v1/traces | List traces with pagination and filtering
 
+
+# **get_audio_by_id**
+> bytearray get_audio_by_id(audio_id)
+
+Get a single audio file by ID
+
+Streams the audio file bytes for the given audio ID.
+
+### Example
+
+
+```python
+import _generated_client
+from _generated_client.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to https://app.atla-ai.com
+# See configuration.py for a list of all supported configuration parameters.
+configuration = _generated_client.Configuration(
+    host = "https://app.atla-ai.com"
+)
+
+
+# Enter a context with an instance of the API client
+with _generated_client.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = _generated_client.SDKApi(api_client)
+    audio_id = 'audio_id_example' # str |
+
+    try:
+        # Get a single audio file by ID
+        api_response = api_instance.get_audio_by_id(audio_id)
+        print("The response of SDKApi->get_audio_by_id:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling SDKApi->get_audio_by_id: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **audio_id** | **str**|  |
+
+### Return type
+
+**bytearray**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: audio/mpeg
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successfully retrieved audio file |  -  |
+**401** | Unauthorized - Invalid or missing API key |  -  |
+**404** | Audio file not found or access denied |  -  |
+**500** | Internal Server Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_trace_by_id**
 > TraceDetailResponse get_trace_by_id(trace_id, include=include)
@@ -36,7 +107,7 @@ configuration = _generated_client.Configuration(
 with _generated_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = _generated_client.SDKApi(api_client)
-    trace_id = 'trace_id_example' # str | 
+    trace_id = 'trace_id_example' # str |
     include = ['include_example'] # List[str] |  (optional)
 
     try:
@@ -55,8 +126,8 @@ with _generated_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **trace_id** | **str**|  | 
- **include** | [**List[str]**](str.md)|  | [optional] 
+ **trace_id** | **str**|  |
+ **include** | [**List[str]**](str.md)|  | [optional]
 
 ### Return type
 
@@ -109,7 +180,7 @@ configuration = _generated_client.Configuration(
 with _generated_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = _generated_client.SDKApi(api_client)
-    ids = ['ids_example'] # List[str] | 
+    ids = ['ids_example'] # List[str] |
     include = ['include_example'] # List[str] |  (optional)
 
     try:
@@ -128,8 +199,8 @@ with _generated_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **ids** | [**List[str]**](str.md)|  | 
- **include** | [**List[str]**](str.md)|  | [optional] 
+ **ids** | [**List[str]**](str.md)|  |
+ **include** | [**List[str]**](str.md)|  | [optional]
 
 ### Return type
 
@@ -203,9 +274,9 @@ with _generated_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **start_timestamp** | **datetime**|  | [optional] 
- **end_timestamp** | **datetime**|  | [optional] 
- **metadata_filter** | **str**| URL-encoded JSON array of metadata key-value pairs: [{\&quot;key\&quot;:\&quot;version\&quot;,\&quot;value\&quot;:\&quot;1\&quot;}] | [optional] 
+ **start_timestamp** | **datetime**|  | [optional]
+ **end_timestamp** | **datetime**|  | [optional]
+ **metadata_filter** | **str**| URL-encoded JSON array of metadata key-value pairs: [{\&quot;key\&quot;:\&quot;version\&quot;,\&quot;value\&quot;:\&quot;1\&quot;}] | [optional]
  **page** | **int**|  | [optional] [default to 1]
  **page_size** | **int**|  | [optional] [default to 50]
 
@@ -231,4 +302,3 @@ No authorization required
 **500** | Internal server error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

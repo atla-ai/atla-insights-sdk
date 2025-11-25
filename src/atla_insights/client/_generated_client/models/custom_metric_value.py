@@ -17,8 +17,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from atla_insights.client._generated_client.models.custom_metric import CustomMetric
 from typing import Optional, Set
 from typing_extensions import Self
@@ -30,7 +30,7 @@ class CustomMetricValue(BaseModel):
     id: StrictStr
     trace_id: StrictStr = Field(alias="traceId")
     custom_metric_id: StrictStr = Field(alias="customMetricId")
-    value: StrictStr
+    value: Union[StrictFloat, StrictInt]
     custom_metric: Optional[CustomMetric] = Field(default=None, alias="customMetric")
     __properties: ClassVar[List[str]] = ["id", "traceId", "customMetricId", "value", "customMetric"]
 
@@ -95,5 +95,3 @@ class CustomMetricValue(BaseModel):
             "customMetric": CustomMetric.from_dict(obj["customMetric"]) if obj.get("customMetric") is not None else None
         })
         return _obj
-
-

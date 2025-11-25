@@ -38,10 +38,10 @@ class TestCustomMetricValue(unittest.TestCase):
                 id = '',
                 trace_id = '',
                 custom_metric_id = '',
-                value = '',
+                value = 1.337,
                 custom_metric = _generated_client.models.get_traces_by_ids_200_response_traces_inner_custom_metric_values_inner_custom_metric.getTracesByIds_200_response_traces_inner_customMetricValues_inner_customMetric(
-                    id = '', 
-                    name = '', 
+                    id = '',
+                    name = '',
                     data_type = 'BOOLEAN', )
             )
         else:
@@ -49,7 +49,7 @@ class TestCustomMetricValue(unittest.TestCase):
                 id = '',
                 trace_id = '',
                 custom_metric_id = '',
-                value = '',
+                value = 1.337,
         )
         """
 
