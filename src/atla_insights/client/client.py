@@ -2,7 +2,7 @@
 
 import json
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, Iterator, List, Optional
 
 from atla_insights.client._generated_client import ApiClient, Configuration, SDKApi
 from atla_insights.client.types import (
@@ -125,3 +125,58 @@ class Client:
                 "customMetrics",
             ],
         )
+
+    def get_audio(self, audio_id: str) -> bytearray:
+        """Get audio file by ID.
+
+        ```python
+        from atla_insights.client import Client
+
+        client = Client(api_key="your_api_key_here")
+
+        # Retrieves audio bytes
+        result = client.get_audio("my_audio_id")
+
+        # Saves audio to MP3 file
+        with open("my_file.mp3", "wb") as f:
+            f.write(result)
+        ```
+
+        Args:
+            audio_id: ID of audio file to retrieve.
+
+        Returns:
+            Response containing the audio bytes.
+        """
+        return self._sdk.get_audio_by_id(audio_id)
+
+    def get_audio_stream(self, audio_id: str, chunk_size: int = 8192) -> Iterator[bytes]:
+        """Get audio file by ID as a streaming iterator.
+
+        ```python
+        from atla_insights.client import Client
+
+        client = Client(api_key="your_api_key_here")
+
+        # Initialize audio bytes stream
+        result = client.get_audio_stream("my_audio_id")
+
+        # Consume stream and save audio to MP3 file
+        with open("my_file.mp3", "wb") as f:
+            for chunk in result:
+                f.write(chunk)
+        ```
+
+        Args:
+            audio_id: ID of audio file to retrieve.
+            chunk_size: Size of chunks to stream (default: 8k bytes).
+
+        Returns:
+            Iterator yielding audio data in chunks.
+        """
+        response = self._sdk.get_audio_by_id_without_preload_content(audio_id)
+        try:
+            for chunk in response.stream(amt=chunk_size):
+                yield chunk
+        finally:
+            response.release_conn()

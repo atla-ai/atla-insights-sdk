@@ -552,6 +552,8 @@ traces = client.get_traces(["trace_1", "trace_2", "trace_3"])
 -   `list_traces()` - Retrieve paginated list of traces with optional filtering
 -   `get_trace(trace_id)` - Get detailed information for a specific trace
 -   `get_traces(trace_ids)` - Bulk retrieve multiple traces by ID
+-   `get_audio(audio_id)` - Retrieve an audio file by ID
+-   `get_audio_stream(audio_id)` - Stream an audio file by ID
 
 The client returns structured data objects with full type hints for easy integration into your workflows.
 
