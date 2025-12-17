@@ -25,17 +25,11 @@ def get_instrumentors_for_provider(
     for provider in llm_provider:
         match provider:
             case "anthropic":
-                try:
-                    from openinference.instrumentation.anthropic import (
-                        AnthropicInstrumentor,
-                    )
-                except ImportError as e:
-                    raise ImportError(
-                        "Anthropic instrumentation needs to be installed. "
-                        'Please install it via `pip install "atla-insights[anthropic]"`.'
-                    ) from e
+                from atla_insights.llm_providers.instrumentors.anthropic import (
+                    AtlaAnthropicInstrumentor,
+                )
 
-                instrumentors.append(AnthropicInstrumentor())
+                instrumentors.append(AtlaAnthropicInstrumentor())
             case "google-genai":
                 from atla_insights.llm_providers.instrumentors.google_genai import (
                     AtlaGoogleGenAIInstrumentor,
