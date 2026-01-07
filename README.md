@@ -1,6 +1,6 @@
 # Atla Insights
 
-> ⚠️ **Notice:** The Atla Insights platform is shutting down after 15th February 2026. This package will no longer be maintained after that date.
+> ⚠️ **Notice:** The Atla Insights platform is shutting down on 16th February 2026. This package will no longer be maintained after that date.
 
 Atla Insights is a platform for monitoring and improving AI agents.
 
