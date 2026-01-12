@@ -1,5 +1,7 @@
 """Atla package for PyPI distribution."""
 
+import warnings
+
 from atla_insights.client import Client
 from atla_insights.custom_metrics import get_custom_metrics, set_custom_metrics
 from atla_insights.experiments import run_experiment
@@ -47,6 +49,13 @@ from atla_insights.marking import mark_failure, mark_success
 from atla_insights.metadata import get_metadata, set_metadata
 from atla_insights.suppression import enable_instrumentation, suppress_instrumentation
 from atla_insights.tool import tool
+
+warnings.warn(
+    "The Atla Insights platform is shutting down after 28th February 2026. "
+    "This package will no longer be maintained after that date.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 __all__ = [
     "AtlaInsightsClient",
